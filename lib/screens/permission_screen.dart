@@ -6,7 +6,7 @@ import '../services/audio_service.dart';
 class PermissionScreen extends StatefulWidget {
   final List<Hotspot> hotspots;
   final AudioService audioService;
-  final VoidCallback? onPermissionsGranted;
+  final void Function(BuildContext)? onPermissionsGranted;
 
   const PermissionScreen({
     super.key,
@@ -33,7 +33,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
     if (!mounted) return;
 
     if (locationStatus.isGranted && notifStatus.isGranted) {
-      widget.onPermissionsGranted?.call();
+      widget.onPermissionsGranted?.call(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
