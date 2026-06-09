@@ -1,1 +1,38 @@
-﻿[]
+﻿[
+  {
+    "id": "catedral",
+    "name": "Catedral de Mallorca",
+    "subtitle": "La Seu • Grundad 1229",
+    "description": "Katedralen byggdes på order av Jaime I efter att han besegrade morerna 1229. Det tog över 400 år att färdigställa den gotiska mästerverket vid vattnet.",
+    "lat": 39.5671,
+    "lng": 2.6498,
+    "radius_meters": 50,
+    "audio_file": "assets/audio/catedral.mp3",
+    "images": ["assets/images/catedral_1.jpg"],
+    "year": 1229
+  },
+  {
+    "id": "placa_major",
+    "name": "Plaça Major",
+    "subtitle": "Stadens hjärta • 1800-tal",
+    "description": "Plaças Major är Palmas centrala torg och omgiven av arkader. Det har varit mötesplats för handel, politik och kultur i över 200 år.",
+    "lat": 39.5697,
+    "lng": 2.6500,
+    "radius_meters": 50,
+    "audio_file": "assets/audio/placa_major.mp3",
+    "images": ["assets/images/placa_major_1.jpg"],
+    "year": 1803
+  },
+  {
+    "id": "bellver",
+    "name": "Castell de Bellver",
+    "subtitle": "Runt slott • Grundat 1300",
+    "description": "Bellver är ett av Europas få runda slott och byggdes av Jaume II på 1300-talet. Från kullen har man en fantastisk utsikt över hela Palma och havet.",
+    "lat": 39.5563,
+    "lng": 2.6197,
+    "radius_meters": 80,
+    "audio_file": "assets/audio/bellver.mp3",
+    "images": ["assets/images/bellver_1.jpg"],
+    "year": 1300
+  }
+]
