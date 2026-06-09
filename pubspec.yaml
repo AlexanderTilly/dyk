@@ -1,0 +1,35 @@
+name: palma_app
+description: Tourist audio guide for Palma de Mallorca
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  geolocator: ^11.0.0
+  geofence_service: ^6.0.0
+  just_audio: ^0.9.36
+  flutter_local_notifications: ^17.0.0
+  google_maps_flutter: ^2.5.0
+  permission_handler: ^11.0.0
+  cached_network_image: ^3.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.0
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/data/hotspots.json
+    - assets/audio/catedral.mp3
+    - assets/audio/placa_major.mp3
+    - assets/audio/bellver.mp3
+    - assets/images/catedral_1.jpg
+    - assets/images/placa_major_1.jpg
+    - assets/images/bellver_1.jpg
