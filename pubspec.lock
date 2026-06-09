@@ -149,39 +149,31 @@ packages:
     dependency: transitive
     description:
       name: fl_location
-      sha256: ef65db6ab481df98b22b81985a4dfb1f9348968c1a974f75ca91d8d7b5292e0d
+      sha256: "8c8ef3e862dae66fd1d8dfcf53ed14da4d50d3da0e33eab2b5fa1dc697de9eb5"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "5.0.0"
   fl_location_platform_interface:
     dependency: transitive
     description:
       name: fl_location_platform_interface
-      sha256: ffb84044f1791ec719477bf43a26b6d347af697dacf624a25f5c28721d3a0ce1
+      sha256: bd730e65248dec7d4fb37d18ea36c6ffe54f8dda6f9d0308c4ddc0d24e8f8c3f
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "5.1.0"
   fl_location_web:
     dependency: transitive
     description:
       name: fl_location_web
-      sha256: db4cecc6e120dff002339e350be6a9e59e311925802bfd8c648c8789ed2c1003
+      sha256: "203777c6d52fe525d01cf53e571840d6d3585c8ce7d0072dcb4df6404e085146"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "5.0.0"
   flutter:
     dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_activity_recognition:
-    dependency: transitive
-    description:
-      name: flutter_activity_recognition
-      sha256: "2437368a9f0bf917abb22c98dc20bf72a96f2fce04c4442db0a32df863c67323"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   flutter_cache_manager:
     dependency: transitive
     description:
@@ -240,14 +232,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  geofence_service:
+  geofencing_api:
     dependency: "direct main"
     description:
-      name: geofence_service
-      sha256: "2c3b8f43ff5510f1a7cf38708f50f3125f961a9c291404369cb24656fe2bd6a9"
+      name: geofencing_api
+      sha256: "9f559767fb658028acafd2678892d2a6667570b42f3ee20db18cc0aaa143006a"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0+1"
+    version: "2.0.0"
   geolocator:
     dependency: "direct main"
     description:
