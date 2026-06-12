@@ -155,23 +155,24 @@ class _InterestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          // Solid card so it reads clearly over the busy background art.
-          color: Colors.white.withValues(alpha: 0.96),
+          // Solid dark gray card — fully opaque so the background art
+          // never bleeds through the content.
+          color: const Color(0xFF2B2B2B),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? DykColors.yellow : Colors.black12,
+            color: selected ? DykColors.yellow : Colors.white12,
             width: 2.5,
           ),
           boxShadow: [
             const BoxShadow(
-              color: Colors.black45,
-              blurRadius: 12,
-              offset: Offset(0, 4),
+              color: Colors.black54,
+              blurRadius: 14,
+              offset: Offset(0, 5),
             ),
             if (selected)
               BoxShadow(
-                color: DykColors.yellow.withValues(alpha: 0.45),
-                blurRadius: 16,
+                color: DykColors.yellow.withValues(alpha: 0.35),
+                blurRadius: 18,
                 spreadRadius: 1,
               ),
           ],
@@ -188,17 +189,17 @@ class _InterestCard extends StatelessWidget {
                       style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
-                          color: Color(0xFF1A1A1A))),
+                          color: Colors.white)),
                   const SizedBox(height: 2),
                   Text(option.description,
                       style: const TextStyle(
-                          fontSize: 12, color: Colors.black54)),
+                          fontSize: 12, color: Colors.white70)),
                 ],
               ),
             ),
             Icon(
               selected ? Icons.check_circle : Icons.circle_outlined,
-              color: selected ? DykColors.yellow : Colors.grey,
+              color: selected ? DykColors.yellow : Colors.white38,
             ),
           ],
         ),
