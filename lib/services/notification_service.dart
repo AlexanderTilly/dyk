@@ -19,6 +19,29 @@ class NotificationService {
       iOS: iosSettings,
     );
     await _plugin.initialize(settings);
+
+    // Create channels up front so the app shows up in Android's
+    // notification settings before the first notification fires.
+    final androidImpl = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (androidImpl != null) {
+      await androidImpl.createNotificationChannel(
+        const AndroidNotificationChannel(
+          'hotspot_channel',
+          'Hotspot Alerts',
+          description: 'Alerts when you are near a historic site',
+          importance: Importance.high,
+        ),
+      );
+      await androidImpl.createNotificationChannel(
+        const AndroidNotificationChannel(
+          'deal_channel',
+          'Hot Deals',
+          description: 'Local offers near you',
+          importance: Importance.high,
+        ),
+      );
+    }
   }
 
   Future<void> showHotspotNotification({
