@@ -1,12 +1,16 @@
 // Smoke test: verify DykApp can be constructed with required dependencies.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palma_app/models/city_pack.dart';
 import 'package:palma_app/models/hot_deal.dart';
 import 'package:palma_app/models/hotspot.dart';
 import 'package:palma_app/services/app_state.dart';
 import 'package:palma_app/services/audio_service.dart';
 import 'package:palma_app/services/geo_fencing_service.dart';
+import 'package:palma_app/services/notification_log.dart';
 import 'package:palma_app/services/notification_service.dart';
+import 'package:palma_app/services/saved_store.dart';
 import 'package:palma_app/main.dart';
+import 'package:palma_app/services/dyk_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -15,6 +19,10 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     final app = DykApp(
       appState: AppState(prefs),
+      notificationLog: NotificationLog(prefs),
+      savedStore: SavedStore(prefs),
+      dykRepo: FakeDykRepository(),
+      cityPacks: const <CityPack>[],
       hotspots: const <Hotspot>[],
       deals: const <HotDeal>[],
       audioService: AudioService(),
@@ -23,4 +31,14 @@ void main() {
     );
     expect(app, isNotNull);
   });
+}
+
+/// Avoids touching Supabase.instance in tests.
+class FakeDykRepository implements DykRepositoryBase {
+  @override
+  Future<List<CityPack>> loadCityPacks() async => [];
+  @override
+  Future<List<Hotspot>> loadHotspots(String citypackId) async => [];
+  @override
+  Future<List<HotDeal>> loadDeals(String citypackId) async => [];
 }

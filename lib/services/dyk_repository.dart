@@ -5,9 +5,16 @@ import '../models/city_pack.dart';
 import '../models/hot_deal.dart';
 import '../models/hotspot.dart';
 
+/// Interface so tests can stub the repository without touching Supabase.
+abstract class DykRepositoryBase {
+  Future<List<CityPack>> loadCityPacks();
+  Future<List<Hotspot>> loadHotspots(String citypackId);
+  Future<List<HotDeal>> loadDeals(String citypackId);
+}
+
 /// Loads DYK content from Supabase. Returns empty lists when offline so the
 /// app can fall back to bundled content instead of crashing.
-class DykRepository {
+class DykRepository implements DykRepositoryBase {
   final SupabaseClient _client;
 
   DykRepository({SupabaseClient? client})
