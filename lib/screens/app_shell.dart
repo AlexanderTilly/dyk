@@ -63,14 +63,14 @@ class _AppShellState extends State<AppShell> {
           image: DecorationImage(
             image: AssetImage('assets/images/landing_background.png'),
             fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
           ),
         ),
         child: Container(
-          // Heavy scrim — the artwork should only be subtly visible
-          // behind the content, unlike on onboarding.
+          // Scrim — artwork visible but clearly behind the content.
           color: dark
-              ? Colors.black.withValues(alpha: 0.86)
-              : const Color(0xFFFAF6EE).withValues(alpha: 0.92),
+              ? Colors.black.withValues(alpha: 0.72)
+              : const Color(0xFFFAF6EE).withValues(alpha: 0.85),
           child: IndexedStack(
         index: _index,
         children: [
