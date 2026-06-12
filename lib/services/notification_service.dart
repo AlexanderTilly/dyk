@@ -29,7 +29,7 @@ class NotificationService {
     const androidDetails = AndroidNotificationDetails(
       'hotspot_channel',
       'Hotspot Alerts',
-      channelDescription: 'Notiser när du är nära en historisk plats',
+      channelDescription: 'Alerts when you are near a historic site',
       importance: Importance.high,
       priority: Priority.high,
     );
@@ -41,10 +41,42 @@ class NotificationService {
 
     await _plugin.show(
       hotspotId.hashCode,
-      'Du står nu vid $name',
-      'Grundad $year — tryck för att höra historien',
+      'You are now at $name',
+      'Founded $year — tap to hear the story',
       details,
       payload: hotspotId,
+    );
+  }
+
+  Future<void> showDealNotification({
+    required String dealId,
+    required String businessName,
+    required String offerText,
+    String? redeemCode,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'deal_channel',
+      'Hot Deals',
+      channelDescription: 'Local offers near you',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const iosDetails = DarwinNotificationDetails();
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    final body = redeemCode != null && redeemCode.isNotEmpty
+        ? '$offerText — CODE: $redeemCode'
+        : offerText;
+
+    await _plugin.show(
+      dealId.hashCode,
+      '🔥 $businessName',
+      body,
+      details,
+      payload: 'deal_$dealId',
     );
   }
 }

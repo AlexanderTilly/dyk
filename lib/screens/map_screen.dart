@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../models/hotspot.dart';
 import '../services/audio_service.dart';
 import 'hotspot_detail_screen.dart';
@@ -20,22 +20,37 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  static const _palmaCenterLat = 39.5696;
-  static const _palmaCenterLng = 2.6502;
+  MapboxMap? _mapboxMap;
 
-  Set<Marker> _buildMarkers() {
-    return widget.hotspots.map((h) {
-      return Marker(
-        markerId: MarkerId(h.id),
-        position: LatLng(h.lat, h.lng),
-        infoWindow: InfoWindow(
-          title: h.name,
-          snippet: h.subtitle,
-          onTap: () => _openHotspot(h),
-        ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+  static const _palmaCenterLng = 2.6500;
+  static const _palmaCenterLat = 39.5690;
+
+  void _onMapCreated(MapboxMap mapboxMap) async {
+    _mapboxMap = mapboxMap;
+    await _addHotspotAnnotations();
+  }
+
+  Future<void> _addHotspotAnnotations() async {
+    if (_mapboxMap == null) return;
+    final annotationManager =
+        await _mapboxMap!.annotations.createPointAnnotationManager();
+
+    for (final h in widget.hotspots) {
+      final options = PointAnnotationOptions(
+        geometry: Point(coordinates: Position(h.lng, h.lat)),
+        iconSize: 1.5,
+        textField: h.name,
+        textOffset: [0, 1.8],
+        textSize: 12,
+        textColor: 0xFF431407,
+        iconColor: 0xFFF97316,
       );
-    }).toSet();
+      await annotationManager.create(options);
+    }
+
+    annotationManager.addOnPointAnnotationClickListener(
+      _AnnotationClickListener(widget.hotspots, _openHotspot),
+    );
   }
 
   void _openHotspot(Hotspot hotspot) {
@@ -75,15 +90,37 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(_palmaCenterLat, _palmaCenterLng),
-          zoom: 14,
+      body: MapWidget(
+        key: const ValueKey('mapbox_map'),
+        cameraOptions: CameraOptions(
+          center: Point(
+            coordinates: Position(_palmaCenterLng, _palmaCenterLat),
+          ),
+          zoom: 14.5,
         ),
-        markers: _buildMarkers(),
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
+        styleUri: MapboxStyles.MAPBOX_STREETS,
+        onMapCreated: _onMapCreated,
       ),
     );
+  }
+}
+
+class _AnnotationClickListener extends OnPointAnnotationClickListener {
+  final List<Hotspot> hotspots;
+  final void Function(Hotspot) onTap;
+
+  _AnnotationClickListener(this.hotspots, this.onTap);
+
+  @override
+  void onPointAnnotationClick(PointAnnotation annotation) {
+    final coords = annotation.geometry.coordinates;
+    final lng = coords.lng;
+    final lat = coords.lat;
+
+    final hotspot = hotspots.firstWhere(
+      (h) => (h.lng - lng).abs() < 0.0001 && (h.lat - lat).abs() < 0.0001,
+      orElse: () => hotspots.first,
+    );
+    onTap(hotspot);
   }
 }

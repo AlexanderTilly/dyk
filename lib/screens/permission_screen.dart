@@ -38,7 +38,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Appen behöver plats- och notistillstånd för att fungera.',
+            'The app needs location and notification permissions to work.',
           ),
         ),
       );
@@ -62,7 +62,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Välkommen till\nPalma Explorer',
+                'Welcome to\nPalma Explorer',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       color: const Color(0xFF431407),
                       fontWeight: FontWeight.bold,
@@ -70,7 +70,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Gå runt i Palma de Mallorca och lär dig om stadens historia när du passerar historiska platser.',
+                'Walk around Palma de Mallorca and discover the city\'s history as you pass historic sites.',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: const Color(0xFF9A3412),
                     ),
@@ -78,16 +78,16 @@ class _PermissionScreenState extends State<PermissionScreen> {
               const SizedBox(height: 40),
               _PermissionTile(
                 icon: '📍',
-                title: 'Platsinformation (alltid)',
+                title: 'Location (always on)',
                 description:
-                    'Så att vi kan trigga berättelser automatiskt när du är nära en plats.',
+                    'So we can trigger stories automatically when you\'re near a site.',
               ),
               const SizedBox(height: 16),
               _PermissionTile(
                 icon: '🔔',
-                title: 'Notiser',
+                title: 'Notifications',
                 description:
-                    'Du får ett meddelande när du är nära en historisk plats.',
+                    'You\'ll get an alert when you\'re near a historic site.',
               ),
               const SizedBox(height: 40),
               SizedBox(
@@ -105,7 +105,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
                   child: _loading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                          'Ge tillstånd och starta',
+                          'Grant permissions & start',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600),
                         ),

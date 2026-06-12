@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Palma Explorer — Arkitektur</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f7; color: #1d1d1f; padding: 2rem; }
+
+h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.25rem; }
+.subtitle { color: #86868b; margin-bottom: 2rem; font-size: 0.9rem; }
+
+.arch { display: grid; grid-template-columns: 1fr 80px 1fr 80px 1fr; gap: 0; align-items: start; margin-bottom: 2rem; }
+
+.layer { background: white; border-radius: 16px; border: 1px solid #e5e5e7; overflow: hidden; }
+.layer-header { padding: 0.75rem 1rem; font-weight: 600; font-size: 0.85rem; color: white; }
+.layer-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.item { background: #f5f5f7; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 0.8rem; }
+.item strong { display: block; font-size: 0.82rem; color: #1d1d1f; }
+.item span { color: #86868b; font-size: 0.75rem; }
+
+.arrow { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #86868b; padding-top: 3rem; }
+
+/* Colors */
+.app .layer-header { background: #F97316; }
+.backend .layer-header { background: #6366f1; }
+.admin .layer-header { background: #0ea5e9; }
+
+.tag { display: inline-block; padding: 0.15em 0.5em; border-radius: 99px; font-size: 0.7rem; font-weight: 500; margin-top: 0.25rem; }
+.tag-free { background: #fef3c7; color: #92400e; }
+.tag-premium { background: #ede9fe; color: #5b21b6; }
+.tag-deal { background: #dcfce7; color: #166534; }
+.tag-admin { background: #e0f2fe; color: #0369a1; }
+
+.flow { margin-top: 2rem; }
+.flow h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+.flow-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+.flow-step { background: white; border-radius: 12px; border: 1px solid #e5e5e7; padding: 1rem; text-align: center; }
+.flow-step .num { width: 28px; height: 28px; border-radius: 50%; background: #F97316; color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; }
+.flow-step strong { display: block; font-size: 0.82rem; margin-bottom: 0.25rem; }
+.flow-step p { font-size: 0.75rem; color: #86868b; }
+
+.stack-note { margin-top: 1.5rem; background: #fff7ed; border-radius: 12px; border-left: 4px solid #F97316; padding: 1rem 1.25rem; }
+.stack-note h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
+.stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem; }
+.stack-item { font-size: 0.78rem; }
+.stack-item strong { display: block; color: #9a3412; }
+.stack-item span { color: #1d1d1f; }
+</style>
+</head>
+<body>
+
+<h2>Palma Explorer — Systemarkitektur</h2>
+<p class="subtitle">Tre delar som pratar med varandra via Supabase</p>
+
+<div class="arch">
+
+  <!-- MOBILAPP -->
+  <div class="layer app">
+    <div class="layer-header">📱 Flutter-appen</div>
+    <div class="layer-body">
+      <div class="item">
+        <strong>Karta + Hotspots</strong>
+        <span>Mapbox, hämtar från Supabase</span>
+        <div><span class="tag tag-free">Gratis: 3 st</span> <span class="tag tag-premium">Premium: alla</span></div>
+      </div>
+      <div class="item">
+        <strong>Geofencing</strong>
+        <span>Triggar när du kliver in i zon</span>
+      </div>
+      <div class="item">
+        <strong>Audio Guide</strong>
+        <span>Spelar MP3 från Supabase Storage</span>
+        <div><span class="tag tag-premium">Premium</span></div>
+      </div>
+      <div class="item">
+        <strong>Hot Deals</strong>
+        <span>Push-notis vid lokalt erbjudande</span>
+        <div><span class="tag tag-free">Gratis-only</span></div>
+      </div>
+      <div class="item">
+        <strong>CityPack-köp</strong>
+        <span>In-app purchase (Apple/Google)</span>
+        <div><span class="tag tag-premium">→ Premium</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">⇄</div>
+
+  <!-- BACKEND -->
+  <div class="layer backend">
+    <div class="layer-header">⚡ Supabase Backend</div>
+    <div class="layer-body">
+      <div class="item">
+        <strong>PostgreSQL</strong>
+        <span>hotspots, deals, citypacks, users</span>
+      </div>
+      <div class="item">
+        <strong>Auth</strong>
+        <span>Inloggning, premium-status</span>
+      </div>
+      <div class="item">
+        <strong>Storage</strong>
+        <span>MP3-filer, bilder per hotspot</span>
+      </div>
+      <div class="item">
+        <strong>Edge Functions</strong>
+        <span>Push-notiser, köpvalidering</span>
+      </div>
+      <div class="item">
+        <strong>Row Level Security</strong>
+        <span>Gratis/premium-logik i databasen</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">⇄</div>
+
+  <!-- ADMIN -->
+  <div class="layer admin">
+    <div class="layer-header">🖥️ Admin-panel (webb)</div>
+    <div class="layer-body">
+      <div class="item">
+        <strong>Hotspot-editor</strong>
+        <span>Namn, text, radius, GPS-koordinat</span>
+        <div><span class="tag tag-admin">Ladda upp MP3 + bilder</span></div>
+      </div>
+      <div class="item">
+        <strong>CityPack-hantering</strong>
+        <span>Skapa/publicera städer</span>
+      </div>
+      <div class="item">
+        <strong>Hot Deals</strong>
+        <span>Skapa erbjudanden, koppla till zon</span>
+        <div><span class="tag tag-deal">Aktiv / Schemalagd</span></div>
+      </div>
+      <div class="item">
+        <strong>Användare</strong>
+        <span>Se premium-kunder, analytics</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="flow">
+  <h3>🔄 Flödet — från admin till turistens telefon</h3>
+  <div class="flow-grid">
+    <div class="flow-step">
+      <div class="num">1</div>
+      <strong>Du i admin-panelen</strong>
+      <p>Lägger till "Restaurang Sol" som Hot Deal vid Catedral, 50m radius, 15% rabatt</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">2</div>
+      <strong>Sparas i Supabase</strong>
+      <p>Koordinater, text och erbjudande lagras i databasen</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">3</div>
+      <strong>Appen synkar</strong>
+      <p>Gratis-användare laddar ned aktiva deals vid appstart</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">4</div>
+      <strong>Turisten får notis</strong>
+      <p>"🍽️ 50m bort: Restaurang Sol — 15% rabatt idag" — klick → visa deal</p>
+    </div>
+  </div>
+</div>
+
+<div class="stack-note">
+  <h3>🛠️ Teknisk stack — allt du redan kan</h3>
+  <div class="stack-grid">
+    <div class="stack-item"><strong>Flutter</strong><span>Mobilapp (iOS + Android)</span></div>
+    <div class="stack-item"><strong>Supabase</strong><span>Backend (som i Callero)</span></div>
+    <div class="stack-item"><strong>React + Vite</strong><span>Admin-panel (som i Callero)</span></div>
+    <div class="stack-item"><strong>Supabase Storage</strong><span>MP3 + bilder</span></div>
+    <div class="stack-item"><strong>FCM / APNs</strong><span>Push-notiser</span></div>
+    <div class="stack-item"><strong>RevenueCat</strong><span>In-app purchases</span></div>
+  </div>
+</div>
+
+</body>
+</html>

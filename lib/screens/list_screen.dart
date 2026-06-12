@@ -19,7 +19,7 @@ class ListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7ED),
       appBar: AppBar(
-        title: const Text('Alla platser'),
+        title: const Text('All locations'),
         backgroundColor: const Color(0xFFF97316),
         foregroundColor: Colors.white,
         elevation: 0,

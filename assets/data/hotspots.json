@@ -1,12 +1,12 @@
-﻿[
+[
   {
     "id": "catedral",
     "name": "Catedral de Mallorca",
-    "subtitle": "La Seu • Grundad 1229",
-    "description": "Katedralen byggdes på order av Jaime I efter att han besegrade morerna 1229. Det tog över 400 år att färdigställa den gotiska mästerverket vid vattnet.",
+    "subtitle": "La Seu • Founded 1229",
+    "description": "The cathedral was built on the orders of King Jaime I after he defeated the Moors in 1229. It took over 400 years to complete this Gothic masterpiece by the waterfront. La Seu is one of the most beautiful Gothic cathedrals in the world and is visible from across the bay.",
     "lat": 39.5671,
     "lng": 2.6498,
-    "radius_meters": 50,
+    "radius_meters": 60,
     "audio_file": "assets/audio/catedral.mp3",
     "images": ["assets/images/catedral_1.jpg"],
     "year": 1229
@@ -14,8 +14,8 @@
   {
     "id": "placa_major",
     "name": "Plaça Major",
-    "subtitle": "Stadens hjärta • 1800-tal",
-    "description": "Plaças Major är Palmas centrala torg och omgiven av arkader. Det har varit mötesplats för handel, politik och kultur i över 200 år.",
+    "subtitle": "Heart of the city • 19th century",
+    "description": "Plaça Major is Palma's central square, surrounded by elegant arcades and street cafés. It has been a meeting place for trade, politics and culture for over 200 years. Today the square buzzes with markets, street musicians and visitors from around the world.",
     "lat": 39.5697,
     "lng": 2.6500,
     "radius_meters": 50,
@@ -24,15 +24,15 @@
     "year": 1803
   },
   {
-    "id": "bellver",
-    "name": "Castell de Bellver",
-    "subtitle": "Runt slott • Grundat 1300",
-    "description": "Bellver är ett av Europas få runda slott och byggdes av Jaume II på 1300-talet. Från kullen har man en fantastisk utsikt över hela Palma och havet.",
-    "lat": 39.5563,
-    "lng": 2.6197,
-    "radius_meters": 80,
-    "audio_file": "assets/audio/bellver.mp3",
-    "images": ["assets/images/bellver_1.jpg"],
-    "year": 1300
+    "id": "placa_cort",
+    "name": "Plaça de Cort",
+    "subtitle": "Town Hall Square • 15th century",
+    "description": "Plaça de Cort is home to Palma's 17th-century town hall and the famous ancient olive tree — one of the most photographed sights in the city. The square has been the centre of civic life for hundreds of years and is surrounded by beautiful Baroque facades.",
+    "lat": 39.5694,
+    "lng": 2.6503,
+    "radius_meters": 40,
+    "audio_file": "assets/audio/placa_cort.mp3",
+    "images": ["assets/images/placa_cort_1.jpg"],
+    "year": 1400
   }
 ]

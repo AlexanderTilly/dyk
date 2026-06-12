@@ -1,0 +1,62 @@
+
+<h2>Palma Explorer — Backend & Admin</h2>
+<p class="subtitle">Hur vill du strukturera plattformen? Välj den modell som passar bäst.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #F97316 0%, #ea580c 100%); padding: 1.5em; color: white;">
+      <div style="font-size: 2em; margin-bottom: 0.5em">🏙️</div>
+      <div style="font-weight: bold; font-size: 1.1em">CityPack Platform</div>
+      <div style="opacity: 0.85; font-size: 0.85em; margin-top: 0.3em">En stad = ett CityPack = ett köp</div>
+    </div>
+    <div class="card-body">
+      <h3>A — CityPack-fokuserad</h3>
+      <p>Appen är gratis att ladda ned. Varje stad (Palma, Barcelona, Rom...) är ett CityPack som kostar t.ex. 49 kr. Innehåller alla hotspots, ljud, bilder för den staden. Admin skapar och publicerar CityPacks via webbpanel.</p>
+      <div style="margin-top: 1em; display: flex; gap: 0.5em; flex-wrap: wrap;">
+        <span style="background:#fef3c7;color:#92400e;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">💰 Tydlig intäktsmodell</span>
+        <span style="background:#dcfce7;color:#166534;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">🌍 Skalbart globalt</span>
+        <span style="background:#ede9fe;color:#5b21b6;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">📦 Offline-stöd</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 1.5em; color: white;">
+      <div style="font-size: 2em; margin-bottom: 0.5em">🔓</div>
+      <div style="font-weight: bold; font-size: 1.1em">Freemium</div>
+      <div style="opacity: 0.85; font-size: 0.85em; margin-top: 0.3em">3 gratis hotspots, resten bakom betalmur</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Freemium per stad</h3>
+      <p>Varje stad har 3 gratis hotspots synliga för alla. Vill du ha alla 20+ hotspots låser du upp staden. Enkelt att prova innan köp. Admin styr vilka hotspots som är "gratis" i webbpanelen.</p>
+      <div style="margin-top: 1em; display: flex; gap: 0.5em; flex-wrap: wrap;">
+        <span style="background:#fef3c7;color:#92400e;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">🪝 Låg tröskel</span>
+        <span style="background:#dcfce7;color:#166534;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">📈 Konvertering</span>
+        <span style="background:#fee2e2;color:#991b1b;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">⚡ Kräver konto</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 1.5em; color: white;">
+      <div style="font-size: 2em; margin-bottom: 0.5em">🎫</div>
+      <div style="font-weight: bold; font-size: 1.1em">Prenumeration</div>
+      <div style="opacity: 0.85; font-size: 0.85em; margin-top: 0.3em">Månads/årsabonnemang — alla städer ingår</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Subscription</h3>
+      <p>En fast månadskostnad (t.ex. 49 kr/mån eller 299 kr/år) ger tillgång till alla CityPacks. Enkelt för frekventa resenärer. Admin kan lägga till nya städer löpande utan ny betalning för befintliga kunder.</p>
+      <div style="margin-top: 1em; display: flex; gap: 0.5em; flex-wrap: wrap;">
+        <span style="background:#fef3c7;color:#92400e;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">📅 Förutsägbar intäkt</span>
+        <span style="background:#dcfce7;color:#166534;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">♾️ Alla städer</span>
+        <span style="background:#fee2e2;color:#991b1b;padding:0.2em 0.6em;border-radius:99px;font-size:0.8em">🔐 Kräver auth</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 1.5em; padding: 1em; background: #fff7ed; border-radius: 12px; border-left: 4px solid #F97316;">
+  <strong>💡 Min rekommendation:</strong> <strong>A — CityPack</strong> som bas, med en gratis förhandsvisning (2-3 hotspots) för att locka köp. Enkelt att förklara, enkelt att prissätta, skalbart.
+</div>

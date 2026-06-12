@@ -1,0 +1,124 @@
+
+<h2>Did You Know! — App-flöde</h2>
+<p class="subtitle">Förslag på användarens resa genom appen. Vilket flöde känns rätt?</p>
+
+<div class="mockup">
+  <div class="mockup-header">Föreslaget flöde — från nedladdning till första hotspot</div>
+  <div class="mockup-body">
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem; text-align: center;">
+      <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.9rem 0.5rem;">
+        <div style="font-size: 1.6rem">👋</div>
+        <strong style="font-size: 0.8rem">1. Onboarding</strong>
+        <p style="font-size: 0.7rem; color: var(--text-secondary)">2-3 sidor: vad appen gör + tillstånd (plats, notiser)</p>
+      </div>
+      <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.9rem 0.5rem;">
+        <div style="font-size: 1.6rem">🌍</div>
+        <strong style="font-size: 0.8rem">2. Välj stad</strong>
+        <p style="font-size: 0.7rem; color: var(--text-secondary)">Lista över CityPacks — Palma först. GPS föreslår närmaste stad</p>
+      </div>
+      <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.9rem 0.5rem;">
+        <div style="font-size: 1.6rem">🗺️</div>
+        <strong style="font-size: 0.8rem">3. Utforska</strong>
+        <p style="font-size: 0.7rem; color: var(--text-secondary)">Karta med hotspots. Gratis = orange, Premium = låst 🔒</p>
+      </div>
+      <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.9rem 0.5rem;">
+        <div style="font-size: 1.6rem">🔔</div>
+        <strong style="font-size: 0.8rem">4. Gå runt</strong>
+        <p style="font-size: 0.7rem; color: var(--text-secondary)">Notis + ljud triggas vid hotspot. Hot Deals för gratis-users</p>
+      </div>
+      <div style="background: var(--bg-tertiary); border-radius: 10px; padding: 0.9rem 0.5rem;">
+        <div style="font-size: 1.6rem">⭐</div>
+        <strong style="font-size: 0.8rem">5. Uppgradera</strong>
+        <p style="font-size: 0.7rem; color: var(--text-secondary)">Köp CityPack → alla hotspots + inga deals-notiser</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin: 1.5rem 0 0.75rem">Navigering i appen — vilken struktur?</h3>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Bottom tabs: Karta · Lista · Spelar nu · Profil</h3>
+      <p>Klassisk apple-struktur. Karta är hem. "Spelar nu" visar aktiv audio (som Spotify mini-player). Profil har köp, språk, inställningar.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Kart-centrerad: allt utgår från kartan</h3>
+      <p>Kartan är hela appen. Lista, player och inställningar är bottom-sheets som dras upp. Modernare känsla (som Google Maps/Uber), färre klick men mer komplex att bygga.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Enkel: Karta + Lista (nuvarande) + mini-player</h3>
+      <p>Behåll det vi har, lägg bara till en mini-player längst ned när ljud spelas och en enkel inställningssida. Minst jobb, snabbast till test.</p>
+    </div>
+  </div>
+
+</div>
+
+<h3 style="margin: 1.5rem 0 0.75rem">Vilka funktioner ska med i v1? (klicka flera)</h3>
+
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="f1" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>🎧 Mini-player</h3>
+      <p>Spotify-liknande list längst ned — pausa/spela ljudet utan att öppna detaljsidan</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="f2" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>✅ Besökta platser</h3>
+      <p>Bock på hotspots du varit vid — "7 av 20 platser upptäckta" gamification</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="f3" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>📏 Avstånd till närmaste</h3>
+      <p>"Catedral — 350 m bort" i listan, sorterad på närhet</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="f4" onclick="toggleSelect(this)">
+    <div class="letter">4</div>
+    <div class="content">
+      <h3>🔒 Premium-lås i UI</h3>
+      <p>Låsta hotspots syns på kartan med 🔒 — teaser för köp (kräver auth + köpflöde)</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="f5" onclick="toggleSelect(this)">
+    <div class="letter">5</div>
+    <div class="content">
+      <h3>🌐 Flerspråk (EN/SV/DE/ES)</h3>
+      <p>Språkval i appen — både UI och innehåll per språk</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="f6" onclick="toggleSelect(this)">
+    <div class="letter">6</div>
+    <div class="content">
+      <h3>📡 Offline-läge</h3>
+      <p>Ladda ned CityPack (ljud + bilder) så allt funkar utan roaming</p>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 1.5em; padding: 1em; background: #fff7ed; border-radius: 12px; border-left: 4px solid #F97316;">
+  <strong>💡 Min rekommendation för v1:</strong> Flöde enligt ovan + navigering <strong>C</strong> (enkelt, snabbt till test) + funktioner <strong>1, 2, 3</strong> (mini-player, besökta, avstånd). Premium-lås (4) byggs när köpflödet kommer, språk (5) och offline (6) i v2.
+</div>
