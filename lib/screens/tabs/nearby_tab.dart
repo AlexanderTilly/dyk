@@ -45,6 +45,11 @@ class _NearbyTabState extends State<NearbyTab> {
 
   void _onMapCreated(MapboxMap map) async {
     _map = map;
+    // Show the user's position as a pulsing blue dot.
+    await map.location.updateSettings(LocationComponentSettings(
+      enabled: true,
+      pulsingEnabled: true,
+    ));
     _annotations = await map.annotations.createPointAnnotationManager();
     await _refreshPins();
   }
