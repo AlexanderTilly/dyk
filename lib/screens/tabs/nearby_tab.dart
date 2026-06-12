@@ -4,6 +4,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../../models/hotspot.dart';
 import '../../services/audio_service.dart';
 import '../../theme/dyk_theme.dart';
+import '../../widgets/category_badge.dart';
 import '../hotspot_detail_screen.dart';
 
 const _categoryMeta = {
@@ -116,20 +117,58 @@ class _NearbyTabState extends State<NearbyTab> {
           ),
         ),
         SizedBox(
-          height: 44,
+          height: 86,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             children: [
               for (final entry in _categoryMeta.entries)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: FilterChip(
-                    selected: _visibleCategories.contains(entry.key),
-                    selectedColor: DykColors.yellow,
-                    checkmarkColor: DykColors.black,
-                    label: Text('${entry.value.$1} ${entry.value.$2}'),
-                    onSelected: (_) => _toggleCategory(entry.key),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: GestureDetector(
+                    onTap: () => _toggleCategory(entry.key),
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 150),
+                      opacity:
+                          _visibleCategories.contains(entry.key) ? 1.0 : 0.4,
+                      child: Column(
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: _visibleCategories
+                                            .contains(entry.key)
+                                        ? DykColors.yellow
+                                        : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: CategoryBadge(
+                                    category: entry.key, size: 52),
+                              ),
+                              if (_visibleCategories.contains(entry.key))
+                                const Positioned(
+                                  right: -2,
+                                  top: -2,
+                                  child: Icon(Icons.check_circle,
+                                      size: 16, color: DykColors.yellow),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(entry.value.$2,
+                              style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
             ],
