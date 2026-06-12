@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/dyk_theme.dart';
 import '../../widgets/category_badge.dart';
+import '../../widgets/dyk_page_route.dart';
 import 'location_screen.dart';
 
 class InterestOption {
@@ -43,7 +44,14 @@ class _InterestsScreenState extends State<InterestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/landing_background.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -54,11 +62,12 @@ class _InterestsScreenState extends State<InterestsScreen> {
                   style: Theme.of(context)
                       .textTheme
                       .headlineMedium
-                      ?.copyWith(fontWeight: FontWeight.w900)),
+                      ?.copyWith(
+                          fontWeight: FontWeight.w900, color: Colors.white)),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 "Make it yours. Pick one or pick them all. You'll only be notified about what's interesting to you.",
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -85,8 +94,8 @@ class _InterestsScreenState extends State<InterestsScreen> {
                       : () {
                           widget.onInterestsChosen?.call(_selected);
                           Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => LocationScreen(
+                            DykPageRoute(
+                              page: LocationScreen(
                                   onFinished: widget.onFinished),
                             ),
                           );
@@ -96,6 +105,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -118,7 +128,12 @@ class _InterestCard extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedScale(
+        scale: selected ? 1.0 : 0.97,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -128,6 +143,15 @@ class _InterestCard extends StatelessWidget {
             color: selected ? DykColors.yellow : Colors.transparent,
             width: 2.5,
           ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: DykColors.yellow.withValues(alpha: 0.35),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : const [],
         ),
         child: Row(
           children: [
@@ -151,6 +175,7 @@ class _InterestCard extends StatelessWidget {
               color: selected ? DykColors.yellow : Colors.grey,
             ),
           ],
+        ),
         ),
       ),
     );

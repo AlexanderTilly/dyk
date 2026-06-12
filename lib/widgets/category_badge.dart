@@ -9,6 +9,7 @@ class CategoryBadge extends StatelessWidget {
   const CategoryBadge({super.key, required this.category, this.size = 48});
 
   static const _assets = {
+    'history': 'assets/images/badges/history.png',
     'funfact': 'assets/images/badges/funfact.png',
     'headline': 'assets/images/badges/headline.png',
     'hotdeal': 'assets/images/badges/hotdeal.png',

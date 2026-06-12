@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/dyk_page_route.dart';
 import 'interests_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -69,8 +70,8 @@ class WelcomeScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 17)),
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => InterestsScreen(
+                        DykPageRoute(
+                          page: InterestsScreen(
                               onFinished: onFinished,
                               onInterestsChosen: onInterestsChosen),
                         ),

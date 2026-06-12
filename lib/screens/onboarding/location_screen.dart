@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../widgets/dyk_page_route.dart';
 import 'notifications_screen.dart';
 
 class LocationScreen extends StatefulWidget {
@@ -14,6 +15,12 @@ class LocationScreen extends StatefulWidget {
 class _LocationScreenState extends State<LocationScreen> {
   bool _requesting = false;
 
+  void _next() {
+    Navigator.of(context).push(DykPageRoute(
+      page: NotificationsScreen(onFinished: widget.onFinished),
+    ));
+  }
+
   Future<void> _request() async {
     setState(() => _requesting = true);
     final status = await Permission.locationAlways.request();
@@ -25,9 +32,7 @@ class _LocationScreenState extends State<LocationScreen> {
             'Location is needed to discover places around you. You can enable it later in Settings.'),
       ));
     }
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => NotificationsScreen(onFinished: widget.onFinished),
-    ));
+    _next();
   }
 
   @override
@@ -40,7 +45,8 @@ class _LocationScreenState extends State<LocationScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('📍', textAlign: TextAlign.center, style: TextStyle(fontSize: 64)),
+              const Text('📍',
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 64)),
               const SizedBox(height: 24),
               Text('Location Access',
                   textAlign: TextAlign.center,
@@ -59,9 +65,14 @@ class _LocationScreenState extends State<LocationScreen> {
                 onPressed: _requesting ? null : _request,
                 child: _requesting
                     ? const SizedBox(
-                        width: 20, height: 20,
+                        width: 20,
+                        height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2))
                     : const Text('ENABLE LOCATION'),
+              ),
+              TextButton(
+                onPressed: _next,
+                child: const Text('Skip for now'),
               ),
             ],
           ),
