@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Visibility;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import '../../models/hotspot.dart';
@@ -45,10 +46,17 @@ class _NearbyTabState extends State<NearbyTab> {
 
   void _onMapCreated(MapboxMap map) async {
     _map = map;
-    // Show the user's position as a pulsing blue dot.
+    // Show the user's position as a pulsing yellow dot (DYK brand color).
+    final puckBytes = await rootBundle.load('assets/images/location_puck.png');
     await map.location.updateSettings(LocationComponentSettings(
       enabled: true,
       pulsingEnabled: true,
+      pulsingColor: 0xFFFFC107,
+      locationPuck: LocationPuck(
+        locationPuck2D: DefaultLocationPuck2D(
+          topImage: puckBytes.buffer.asUint8List(),
+        ),
+      ),
     ));
     _annotations = await map.annotations.createPointAnnotationManager();
     await _refreshPins();
