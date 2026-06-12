@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/dyk_theme.dart';
 import 'interests_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -11,7 +10,6 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -19,23 +17,11 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              // Logo placeholder until the PNG asset is added.
-              Text(
-                'Did You\nKnow?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 56,
-                  height: 1.0,
-                  fontWeight: FontWeight.w900,
-                  fontStyle: FontStyle.italic,
-                  color: dark ? Colors.white : DykColors.black,
-                  shadows: const [
-                    Shadow(color: DykColors.yellow, offset: Offset(3, 3)),
-                  ],
-                ),
+              Image.asset(
+                'assets/images/dyk_logo.png',
+                height: 240,
+                fit: BoxFit.contain,
               ),
-              const SizedBox(height: 12),
-              const Text('💡', style: TextStyle(fontSize: 40)),
               const Spacer(flex: 2),
               Text(
                 'Explore cities. Discover stories.',

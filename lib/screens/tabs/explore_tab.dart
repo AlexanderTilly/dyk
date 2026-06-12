@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/app_state.dart';
 import '../../services/notification_log.dart';
 import '../../theme/dyk_theme.dart';
+import '../../widgets/category_badge.dart';
 
 const _interestMeta = {
   'history': ('🏛️', 'History'),
@@ -63,7 +64,7 @@ class ExploreTab extends StatelessWidget {
                 for (final entry in _interestMeta.entries)
                   Expanded(
                     child: _InterestChip(
-                      emoji: entry.value.$1,
+                      categoryKey: entry.key,
                       label: entry.value.$2,
                       active: appState.interests.contains(entry.key),
                       onTap: () => appState.toggleInterest(entry.key),
@@ -104,13 +105,13 @@ class ExploreTab extends StatelessWidget {
 }
 
 class _InterestChip extends StatelessWidget {
-  final String emoji;
+  final String categoryKey;
   final String label;
   final bool active;
   final VoidCallback onTap;
 
   const _InterestChip({
-    required this.emoji,
+    required this.categoryKey,
     required this.label,
     required this.active,
     required this.onTap,
@@ -137,13 +138,13 @@ class _InterestChip extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 26)),
+                CategoryBadge(category: categoryKey, size: 44),
                 if (active)
                   const Positioned(
                     right: -8,
                     top: -4,
                     child: Icon(Icons.check_circle,
-                        size: 14, color: DykColors.yellow),
+                        size: 16, color: DykColors.yellow),
                   ),
               ],
             ),

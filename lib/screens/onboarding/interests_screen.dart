@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/dyk_theme.dart';
+import '../../widgets/category_badge.dart';
 import 'location_screen.dart';
 
 class InterestOption {
@@ -130,7 +131,7 @@ class _InterestCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(option.emoji, style: const TextStyle(fontSize: 32)),
+            CategoryBadge(category: option.key, size: 52),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

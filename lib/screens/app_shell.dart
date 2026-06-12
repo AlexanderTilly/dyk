@@ -6,7 +6,6 @@ import '../services/app_state.dart';
 import '../services/audio_service.dart';
 import '../services/notification_log.dart';
 import '../services/saved_store.dart';
-import '../theme/dyk_theme.dart';
 import 'tabs/city_packs_tab.dart';
 import 'tabs/explore_tab.dart';
 import 'tabs/nearby_tab.dart';
@@ -52,16 +51,11 @@ class _AppShellState extends State<AppShell> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: Text(
-          'Did You Know?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontStyle: FontStyle.italic,
-            color: dark ? Colors.white : DykColors.black,
-            shadows: const [
-              Shadow(color: DykColors.yellow, offset: Offset(2, 2)),
-            ],
-          ),
+        toolbarHeight: 64,
+        title: Image.asset(
+          'assets/images/dyk_logo.png',
+          height: 56,
+          fit: BoxFit.contain,
         ),
       ),
       body: IndexedStack(
