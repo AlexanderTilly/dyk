@@ -51,7 +51,20 @@ class _InterestsScreenState extends State<InterestsScreen> {
             fit: BoxFit.cover,
           ),
         ),
-        child: SafeArea(
+        child: Container(
+          // Dark scrim so text and cards stay readable over the artwork.
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withValues(alpha: 0.55),
+                Colors.black.withValues(alpha: 0.35),
+                Colors.black.withValues(alpha: 0.65),
+              ],
+            ),
+          ),
+          child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -59,15 +72,20 @@ class _InterestsScreenState extends State<InterestsScreen> {
             children: [
               const SizedBox(height: 16),
               Text('Choose Your Interests',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(
-                          fontWeight: FontWeight.w900, color: Colors.white)),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(color: Colors.black87, blurRadius: 8),
+                    ],
+                  )),
               const SizedBox(height: 8),
               const Text(
                 "Make it yours. Pick one or pick them all. You'll only be notified about what's interesting to you.",
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: Colors.white,
+                  shadows: [Shadow(color: Colors.black87, blurRadius: 6)],
+                ),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -107,6 +125,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
           ),
         ),
         ),
+        ),
       ),
     );
   }
@@ -125,7 +144,6 @@ class _InterestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedScale(
@@ -137,21 +155,26 @@ class _InterestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: dark ? Colors.white10 : Colors.white,
+          // Solid card so it reads clearly over the busy background art.
+          color: Colors.white.withValues(alpha: 0.96),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? DykColors.yellow : Colors.transparent,
+            color: selected ? DykColors.yellow : Colors.black12,
             width: 2.5,
           ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: DykColors.yellow.withValues(alpha: 0.35),
-                    blurRadius: 14,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : const [],
+          boxShadow: [
+            const BoxShadow(
+              color: Colors.black45,
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+            if (selected)
+              BoxShadow(
+                color: DykColors.yellow.withValues(alpha: 0.45),
+                blurRadius: 16,
+                spreadRadius: 1,
+              ),
+          ],
         ),
         child: Row(
           children: [
@@ -163,10 +186,13 @@ class _InterestCard extends StatelessWidget {
                 children: [
                   Text(option.title,
                       style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 16)),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          color: Color(0xFF1A1A1A))),
                   const SizedBox(height: 2),
                   Text(option.description,
-                      style: Theme.of(context).textTheme.bodySmall),
+                      style: const TextStyle(
+                          fontSize: 12, color: Colors.black54)),
                 ],
               ),
             ),
