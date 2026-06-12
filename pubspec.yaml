@@ -24,6 +24,14 @@ dev_dependencies:
     sdk: flutter
   mocktail: ^1.0.0
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/dyk_icon.png"
+  adaptive_icon_background: "#FFC107"
+  adaptive_icon_foreground: "assets/icon/dyk_icon.png"
 
 flutter:
   uses-material-design: true
