@@ -5,7 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/hot_deal.dart';
 import 'models/hotspot.dart';
 import 'screens/map_screen.dart';
-import 'screens/permission_screen.dart';
+import 'screens/onboarding/interests_screen.dart';
+import 'screens/onboarding/welcome_screen.dart';
 import 'services/app_state.dart';
 import 'services/audio_service.dart';
 import 'services/content_repository.dart';
@@ -117,28 +118,47 @@ class _DykAppState extends State<DykApp> {
     super.dispose();
   }
 
+  final _navKey = GlobalKey<NavigatorState>();
+
+  void _finishOnboarding() {
+    widget.appState.completeOnboarding();
+    _startGeoMonitoring();
+    _navKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => MapScreen(
+          hotspots: widget.hotspots,
+          audioService: widget.audioService,
+        ),
+      ),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final Widget home;
+    if (widget.appState.onboardingDone) {
+      // Returning user: resume exploring if it was on.
+      if (widget.appState.isExploring) _startGeoMonitoring();
+      home = MapScreen(
+        hotspots: widget.hotspots,
+        audioService: widget.audioService,
+      );
+    } else {
+      home = WelcomeScreen(
+        onFinished: _finishOnboarding,
+        onInterestsChosen: (interests) =>
+            widget.appState.setInterests(interests),
+      );
+    }
+
     return MaterialApp(
+      navigatorKey: _navKey,
       title: 'Did You Know?',
       debugShowCheckedModeBanner: false,
       theme: dykLightTheme(),
       darkTheme: dykDarkTheme(),
-      home: PermissionScreen(
-        hotspots: widget.hotspots,
-        audioService: widget.audioService,
-        onPermissionsGranted: (context) {
-          _startGeoMonitoring();
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => MapScreen(
-                hotspots: widget.hotspots,
-                audioService: widget.audioService,
-              ),
-            ),
-          );
-        },
-      ),
+      home: home,
     );
   }
 }
