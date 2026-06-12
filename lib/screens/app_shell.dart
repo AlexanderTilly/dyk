@@ -58,7 +58,20 @@ class _AppShellState extends State<AppShell> {
           fit: BoxFit.contain,
         ),
       ),
-      body: IndexedStack(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/landing_background.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Container(
+          // Heavy scrim — the artwork should only be subtly visible
+          // behind the content, unlike on onboarding.
+          color: dark
+              ? Colors.black.withValues(alpha: 0.86)
+              : const Color(0xFFFAF6EE).withValues(alpha: 0.92),
+          child: IndexedStack(
         index: _index,
         children: [
           ExploreTab(
@@ -85,6 +98,8 @@ class _AppShellState extends State<AppShell> {
             notificationLog: widget.notificationLog,
           ),
         ],
+          ),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
