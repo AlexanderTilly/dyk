@@ -119,39 +119,42 @@ class _InterestChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 3),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: dark ? Colors.white10 : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: active ? DykColors.yellow : Colors.transparent,
-            width: 2,
-          ),
-        ),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 150),
+        opacity: active ? 1.0 : 0.45,
         child: Column(
           children: [
             Stack(
               clipBehavior: Clip.none,
               children: [
-                CategoryBadge(category: categoryKey, size: 44),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:
+                          active ? DykColors.yellow : Colors.transparent,
+                      width: 2.5,
+                    ),
+                  ),
+                  child: CategoryBadge(category: categoryKey, size: 64),
+                ),
                 if (active)
                   const Positioned(
-                    right: -8,
-                    top: -4,
+                    right: 0,
+                    top: 0,
                     child: Icon(Icons.check_circle,
-                        size: 16, color: DykColors.yellow),
+                        size: 20, color: DykColors.yellow),
                   ),
               ],
             ),
             const SizedBox(height: 4),
             Text(label,
                 style: const TextStyle(
-                    fontSize: 10, fontWeight: FontWeight.w700)),
+                    fontSize: 11, fontWeight: FontWeight.w700)),
           ],
         ),
       ),
