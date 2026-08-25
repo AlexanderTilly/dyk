@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../i18n/i18n.dart';
 
 import '../../models/city_pack.dart';
 import '../../theme/dyk_theme.dart';
@@ -25,13 +26,13 @@ class CityPacksTab extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900, letterSpacing: 0.5)),
         const SizedBox(height: 4),
-        Text('Download city packs to unlock stories, deals and hidden gems.',
+        Text(tr('city_packs_sub'),
             style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 16),
         if (packs.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(24),
-            child: Center(child: Text('No city packs available — check your connection.')),
+            child: Center(child: Text(tr('no_city_packs'))),
           )
         else
           for (final p in packs)

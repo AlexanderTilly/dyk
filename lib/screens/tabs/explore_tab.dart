@@ -1,102 +1,198 @@
+import 'dart:async';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/app_state.dart';
 import '../../services/notification_log.dart';
+import '../../services/notification_router.dart';
+import '../../services/saved_store.dart';
 import '../../theme/dyk_theme.dart';
 import '../../widgets/category_badge.dart';
+import '../notification_center_screen.dart';
+import '../../i18n/i18n.dart';
+import '../../utils/time_ago.dart';
 
 const _interestMeta = {
   'history': ('🏛️', 'History'),
-  'funfact': ('💡', 'Fun Facts'),
-  'headline': ('📰', 'Headlines'),
+  'otium': ('🌿', 'Otium'),
+  'headline': ('📖', 'Stories & Legends'),
   'hotdeal': ('🔥', 'Hot Deals'),
 };
 
-class ExploreTab extends StatelessWidget {
+class ExploreTab extends StatefulWidget {
   final AppState appState;
   final NotificationLog notificationLog;
-  final VoidCallback onToggleExploring;
+  final SavedStore savedStore;
 
   const ExploreTab({
     super.key,
     required this.appState,
     required this.notificationLog,
-    required this.onToggleExploring,
+    required this.savedStore,
   });
 
   @override
+  State<ExploreTab> createState() => _ExploreTabState();
+}
+
+class _ExploreTabState extends State<ExploreTab> with WidgetsBindingObserver {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Refresh the notification log (written by the background isolate)
+    // on start, when the app resumes, and periodically while open.
+    _refreshLog();
+    _timer = Timer.periodic(
+        const Duration(seconds: 8), (_) => _refreshLog());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refreshLog();
+  }
+
+  Future<void> _refreshLog() async {
+    await widget.notificationLog.refresh();
+    if (mounted) setState(() {});
+  }
+
+  // Swipe right → save the discovery to the Saved tab.
+  Future<void> _saveEntry(LoggedNotification entry) async {
+    if (entry.type == 'hotspot' && entry.targetId != null) {
+      if (!widget.savedStore.isSaved(entry.targetId!)) {
+        await widget.savedStore.toggle(entry.targetId!);
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('saved_toast').replaceFirst('{title}', entry.title))),
+        );
+      }
+    }
+    // Also drop it from the live list so the swipe feels resolved.
+    final idx = widget.notificationLog.entries
+        .indexWhere((e) => e.targetId == entry.targetId && e.at == entry.at);
+    if (idx >= 0) await widget.notificationLog.removeAt(idx);
+    if (mounted) setState(() {});
+  }
+
+  // Swipe left → dismiss from the notification list.
+  Future<void> _removeEntry(int index) async {
+    await widget.notificationLog.removeAt(index);
+    if (mounted) setState(() {});
+  }
+
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final appState = widget.appState;
+    final notificationLog = widget.notificationLog;
     return AnimatedBuilder(
       animation: appState,
       builder: (context, _) {
-        final exploring = appState.isExploring;
         final entries = notificationLog.entries;
-        return ListView(
-          padding: const EdgeInsets.all(16),
+        // Only the three most recent discoveries; the rest live on the
+        // Notifications page ("See all").
+        final latest = entries.take(3).toList();
+        return Column(
           children: [
-            // Exploring toggle — yellow when active, dark when paused.
-            SizedBox(
-              height: 64,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      exploring ? DykColors.yellow : Colors.grey.shade800,
-                  foregroundColor:
-                      exploring ? DykColors.black : Colors.white,
-                ),
-                icon: Icon(exploring ? Icons.pause_circle : Icons.explore),
-                label: Text(
-                  exploring ? 'EXPLORING — TAP TO PAUSE' : 'START EXPLORING',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                onPressed: onToggleExploring,
+            Expanded(
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Text(tr('active_interests'),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final entry in _interestMeta.entries)
+                        Expanded(
+                          child: _InterestChip(
+                            categoryKey: entry.key,
+                            label: tr('cat_${entry.key}'),
+                            active: appState.interests.contains(entry.key),
+                            onTap: () => appState.toggleInterest(entry.key),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(tr('latest_notifications'),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 4),
+                  if (latest.isNotEmpty)
+                    Text(tr('swipe_hint'),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  if (latest.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white10
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: Text(
+                          tr('nothing_yet'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  else
+                    for (var i = 0; i < latest.length; i++)
+                      _SwipeableNotification(
+                        key: ValueKey(
+                            '${latest[i].targetId}_${latest[i].at.toIso8601String()}'),
+                        entry: latest[i],
+                        onSave: () => _saveEntry(latest[i]),
+                        onRemove: () => _removeEntry(i),
+                      ),
+
+                  // See all → full Notifications page.
+                  if (entries.isNotEmpty)
+                    Center(
+                      child: TextButton(
+                        onPressed: () async {
+                          await Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => NotificationCenterScreen(
+                              notificationLog: widget.notificationLog,
+                              savedStore: widget.savedStore,
+                            ),
+                          ));
+                          if (mounted) setState(() {});
+                        },
+                        child: Text('${tr('see_all')} (${entries.length})',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w800)),
+                      ),
+                    ),
+
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Text('Active interests',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                for (final entry in _interestMeta.entries)
-                  Expanded(
-                    child: _InterestChip(
-                      categoryKey: entry.key,
-                      label: entry.value.$2,
-                      active: appState.interests.contains(entry.key),
-                      onTap: () => appState.toggleInterest(entry.key),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text('Latest notifications',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            if (entries.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white10
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Nothing yet — start walking and your discoveries will show up here!',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-            else
-              for (final e in entries) _NotificationCard(entry: e),
           ],
         );
       },
@@ -143,20 +239,118 @@ class _InterestChip extends StatelessWidget {
                   child: CategoryBadge(category: categoryKey, size: 64),
                 ),
                 if (active)
-                  const Positioned(
+                  Positioned(
                     right: 0,
                     top: 0,
-                    child: Icon(Icons.check_circle,
-                        size: 20, color: DykColors.yellow),
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: DykColors.yellow,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check,
+                          size: 14, color: Colors.white),
+                    ),
                   ),
               ],
             ),
             const SizedBox(height: 4),
             Text(label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
                 style: const TextStyle(
-                    fontSize: 11, fontWeight: FontWeight.w700)),
+                    fontSize: 11, fontWeight: FontWeight.w700, height: 1.1)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SwipeableNotification extends StatelessWidget {
+  final LoggedNotification entry;
+  final VoidCallback onSave;
+  final VoidCallback onRemove;
+
+  const _SwipeableNotification({
+    super.key,
+    required this.entry,
+    required this.onSave,
+    required this.onRemove,
+  });
+
+  bool get _canSave => entry.type == 'hotspot' && entry.targetId != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dismissible(
+      key: key!,
+      // Right swipe (save) only enabled for hotspots.
+      direction: _canSave
+          ? DismissDirection.horizontal
+          : DismissDirection.endToStart,
+      background: _SwipeBg(
+        color: DykColors.yellow,
+        icon: Icons.favorite,
+        label: 'SAVE',
+        alignment: Alignment.centerLeft,
+        textColor: DykColors.black,
+      ),
+      secondaryBackground: const _SwipeBg(
+        color: Colors.redAccent,
+        icon: Icons.delete_outline,
+        label: 'REMOVE',
+        alignment: Alignment.centerRight,
+        textColor: Colors.white,
+      ),
+      onDismissed: (dir) {
+        if (dir == DismissDirection.startToEnd) {
+          onSave();
+        } else {
+          onRemove();
+        }
+      },
+      child: _NotificationCard(entry: entry),
+    );
+  }
+}
+
+class _SwipeBg extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final String label;
+  final Alignment alignment;
+  final Color textColor;
+
+  const _SwipeBg({
+    required this.color,
+    required this.icon,
+    required this.label,
+    required this.alignment,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      alignment: alignment,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: textColor),
+          const SizedBox(width: 8),
+          Text(label,
+              style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13)),
+        ],
       ),
     );
   }
@@ -172,7 +366,11 @@ class _NotificationCard extends StatelessWidget {
     final categoryLabel = entry.type == 'deal'
         ? 'HOT DEAL'
         : (entry.category ?? 'history').toUpperCase();
-    return Container(
+    return GestureDetector(
+      onTap: entry.payload == null
+          ? null
+          : () => NotificationRouter.handlePayload(entry.payload),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -181,16 +379,39 @@ class _NotificationCard extends StatelessWidget {
       ),
       child: Row(
         children: [
+          if (entry.imageUrl != null && entry.imageUrl!.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl: entry.imageUrl!,
+                width: 52,
+                height: 52,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => Container(
+                    width: 52, height: 52, color: Colors.black12),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(categoryLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.amber.shade700,
-                    )),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(categoryLabel,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.amber.shade700,
+                          )),
+                    ),
+                    Text(timeAgo(entry.at),
+                        style: const TextStyle(
+                            fontSize: 11, color: Colors.grey)),
+                  ],
+                ),
                 const SizedBox(height: 2),
                 Text(entry.title,
                     style: const TextStyle(
@@ -220,6 +441,7 @@ class _NotificationCard extends StatelessWidget {
                   )),
             ),
         ],
+      ),
       ),
     );
   }

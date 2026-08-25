@@ -1,4 +1,17 @@
+import 'package:flutter/material.dart' show Color;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+import 'notification_router.dart';
+
+// Shared DYK branding for notifications: yellow accent + logo large icon.
+const dykNotificationColor = Color(0xFFFFC107);
+final dykLargeIcon = DrawableResourceAndroidBitmap('@mipmap/ic_launcher');
+
+// Must be a top-level function for background notification taps.
+@pragma('vm:entry-point')
+void notificationBackgroundTap(NotificationResponse response) {
+  NotificationRouter.handlePayload(response.payload);
+}
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin;
@@ -9,16 +22,30 @@ class NotificationService {
   Future<void> initialize() async {
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
+    // iOS has no separate settings-screen toggle: if we never ask here, the
+    // app can never show a notification. Android ignores these flags.
     const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
     );
     const settings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
-    await _plugin.initialize(settings);
+    await _plugin.initialize(
+      settings,
+      onDidReceiveNotificationResponse: (resp) =>
+          NotificationRouter.handlePayload(resp.payload),
+      onDidReceiveBackgroundNotificationResponse: notificationBackgroundTap,
+    );
+
+    // If the app was launched by tapping a notification (cold start),
+    // route to it once the UI is ready.
+    final launch = await _plugin.getNotificationAppLaunchDetails();
+    if (launch?.didNotificationLaunchApp ?? false) {
+      NotificationRouter.handlePayload(launch!.notificationResponse?.payload);
+    }
 
     // Create channels up front so the app shows up in Android's
     // notification settings before the first notification fires.
@@ -49,15 +76,18 @@ class NotificationService {
     required String name,
     required int year,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'hotspot_channel',
       'Hotspot Alerts',
       channelDescription: 'Alerts when you are near a historic site',
       importance: Importance.high,
       priority: Priority.high,
+      color: dykNotificationColor,
+      colorized: true,
+      largeIcon: dykLargeIcon,
     );
     const iosDetails = DarwinNotificationDetails();
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
@@ -67,7 +97,7 @@ class NotificationService {
       'You are now at $name',
       'Founded $year — tap to hear the story',
       details,
-      payload: hotspotId,
+      payload: 'hotspot:$hotspotId',
     );
   }
 
@@ -77,15 +107,18 @@ class NotificationService {
     required String offerText,
     String? redeemCode,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'deal_channel',
       'Hot Deals',
       channelDescription: 'Local offers near you',
       importance: Importance.high,
       priority: Priority.high,
+      color: dykNotificationColor,
+      colorized: true,
+      largeIcon: dykLargeIcon,
     );
     const iosDetails = DarwinNotificationDetails();
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
@@ -99,7 +132,7 @@ class NotificationService {
       '🔥 $businessName',
       body,
       details,
-      payload: 'deal_$dealId',
+      payload: 'deal:$dealId',
     );
   }
 }

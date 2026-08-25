@@ -7,7 +7,7 @@ class AppState extends ChangeNotifier {
   final SharedPreferences _prefs;
   AppState(this._prefs);
 
-  static const allInterests = ['history', 'funfact', 'headline', 'hotdeal'];
+  static const allInterests = ['history', 'otium', 'headline', 'hotdeal'];
 
   bool get isExploring => _prefs.getBool('exploring') ?? false;
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../i18n/i18n.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../widgets/dyk_page_route.dart';
+import 'background_location_screen.dart';
 import 'notifications_screen.dart';
 
 class LocationScreen extends StatefulWidget {
@@ -15,7 +17,8 @@ class LocationScreen extends StatefulWidget {
 class _LocationScreenState extends State<LocationScreen> {
   bool _requesting = false;
 
-  void _next() {
+  // Skip straight to notifications (used when location is declined).
+  void _skip() {
     Navigator.of(context).push(DykPageRoute(
       page: NotificationsScreen(onFinished: widget.onFinished),
     ));
@@ -23,16 +26,24 @@ class _LocationScreenState extends State<LocationScreen> {
 
   Future<void> _request() async {
     setState(() => _requesting = true);
-    final status = await Permission.locationAlways.request();
+    // Android 11+ requires a two-step flow: foreground ("while in use") here,
+    // then background ("allow all the time") on the next screen. Requesting
+    // background directly silently fails, so we grant foreground first.
+    final foreground = await Permission.location.request();
     setState(() => _requesting = false);
     if (!mounted) return;
-    if (!status.isGranted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Location is needed to discover places around you. You can enable it later in Settings.'),
+    if (foreground.isGranted) {
+      // Move on to the dedicated "Allow all the time" step.
+      Navigator.of(context).push(DykPageRoute(
+        page: BackgroundLocationScreen(onFinished: widget.onFinished),
       ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            tr('ob_location_later')),
+      ));
+      _skip();
     }
-    _next();
   }
 
   @override
@@ -48,7 +59,7 @@ class _LocationScreenState extends State<LocationScreen> {
               const Text('📍',
                   textAlign: TextAlign.center, style: TextStyle(fontSize: 64)),
               const SizedBox(height: 24),
-              Text('Location Access',
+              Text(tr('ob_location_title'),
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
@@ -56,7 +67,7 @@ class _LocationScreenState extends State<LocationScreen> {
                       ?.copyWith(fontWeight: FontWeight.w900)),
               const SizedBox(height: 12),
               Text(
-                'We use your location to discover places around you.',
+                tr('ob_location_sub'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
@@ -64,15 +75,15 @@ class _LocationScreenState extends State<LocationScreen> {
               ElevatedButton(
                 onPressed: _requesting ? null : _request,
                 child: _requesting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('ENABLE LOCATION'),
+                    : Text(tr('ob_enable_location')),
               ),
               TextButton(
-                onPressed: _next,
-                child: const Text('Skip for now'),
+                onPressed: _skip,
+                child: Text(tr('ob_skip_now')),
               ),
             ],
           ),

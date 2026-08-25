@@ -10,6 +10,7 @@ class CategoryBadge extends StatelessWidget {
 
   static const _assets = {
     'history': 'assets/images/badges/history.png',
+    'otium': 'assets/images/badges/otium.png',
     'funfact': 'assets/images/badges/funfact.png',
     'headline': 'assets/images/badges/headline.png',
     'hotdeal': 'assets/images/badges/hotdeal.png',
@@ -18,8 +19,9 @@ class CategoryBadge extends StatelessWidget {
 
   static const _emojiFallback = {
     'history': '🏛️',
+    'otium': '🌿',
     'funfact': '💡',
-    'headline': '📰',
+    'headline': '📖',
     'hotdeal': '🔥',
     'citypack': '📦',
   };

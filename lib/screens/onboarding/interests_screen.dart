@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../i18n/i18n.dart';
 
 import '../../theme/dyk_theme.dart';
 import '../../widgets/category_badge.dart';
 import '../../widgets/dyk_page_route.dart';
-import 'location_screen.dart';
+import 'consent_screen.dart';
 
 class InterestOption {
   final String key;
@@ -13,16 +14,14 @@ class InterestOption {
   const InterestOption(this.key, this.emoji, this.title, this.description);
 }
 
-const dykInterestOptions = [
-  InterestOption('history', '🏛️', 'History',
-      'Ancient landmarks, hidden stories and historical moments.'),
-  InterestOption('funfact', '💡', 'Fun Facts',
-      'Unexpected stories and surprising details most visitors never discover.'),
-  InterestOption('headline', '📰', 'Headlines',
-      'Important events, famous people and moments that shaped the city.'),
-  InterestOption('hotdeal', '🔥', 'Hot Deals',
-      'Exclusive discounts and offers from places around you.'),
-];
+// Built per access so titles/descriptions follow the chosen language.
+List<InterestOption> get dykInterestOptions => [
+      InterestOption('history', '🏛️', tr('cat_history'), tr('int_history_sub')),
+      InterestOption('otium', '🌿', tr('cat_otium'), tr('int_otium_sub')),
+      InterestOption(
+          'headline', '📖', tr('cat_headline'), tr('int_headline_sub')),
+      InterestOption('hotdeal', '🔥', tr('cat_hotdeal'), tr('int_hotdeal_sub')),
+    ];
 
 class InterestsScreen extends StatefulWidget {
   final VoidCallback onFinished;
@@ -39,13 +38,18 @@ class InterestsScreen extends StatefulWidget {
 }
 
 class _InterestsScreenState extends State<InterestsScreen> {
-  final Set<String> _selected = {'history', 'funfact', 'headline', 'hotdeal'};
+  final Set<String> _selected = {
+    'history',
+    'otium',
+    'headline',
+    'hotdeal',
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/landing_background.png'),
             fit: BoxFit.cover,
@@ -71,7 +75,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              Text('Choose Your Interests',
+              Text(tr('ob_interests_title'),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
@@ -113,7 +117,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                           widget.onInterestsChosen?.call(_selected);
                           Navigator.of(context).push(
                             DykPageRoute(
-                              page: LocationScreen(
+                              page: ConsentScreen(
                                   onFinished: widget.onFinished),
                             ),
                           );

@@ -38,10 +38,10 @@ void main() {
       'city': 'Palma',
       'country': 'Spain',
       'description': 'desc',
-      'price_sek': 49,
+      'price_cents': 49,
     });
     expect(pack.name, 'Palma de Mallorca');
-    expect(pack.priceSek, 49);
+    expect(pack.priceCents, 49);
   });
 
   test('Hotspot.fromJson defaults category and is_free', () {
@@ -68,10 +68,10 @@ void main() {
       'lat': 39.5,
       'lng': 2.6,
       'radius_meters': 50,
-      'category': 'funfact',
+      'category': 'headline',
       'is_free': true,
     });
-    expect(h.category, 'funfact');
+    expect(h.category, 'headline');
     expect(h.isFree, true);
     expect(h.audioFile, '');
     expect(h.images, isEmpty);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../i18n/i18n.dart';
 import '../models/hotspot.dart';
 import '../services/audio_service.dart';
 import '../widgets/hotspot_list_tile.dart';
@@ -19,7 +20,7 @@ class ListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7ED),
       appBar: AppBar(
-        title: const Text('All locations'),
+        title: Text(tr('all_locations')),
         backgroundColor: const Color(0xFFF97316),
         foregroundColor: Colors.white,
         elevation: 0,

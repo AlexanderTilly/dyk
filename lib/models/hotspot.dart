@@ -8,9 +8,14 @@ class Hotspot {
   final int radiusMeters;
   final String audioFile;
   final List<String> images;
-  final int year;
-  final String category; // history | funfact | headline
+  // Optional caption per image, aligned by index with [images].
+  final List<String?> imageCaptions;
+  final String year;
+  final String category; // history | otium | funfact | headline
+  final String? subcategory; // building | work_of_art | ... (drives pin icon)
   final bool isFree;
+  final List<String> facts;
+  final List<String> videos;
 
   const Hotspot({
     required this.id,
@@ -22,9 +27,13 @@ class Hotspot {
     required this.radiusMeters,
     required this.audioFile,
     required this.images,
+    this.imageCaptions = const [],
     required this.year,
     this.category = 'history',
+    this.subcategory,
     this.isFree = false,
+    this.facts = const [],
+    this.videos = const [],
   });
 
   factory Hotspot.fromJson(Map<String, dynamic> json) {
@@ -38,11 +47,38 @@ class Hotspot {
       radiusMeters: json['radius_meters'] as int,
       audioFile: (json['audio_file'] as String?) ?? '',
       images: json['images'] != null ? List<String>.from(json['images'] as List) : const [],
-      year: (json['year'] as int?) ?? 0,
+      year: json['year']?.toString() ?? '',
       category: (json['category'] as String?) ?? 'history',
+      subcategory: json['subcategory'] as String?,
       isFree: (json['is_free'] as bool?) ?? false,
     );
   }
+
+  Hotspot copyWith({
+    List<String>? images,
+    List<String?>? imageCaptions,
+    String? audioFile,
+    List<String>? facts,
+    List<String>? videos,
+  }) =>
+      Hotspot(
+        id: id,
+        name: name,
+        subtitle: subtitle,
+        description: description,
+        lat: lat,
+        lng: lng,
+        radiusMeters: radiusMeters,
+        audioFile: audioFile ?? this.audioFile,
+        images: images ?? this.images,
+        imageCaptions: imageCaptions ?? this.imageCaptions,
+        year: year,
+        category: category,
+        subcategory: subcategory,
+        isFree: isFree,
+        facts: facts ?? this.facts,
+        videos: videos ?? this.videos,
+      );
 
   Map<String, dynamic> toJson() => {
         'id': id,

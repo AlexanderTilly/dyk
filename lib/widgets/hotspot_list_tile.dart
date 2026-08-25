@@ -1,6 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import '../models/hotspot.dart';
 
+import '../i18n/i18n.dart';
+import '../models/hotspot.dart';
+import 'category_badge.dart';
+
+/// Photo row with a small category badge — same look as the Nearby list.
 class HotspotListTile extends StatelessWidget {
   final Hotspot hotspot;
   final VoidCallback onTap;
@@ -13,79 +18,89 @@ class HotspotListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final img = hotspot.images.isNotEmpty ? hotspot.images.first : null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFF97316).withValues(alpha: 0.1),
-              blurRadius: 6,
-            ),
-          ],
+          color: dark ? Colors.white10 : Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
-              ),
-              child: hotspot.images.isNotEmpty
-                  ? Image.asset(
-                      hotspot.images.first,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        width: 80,
-                        height: 80,
-                        color: const Color(0xFFFED7AA),
-                        child: const Icon(Icons.place,
-                            color: Color(0xFFF97316)),
-                      ),
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: img != null
+                  ? Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: CachedNetworkImage(
+                            imageUrl: img,
+                            width: 56,
+                            height: 56,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) => Center(
+                                child: CategoryBadge(
+                                    category: hotspot.category, size: 44)),
+                          ),
+                        ),
+                        Positioned(
+                          right: -4,
+                          bottom: -4,
+                          child: Container(
+                            padding: const EdgeInsets.all(1.5),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: dark
+                                      ? const Color(0xFF1A1A1A)
+                                      : Colors.white,
+                                  width: 2),
+                            ),
+                            child: CategoryBadge(
+                                category: hotspot.category, size: 20),
+                          ),
+                        ),
+                      ],
                     )
-                  : Container(
-                      width: 80,
-                      height: 80,
-                      color: const Color(0xFFFED7AA),
-                      child: const Icon(Icons.place,
-                          color: Color(0xFFF97316)),
-                    ),
+                  : Center(
+                      child:
+                          CategoryBadge(category: hotspot.category, size: 44)),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hotspot.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF431407),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      hotspot.subtitle,
-                      style: const TextStyle(
-                        color: Color(0xFF9A3412),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hotspot.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 14),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    hotspot.subtitle.isNotEmpty
+                        ? hotspot.subtitle
+                        : tr('cat_${hotspot.category}').toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.amber.shade700),
+                  ),
+                ],
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(right: 12),
-              child: Icon(Icons.chevron_right, color: Color(0xFFF97316)),
-            ),
+            const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
           ],
         ),
       ),

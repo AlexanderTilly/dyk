@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../i18n/i18n.dart';
 
 class ReadyScreen extends StatefulWidget {
   final VoidCallback onFinished;
@@ -45,7 +46,7 @@ class _ReadyScreenState extends State<ReadyScreen>
                     style: TextStyle(fontSize: 72)),
               ),
               const SizedBox(height: 24),
-              Text("You're all set.",
+              Text(tr('ob_all_set'),
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme

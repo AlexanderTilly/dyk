@@ -1,0 +1,87 @@
+# Codemagic CI — builds the iOS app and ships it to TestFlight.
+#
+# One-time setup in the Codemagic UI before the first run:
+#   1. Integrations → App Store Connect: upload the API key (.p8) and note the
+#      integration name; put that name in APP_STORE_CONNECT_ISSUER below.
+#   2. Environment variables → group "mapbox": add MAPBOX_DOWNLOADS_TOKEN
+#      (a SECRET token from the Mapbox dashboard, starts with sk.) and mark it
+#      secure. Without it CocoaPods cannot download the Mapbox SDK.
+#   3. Register the bundle id app.diduknow in the Apple Developer portal.
+
+workflows:
+  ios-testflight:
+    name: iOS — TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+
+    integrations:
+      app_store_connect: DYK App Store Connect   # ← name of the integration in step 1
+
+    environment:
+      groups:
+        - mapbox                                  # provides MAPBOX_DOWNLOADS_TOKEN
+      flutter: 3.44.1                             # pinned: matches local dev
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: app.diduknow
+
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $FCI_BUILD_DIR/ios/Pods
+
+    scripts:
+      - name: Mapbox SDK credentials
+        script: |
+          # CocoaPods authenticates to Mapbox via ~/.netrc.
+          printf "machine api.mapbox.com\n  login mapbox\n  password %s\n" \
+            "$MAPBOX_DOWNLOADS_TOKEN" > "$HOME/.netrc"
+          chmod 600 "$HOME/.netrc"
+
+      - name: Flutter dependencies
+        script: |
+          flutter pub get
+
+      - name: Analyze and test
+        script: |
+          flutter analyze lib test
+          flutter test
+
+      - name: Build number from TestFlight
+        script: |
+          # Always one higher than what is already on TestFlight, so uploads
+          # never collide with a previous build.
+          BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number \
+            "$APP_STORE_APPLE_ID" --platform IOS 2>/dev/null || echo 0)
+          echo "NEXT_BUILD=$(($BUILD_NUMBER + 1))" >> $CM_ENV
+
+      - name: CocoaPods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+
+      - name: Build IPA
+        script: |
+          flutter build ipa --release \
+            --build-number=$NEXT_BUILD \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # Leave TestFlight distribution manual until the background-location
+        # rework lands — early builds are not representative.
+        submit_to_app_store: false
+      email:
+        recipients:
+          - alexander@vibesense.se
+        notify:
+          success: true
+          failure: true

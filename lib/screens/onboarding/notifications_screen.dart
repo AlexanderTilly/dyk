@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../i18n/i18n.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../widgets/dyk_page_route.dart';
@@ -58,15 +59,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ElevatedButton(
                 onPressed: _requesting ? null : _request,
                 child: _requesting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('ENABLE NOTIFICATIONS'),
+                    : Text(tr('ob_enable_notif')),
               ),
               TextButton(
                 onPressed: _next,
-                child: const Text('Skip for now'),
+                child: Text(tr('ob_skip_now')),
               ),
             ],
           ),

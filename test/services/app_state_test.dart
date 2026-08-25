@@ -7,7 +7,8 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final state = AppState(await SharedPreferences.getInstance());
     expect(state.isExploring, false);
-    expect(state.interests, {'history', 'funfact', 'headline', 'hotdeal'});
+    expect(state.interests,
+        {'history', 'otium', 'headline', 'hotdeal'});
     expect(state.onboardingDone, false);
   });
 

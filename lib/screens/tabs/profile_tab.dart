@@ -1,18 +1,57 @@
 import 'package:flutter/material.dart';
 
+import '../../services/app_state.dart';
+import '../../services/auth_service.dart';
+import '../../services/dyk_repository.dart';
+import '../../services/entitlements.dart';
 import '../../services/notification_log.dart';
 import '../../services/saved_store.dart';
 import '../../theme/dyk_theme.dart';
+import '../auth_screen.dart';
+import '../premium_screen.dart';
+import '../settings_screen.dart';
+import '../support_screen.dart';
+import '../../i18n/i18n.dart';
+import '../../services/step_store.dart';
 
 class ProfileTab extends StatelessWidget {
   final SavedStore savedStore;
   final NotificationLog notificationLog;
+  final AuthService authService;
+  final AppState appState;
+  final VoidCallback onToggleExploring;
+  final VoidCallback onAuthChanged;
+  final DykRepositoryBase? repo;
+  final Entitlements? entitlements;
+  final String? citypackId;
+  final String? cityName;
+  final int cityPriceCents;
 
   const ProfileTab({
     super.key,
     required this.savedStore,
     required this.notificationLog,
+    required this.authService,
+    required this.appState,
+    required this.onToggleExploring,
+    required this.onAuthChanged,
+    this.repo,
+    this.entitlements,
+    this.citypackId,
+    this.cityName,
+    this.cityPriceCents = 0,
   });
+
+  void _openSettings(BuildContext context) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => SettingsScreen(
+        authService: authService,
+        appState: appState,
+        onToggleExploring: onToggleExploring,
+        onAuthChanged: onAuthChanged,
+      ),
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,36 +90,45 @@ class ProfileTab extends StatelessWidget {
           ),
         );
 
-    void comingSoon() {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Coming soon'),
-          content: const Text('This feature is on its way!'),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK')),
-          ],
+    void openPremium() {
+      final e = entitlements;
+      final cityId = citypackId;
+      final r = repo;
+      if (e == null || cityId == null || r == null) return;
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => PremiumScreen(
+          entitlements: e,
+          repo: r,
+          authService: authService,
+          cityId: cityId,
+          cityName: cityName ?? 'this city',
+          cityPriceCents: cityPriceCents,
         ),
-      );
+      ));
     }
 
     return AnimatedBuilder(
       animation: savedStore,
       builder: (context, _) => ListView(
-        padding: const EdgeInsets.all(16),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+            16, 16, 16, 40 + MediaQuery.of(context).padding.bottom),
         children: [
           Center(
             child: Column(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 40,
                   backgroundColor: DykColors.yellow,
-                  child: Text('🧭', style: TextStyle(fontSize: 36)),
+                  backgroundImage: authService.isSignedIn
+                      ? AssetImage(authService.avatarAsset)
+                      : null,
+                  child: authService.isSignedIn
+                      ? null
+                      : const Text('🧭', style: TextStyle(fontSize: 36)),
                 ),
                 const SizedBox(height: 8),
-                Text('Explorer',
+                Text(authService.displayLabel,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge
@@ -90,7 +138,51 @@ class ProfileTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          // Sign-in card for guests
+          if (!authService.isSignedIn)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: DykColors.yellow,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tr('guest_title'),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                color: DykColors.black)),
+                        Text(tr('guest_sub'),
+                            style: TextStyle(
+                                fontSize: 12, color: DykColors.black)),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: DykColors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () async {
+                      final ok = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              AuthScreen(authService: authService),
+                        ),
+                      );
+                      if (ok == true) onAuthChanged();
+                    },
+                    child: Text(tr('sign_in')),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
@@ -99,11 +191,65 @@ class ProfileTab extends StatelessWidget {
             ),
             child: Row(
               children: [
-                statCard('1', 'Cities\nExplored'),
-                statCard('$visited', 'Hotspots\nVisited'),
-                statCard('$savedCount', 'Saved\nItems'),
+                statCard('1', tr('cities_explored')),
+                statCard('$visited', tr('hotspots_visited')),
+                Expanded(
+                  child: FutureBuilder<int>(
+                    future: StepStore.todaySteps(),
+                    builder: (context, snap) => Column(
+                      children: [
+                        Text(StepStore.fmt(snap.data ?? 0),
+                            style: const TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.w900)),
+                        Text(tr('steps_today'),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                ),
+                statCard('$savedCount', tr('saved_items')),
               ],
             ),
+          ),
+          const SizedBox(height: 16),
+          // Exploring on/off — geofence notifications about nearby places.
+          AnimatedBuilder(
+            animation: appState,
+            builder: (context, _) {
+              final on = appState.isExploring;
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: dark ? Colors.white10 : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Icon(on ? Icons.explore : Icons.explore_off,
+                        color: on ? Colors.amber.shade700 : Colors.grey),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tr('exploring'),
+                              style: const TextStyle(fontWeight: FontWeight.w800)),
+                          Text(tr('exploring_sub'),
+                              style: const TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: on,
+                      activeColor: DykColors.yellow,
+                      onChanged: (_) => onToggleExploring(),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           // Go Premium banner
@@ -117,39 +263,46 @@ class ProfileTab extends StatelessWidget {
               children: [
                 const Text('👑', style: TextStyle(fontSize: 28)),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Go Premium',
-                          style: TextStyle(fontWeight: FontWeight.w900)),
-                      Text(
-                          'Unlock unlimited downloads, exclusive content and more perks.',
-                          style: TextStyle(fontSize: 12)),
+                      Text(tr('go_premium'),
+                          style: const TextStyle(fontWeight: FontWeight.w900)),
+                      Text(tr('premium_pitch'),
+                          style: const TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: comingSoon,
-                  child: const Text('View Plans'),
+                  onPressed: openPremium,
+                  child: Text(tr('view_plans')),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 20),
-          menuRow(Icons.person_outline, 'Edit Profile', comingSoon),
-          menuRow(Icons.settings_outlined, 'Settings', comingSoon),
-          menuRow(Icons.help_outline, 'Help & Support', comingSoon),
-          menuRow(Icons.info_outline, 'About Did You Know?', () {
+          menuRow(Icons.person_outline, tr('edit_profile'), () => _openSettings(context)),
+          menuRow(Icons.settings_outlined, tr('settings'), () => _openSettings(context)),
+          menuRow(Icons.help_outline, tr('help_support'), () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => SupportScreen(authService: authService),
+            ));
+          }),
+          menuRow(Icons.info_outline, tr('about_app'), () {
             showAboutDialog(
               context: context,
               applicationName: 'Did You Know?',
-              applicationVersion: '1.0.0-alpha',
               children: const [
                 Text('Explore cities. Discover stories. Unlock hidden gems.'),
               ],
             );
           }),
+          if (authService.isSignedIn)
+            menuRow(Icons.logout, tr('sign_out'), () async {
+              await authService.signOut();
+              onAuthChanged();
+            }),
         ],
       ),
     );

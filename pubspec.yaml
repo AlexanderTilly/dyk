@@ -1,7 +1,7 @@
 name: palma_app
 description: Tourist audio guide for Palma de Mallorca
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -12,12 +12,25 @@ dependencies:
   geolocator: ^11.0.0
   geofencing_api: ^2.0.0
   just_audio: ^0.9.36
+  url_launcher: ^6.3.0
+  just_audio_background: ^0.0.1-beta.11
   flutter_local_notifications: ^17.0.0
   mapbox_maps_flutter: ^2.5.0
   permission_handler: ^11.0.0
   cached_network_image: ^3.3.0
+  path_provider: ^2.1.0
+  flutter_cache_manager: ^3.3.1
   supabase_flutter: ^2.8.0
   shared_preferences: ^2.2.0
+  flutter_foreground_task: ^8.10.0
+  device_info_plus: ^10.1.0
+  package_info_plus: ^8.0.0
+  uuid: ^4.0.0
+  http: ^1.2.0
+  google_fonts: ^6.2.1
+  video_player: ^2.9.1
+  geocoding: ^3.0.0
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -28,7 +41,7 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: true
-  ios: false
+  ios: true
   image_path: "assets/icon/dyk_icon.png"
   adaptive_icon_background: "#FFC107"
   adaptive_icon_foreground: "assets/icon/dyk_icon.png"
@@ -40,3 +53,4 @@ flutter:
     - assets/audio/
     - assets/images/
     - assets/images/badges/
+    - assets/images/headers/

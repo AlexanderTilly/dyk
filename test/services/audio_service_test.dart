@@ -6,6 +6,11 @@ import 'package:palma_app/services/audio_service.dart';
 class MockAudioPlayer extends Mock implements AudioPlayer {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(
+        AudioSource.asset('assets/audio/catedral.mp3'));
+  });
+
   group('AudioService', () {
     late MockAudioPlayer mockPlayer;
     late AudioService audioService;
@@ -15,13 +20,14 @@ void main() {
       audioService = AudioService(player: mockPlayer);
     });
 
-    test('play calls setAsset and play on the player', () async {
-      when(() => mockPlayer.setAsset(any())).thenAnswer((_) async => null);
+    test('play loads the source and starts playback', () async {
+      when(() => mockPlayer.setAudioSource(any()))
+          .thenAnswer((_) async => null);
       when(() => mockPlayer.play()).thenAnswer((_) async {});
 
       await audioService.play('assets/audio/catedral.mp3');
 
-      verify(() => mockPlayer.setAsset('assets/audio/catedral.mp3')).called(1);
+      verify(() => mockPlayer.setAudioSource(any())).called(1);
       verify(() => mockPlayer.play()).called(1);
     });
 
