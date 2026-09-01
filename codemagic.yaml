@@ -28,7 +28,8 @@ workflows:
 
     environment:
       groups:
-        - mapbox                                  # provides MAPBOX_DOWNLOADS_TOKEN
+        - mapbox                                  # MAPBOX_DOWNLOADS_TOKEN (secret)
+        - appstore                                # APP_STORE_APPLE_ID (not secret)
       flutter: 3.44.1                             # pinned: matches local dev
       xcode: latest
       cocoapods: default
