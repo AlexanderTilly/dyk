@@ -1,12 +1,21 @@
-# Codemagic CI — builds the iOS app and ships it to TestFlight.
+# Codemagic CI — builds the DYK iOS app and ships it to TestFlight.
+# Kept fully separate from the Akut Jour app: own repo, own Codemagic
+# application, own bundle id (app.diduknow), own App Store record.
+# Shared with Akut Jour: the Apple team (Ofelex AB) and therefore the same
+# App Store Connect API-key integration.
 #
-# One-time setup in the Codemagic UI before the first run:
-#   1. Integrations → App Store Connect: upload the API key (.p8) and note the
-#      integration name; put that name in APP_STORE_CONNECT_ISSUER below.
-#   2. Environment variables → group "mapbox": add MAPBOX_DOWNLOADS_TOKEN
-#      (a SECRET token from the Mapbox dashboard, starts with sk.) and mark it
-#      secure. Without it CocoaPods cannot download the Mapbox SDK.
-#   3. Register the bundle id app.diduknow in the Apple Developer portal.
+# Setup checklist (see memory: codemagic-ios-lardomar):
+#   1. Apple Developer portal → Identifiers → App ID `app.diduknow`
+#      with Background Modes enabled.
+#   2. App Store Connect → new app record for app.diduknow; note its numeric
+#      Apple ID and set it as env var APP_STORE_APPLE_ID (not secret).
+#   3. Codemagic → Generate certificate, then create an App Store distribution
+#      profile in the Apple portal for app.diduknow, then Fetch profiles.
+#      `ios_signing` below only FETCHES — it never creates anything.
+#   4. Environment variables → group `mapbox` with MAPBOX_DOWNLOADS_TOKEN
+#      (secret sk. token, DOWNLOADS:READ). Already done.
+#   5. App Store Connect → TestFlight → Test Information: fill in feedback
+#      email and beta review contact, or the beta-review step goes red.
 
 workflows:
   ios-testflight:
@@ -15,7 +24,7 @@ workflows:
     max_build_duration: 90
 
     integrations:
-      app_store_connect: DYK App Store Connect   # ← name of the integration in step 1
+      app_store_connect: Akut Jour App Store Connect  # team-wide key (Ofelex AB), shared with the Akut Jour app
 
     environment:
       groups:
@@ -61,6 +70,12 @@ workflows:
         script: |
           find . -name "Podfile" -execdir pod install \;
 
+      - name: Apply signing profiles
+        script: |
+          # Writes /Users/builder/export_options.plist — without this step the
+          # IPA build fails with "property list does not exist".
+          xcode-project use-profiles
+
       - name: Build IPA
         script: |
           flutter build ipa --release \
@@ -68,9 +83,13 @@ workflows:
             --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
+      # Globs resolve against working_directory, so list both shapes —
+      # a missed glob means "No artifacts were found" and nothing reaches
+      # TestFlight even though the build goes green.
       - build/ios/ipa/*.ipa
+      - ios/build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-      - flutter_drive.log
 
     publishing:
       app_store_connect:
