@@ -55,8 +55,8 @@
 	<string>Did You Know? uses your location in the background so you get a notification the moment you reach a historic site, a hidden gem or a local offer — even with the app closed.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Did You Know? uses your location in the background so you get a notification the moment you reach a historic site, a hidden gem or a local offer — even with the app closed.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Used to scan redemption codes at partner venues.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Did You Know? never records audio. This entry is required because the audio playback library links Apple's audio APIs.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Used to count the steps you walk while exploring a city.</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
