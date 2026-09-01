@@ -39,8 +39,8 @@ workflows:
         # or the build fails with "No matching profiles found".
         provisioning_profiles:
           - DYK App Store
-        certificates:
-          - Akut Jour Distribution              # team-level cert, shared
+        # No `certificates:` list — the profile already points at the right
+        # certificate, and Codemagic shows it as matched (green check).
 
     cache:
       cache_paths:
