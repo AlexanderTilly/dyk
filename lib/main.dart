@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
@@ -179,6 +181,7 @@ class _DykAppState extends State<DykApp> {
     // Handle a payload that arrived during cold start.
     WidgetsBinding.instance.addPostFrameCallback((_) => _handleNotificationTap());
     _initTelemetry();
+    _startForegroundPresence();
     // Language switch → re-fetch content so translations apply immediately.
     I18n.instance.addListener(_onLanguageChanged);
     // Branded splash for a moment on launch.
@@ -274,6 +277,46 @@ class _DykAppState extends State<DykApp> {
     }
   }
 
+  // Live presence while the app is open. The background isolate also reports,
+  // but only on Android — on iOS it barely runs, so without this an iPhone
+  // never appears on the admin live map.
+  Timer? _presenceTimer;
+
+  void _startForegroundPresence() {
+    _reportPresenceNow();
+    _presenceTimer?.cancel();
+    _presenceTimer = Timer.periodic(
+        const Duration(seconds: 30), (_) => _reportPresenceNow());
+  }
+
+  Future<void> _reportPresenceNow() async {
+    if (!widget.appState.isExploring) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionId = prefs.getString('anon_install_id');
+      if (sessionId == null) return;
+      final pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      final n = DateTime.now();
+      final steps =
+          (prefs.getDouble('steps_day_m_${n.year}-${n.month}-${n.day}') ?? 0) /
+              0.75;
+      await Supabase.instance.client.rpc('record_presence', params: {
+        'p_session_id': sessionId,
+        'p_user_id': _authService.currentUser?.id,
+        'p_label': _authService.displayLabel,
+        'p_is_user': _authService.isSignedIn,
+        'p_lat': pos.latitude,
+        'p_lng': pos.longitude,
+        'p_status': 'exploring',
+        'p_status_detail': null,
+        'p_steps': steps.round(),
+      });
+    } catch (_) {
+      // Presence is best-effort; never disturb the user over it.
+    }
+  }
+
   // Remove our live dot when exploring stops.
   Future<void> _endPresence() async {
     try {
@@ -352,6 +395,7 @@ class _DykAppState extends State<DykApp> {
 
   @override
   void dispose() {
+    _presenceTimer?.cancel();
     I18n.instance.removeListener(_onLanguageChanged);
     widget.audioService.dispose();
     widget.geoService.dispose();
