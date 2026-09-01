@@ -59,6 +59,10 @@
 	<string>Used to scan redemption codes at partner venues.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Used to count the steps you walk while exploring a city.</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.pravera.flutter_foreground_task.refresh</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
