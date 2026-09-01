@@ -75,6 +75,10 @@ class NotificationService {
     required String hotspotId,
     required String name,
     required int year,
+    // Supplied by the iOS path, which knows the user's language. The Android
+    // isolate has its own translation table and keeps the defaults.
+    String? title,
+    String? body,
   }) async {
     final androidDetails = AndroidNotificationDetails(
       'hotspot_channel',
@@ -94,8 +98,8 @@ class NotificationService {
 
     await _plugin.show(
       hotspotId.hashCode,
-      'You are now at $name',
-      'Founded $year — tap to hear the story',
+      title ?? 'You are now at $name',
+      body ?? 'Founded $year — tap to hear the story',
       details,
       payload: 'hotspot:$hotspotId',
     );

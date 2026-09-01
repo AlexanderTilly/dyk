@@ -29,6 +29,8 @@ import 'services/entitlements.dart';
 import 'services/geo_fencing_service.dart';
 import 'services/geofence_foreground_service.dart';
 import 'services/ios_geo_service.dart';
+import 'services/proximity_engine.dart';
+import 'services/step_store.dart';
 import 'services/notification_router.dart';
 import 'services/onboarding_music.dart';
 import 'screens/deal_detail_screen.dart';
@@ -169,6 +171,8 @@ class _DykAppState extends State<DykApp> {
   // iOS cannot run the Android-style foreground service; this replaces it.
   late final IosGeoService _iosGeo =
       IosGeoService(onPosition: _onPreciseFix);
+  final _proximity = ProximityEngine();
+  geo.Position? _lastFix;
   final _authService = AuthService();
   final _deviceService = DeviceProfileService();
   final _entitlements = Entitlements();
@@ -282,10 +286,93 @@ class _DykAppState extends State<DykApp> {
   // fed, which also makes the zone switching observable in the field.
   DateTime _lastPresence = DateTime.fromMillisecondsSinceEpoch(0);
 
-  void _onPreciseFix(geo.Position pos) {
-    if (DateTime.now().difference(_lastPresence).inSeconds < 30) return;
-    _lastPresence = DateTime.now();
-    _reportPresenceAt(pos);
+  Future<void> _onPreciseFix(geo.Position pos) async {
+    // Steps explored: the same GPS-delta model the Android isolate uses, with
+    // the same sanity window so a bus ride is not counted as walking. The
+    // tour screen counts its own, so skip while one is running.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final tourActive = prefs.getBool('tour_active') ?? false;
+    final last = _lastFix;
+    if (last != null && !tourActive) {
+      final moved = geo.Geolocator.distanceBetween(
+          last.latitude, last.longitude, pos.latitude, pos.longitude);
+      if (moved >= 3 && moved <= 300) await StepStore.addMeters(moved);
+    }
+    _lastFix = pos;
+
+    if (DateTime.now().difference(_lastPresence).inSeconds >= 30) {
+      _lastPresence = DateTime.now();
+      unawaited(_reportPresenceAt(pos));
+    }
+
+    final arrivedMs = prefs.getInt('city_arrived_at');
+    final hits = _proximity.check(
+      lat: pos.latitude,
+      lng: pos.longitude,
+      hotspots: _hotspots,
+      deals: _deals,
+      interests: widget.appState.interests,
+      tourActive: tourActive,
+      stepsToday: await StepStore.todaySteps(),
+      cityArrivedAt: arrivedMs == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(arrivedMs),
+    );
+
+    for (final hit in hits) {
+      if (hit.kind == 'hotspot') {
+        final h = _hotspots.where((x) => x.id == hit.id).firstOrNull;
+        if (h != null) await _notifyHotspot(h);
+      } else {
+        final d = _deals.where((x) => x.id == hit.id).firstOrNull;
+        if (d != null) await _notifyDeal(d, prefs.getString('anon_install_id'));
+      }
+    }
+  }
+
+  Future<void> _notifyHotspot(Hotspot h) async {
+    await widget.notificationService.showHotspotNotification(
+      hotspotId: h.id,
+      name: h.name,
+      year: int.tryParse(h.year) ?? 0,
+      title: '${tr('now_at')} ${h.name}',
+      body: tr('tap_story'),
+    );
+    await widget.notificationLog.add(LoggedNotification(
+      type: 'hotspot',
+      title: '${tr('now_at')} ${h.name}',
+      body: tr('tap_story'),
+      category: h.category,
+      targetId: h.id,
+      imageUrl: h.images.isNotEmpty ? h.images.first : null,
+      at: DateTime.now(),
+    ));
+  }
+
+  Future<void> _notifyDeal(HotDeal d, String? userKey) async {
+    await widget.notificationService.showDealNotification(
+      dealId: d.id,
+      businessName: d.businessName,
+      offerText: d.offerText,
+      redeemCode: d.redeemCode,
+    );
+    await widget.notificationLog.add(LoggedNotification(
+      type: 'deal',
+      title: '🔥 ${d.businessName}',
+      body: d.offerText,
+      category: 'hotdeal',
+      redeemCode: d.redeemCode,
+      targetId: d.id,
+      at: DateTime.now(),
+    ));
+    // Billable reach — the server dedupes per person, per deal, per day.
+    if (userKey != null) {
+      try {
+        await Supabase.instance.client.rpc('deal_reach_log',
+            params: {'p_deal_id': d.id, 'p_user_key': userKey});
+      } catch (_) {}
+    }
   }
 
   Future<void> _toggleExploring() async {
