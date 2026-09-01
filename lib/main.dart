@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+// Prefixed: mapbox_maps_flutter also exports a `Position`.
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
@@ -26,6 +28,7 @@ import 'services/dyk_repository.dart';
 import 'services/entitlements.dart';
 import 'services/geo_fencing_service.dart';
 import 'services/geofence_foreground_service.dart';
+import 'services/ios_geo_service.dart';
 import 'services/notification_router.dart';
 import 'services/onboarding_music.dart';
 import 'screens/deal_detail_screen.dart';
@@ -163,6 +166,9 @@ class DykApp extends StatefulWidget {
 class _DykAppState extends State<DykApp> {
   final _navKey = GlobalKey<NavigatorState>();
   final _fgService = GeofenceForegroundService();
+  // iOS cannot run the Android-style foreground service; this replaces it.
+  late final IosGeoService _iosGeo =
+      IosGeoService(onPosition: _onPreciseFix);
   final _authService = AuthService();
   final _deviceService = DeviceProfileService();
   final _entitlements = Entitlements();
@@ -260,17 +266,33 @@ class _DykAppState extends State<DykApp> {
     }
 
     await widget.appState.setExploring(true);
-    await _fgService.start(
-      hotspots: _hotspots,
-      deals: _deals,
-      interests: widget.appState.interests,
-    );
+    if (Platform.isIOS) {
+      await _iosGeo.start(_hotspots);
+    } else {
+      await _fgService.start(
+        hotspots: _hotspots,
+        deals: _deals,
+        interests: widget.appState.interests,
+      );
+    }
+  }
+
+  // Every precise fix while the user is inside a content zone. Proximity
+  // checks and notifications land here next; for now it keeps the live map
+  // fed, which also makes the zone switching observable in the field.
+  DateTime _lastPresence = DateTime.fromMillisecondsSinceEpoch(0);
+
+  void _onPreciseFix(geo.Position pos) {
+    if (DateTime.now().difference(_lastPresence).inSeconds < 30) return;
+    _lastPresence = DateTime.now();
+    _reportPresenceAt(pos);
   }
 
   Future<void> _toggleExploring() async {
     if (widget.appState.isExploring) {
       await widget.appState.setExploring(false);
       await _fgService.stop();
+      await _iosGeo.stop();
       await _endPresence();
     } else {
       await _startGeoMonitoring();
@@ -295,8 +317,19 @@ class _DykAppState extends State<DykApp> {
       final prefs = await SharedPreferences.getInstance();
       final sessionId = prefs.getString('anon_install_id');
       if (sessionId == null) return;
-      final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      final pos = await geo.Geolocator.getCurrentPosition(
+          desiredAccuracy: geo.LocationAccuracy.high);
+      await _reportPresenceAt(pos);
+    } catch (_) {
+      // Presence is best-effort; never disturb the user over it.
+    }
+  }
+
+  Future<void> _reportPresenceAt(geo.Position pos) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionId = prefs.getString('anon_install_id');
+      if (sessionId == null) return;
       final n = DateTime.now();
       final steps =
           (prefs.getDouble('steps_day_m_${n.year}-${n.month}-${n.day}') ?? 0) /
