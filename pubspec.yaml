@@ -15,7 +15,10 @@ dependencies:
   url_launcher: ^6.3.0
   just_audio_background: ^0.0.1-beta.11
   flutter_local_notifications: ^17.0.0
-  mapbox_maps_flutter: ^2.5.0
+  # Pinned: 2.29.0 fails to compile on Android against this project's Kotlin
+  # version (unresolved references throughout the generated pigeon classes).
+  # 2.24.3 is the version every shipped build has used.
+  mapbox_maps_flutter: 2.24.3
   permission_handler: ^11.0.0
   cached_network_image: ^3.3.0
   path_provider: ^2.1.0
