@@ -332,8 +332,18 @@ class _AppShellState extends State<AppShell> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: true,
         toolbarHeight: 64,
+        // The wordmark lives in flexibleSpace, not in `title`: AppBar refuses
+        // to let a centred title overlap the leading slot, so with a 160 px
+        // city pill the logo gets shoved right on narrow phones and sits
+        // correctly on wide ones. This centres against the full width always.
+        flexibleSpace: const SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: 64,
+            child: Center(child: PassimLogo(height: 34)),
+          ),
+        ),
         // Left: city location pill.
         leadingWidth: 160,
         leading: Builder(builder: (context) {
@@ -379,7 +389,6 @@ class _AppShellState extends State<AppShell> {
             ),
           );
         }),
-        title: const PassimLogo(height: 34),
         // Right: profile avatar → opens the Profile screen.
         actions: [
           Padding(
