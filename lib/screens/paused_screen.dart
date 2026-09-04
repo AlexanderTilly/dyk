@@ -25,7 +25,7 @@ class PausedScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset('assets/images/dyk_logo.png', height: 110),
+              Image.asset('assets/images/passim_logo.png', height: 110),
               const SizedBox(height: 32),
               const Icon(Icons.pause_circle_outline,
                   size: 64, color: DykColors.yellow),

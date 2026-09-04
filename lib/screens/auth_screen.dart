@@ -88,7 +88,7 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset('assets/images/dyk_logo.png', height: 110),
+              Image.asset('assets/images/passim_logo.png', height: 110),
               const SizedBox(height: 16),
               Text(
                 _isSignUp ? tr('create_account_title') : tr('welcome_back'),

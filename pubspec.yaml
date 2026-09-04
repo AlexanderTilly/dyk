@@ -42,9 +42,11 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/dyk_icon.png"
-  adaptive_icon_background: "#FFC107"
-  adaptive_icon_foreground: "assets/icon/dyk_icon.png"
+  image_path: "assets/icon/passim_icon.png"
+  # Sand behind the amber pin, matching the brand sheet's light icon variant.
+  adaptive_icon_background: "#F4F1E8"
+  # Separate file: Android crops the foreground to the middle 66 %.
+  adaptive_icon_foreground: "assets/icon/passim_icon_fg.png"
 
 flutter:
   uses-material-design: true
@@ -52,5 +54,6 @@ flutter:
     - assets/data/
     - assets/audio/
     - assets/images/
+    - assets/icon/
     - assets/images/badges/
     - assets/images/headers/

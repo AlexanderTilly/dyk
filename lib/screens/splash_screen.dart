@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen>
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.png'),
+            image: AssetImage('assets/images/landing_background.jpg'),
             fit: BoxFit.cover,
           ),
         ),
@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: ScaleTransition(
                     scale: _pulse,
                     child: Image.asset(
-                      'assets/images/dyk_logo.png',
+                      'assets/images/passim_logo.png',
                       height: 200,
                     ),
                   ),

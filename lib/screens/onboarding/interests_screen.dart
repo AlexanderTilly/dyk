@@ -51,7 +51,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.png'),
+            image: AssetImage('assets/images/landing_background.jpg'),
             fit: BoxFit.cover,
           ),
         ),

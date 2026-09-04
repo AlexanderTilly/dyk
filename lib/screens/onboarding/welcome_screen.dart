@@ -31,7 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.png'),
+            image: AssetImage('assets/images/landing_background.jpg'),
             fit: BoxFit.cover,
           ),
         ),
@@ -42,7 +42,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               children: [
                 const Spacer(flex: 3),
                 Image.asset(
-                  'assets/images/dyk_logo.png',
+                  'assets/images/passim_logo.png',
                   height: 220,
                   fit: BoxFit.contain,
                 ),
