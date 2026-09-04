@@ -1,16 +1,16 @@
-# Codemagic CI — builds the DYK iOS app and ships it to TestFlight.
+# Codemagic CI — builds the Passim iOS app and ships it to TestFlight.
 # Kept fully separate from the Akut Jour app: own repo, own Codemagic
-# application, own bundle id (app.diduknow), own App Store record.
+# application, own bundle id (app.passim), own App Store record.
 # Shared with Akut Jour: the Apple team (Ofelex AB) and therefore the same
 # App Store Connect API-key integration.
 #
 # Setup checklist (see memory: codemagic-ios-lardomar):
-#   1. Apple Developer portal → Identifiers → App ID `app.diduknow`
+#   1. Apple Developer portal → Identifiers → App ID `app.passim`
 #      with Background Modes enabled.
-#   2. App Store Connect → new app record for app.diduknow; note its numeric
+#   2. App Store Connect → new app record for app.passim; note its numeric
 #      Apple ID and set it as env var APP_STORE_APPLE_ID (not secret).
 #   3. Codemagic → Generate certificate, then create an App Store distribution
-#      profile in the Apple portal for app.diduknow, then Fetch profiles.
+#      profile in the Apple portal for app.passim, then Fetch profiles.
 #      `ios_signing` below only FETCHES — it never creates anything.
 #   4. Environment variables → group `mapbox` with MAPBOX_DOWNLOADS_TOKEN
 #      (secret sk. token, DOWNLOADS:READ). Already done.
@@ -38,7 +38,7 @@ workflows:
         # not names in the Apple portal. The profile must be fetched there first
         # or the build fails with "No matching profiles found".
         provisioning_profiles:
-          - DYK App Store
+          - Passim App Store
         # No `certificates:` list — the profile already points at the right
         # certificate, and Codemagic shows it as matched (green check).
 

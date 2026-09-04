@@ -1,4 +1,4 @@
-package app.diduknow
+package app.passim
 
 import com.ryanheise.audioservice.AudioServiceActivity
 

@@ -53,7 +53,7 @@ void main() async {
   // Narration keeps playing when the app is backgrounded, with play/pause
   // controls on the lock screen and in the notification shade.
   await JustAudioBackground.init(
-    androidNotificationChannelId: 'app.diduknow.audio',
+    androidNotificationChannelId: 'app.passim.audio',
     androidNotificationChannelName: 'Narration playback',
     androidNotificationOngoing: true,
   );
