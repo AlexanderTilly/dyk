@@ -2,9 +2,10 @@ import 'package:flutter/material.dart' show Color;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'notification_router.dart';
+import '../theme/dyk_theme.dart';
 
 // Shared DYK branding for notifications: yellow accent + logo large icon.
-const dykNotificationColor = Color(0xFFFFC107);
+const dykNotificationColor = PassimColors.brand;
 final dykLargeIcon = DrawableResourceAndroidBitmap('@mipmap/ic_launcher');
 
 // Must be a top-level function for background notification taps.

@@ -82,7 +82,7 @@ class ProfileTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
           ),
           child: ListTile(
-            leading: Icon(icon, color: Colors.amber.shade700),
+            leading: Icon(icon, color: PassimColors.brand),
             title: Text(label,
                 style: const TextStyle(fontWeight: FontWeight.w600)),
             trailing: const Icon(Icons.chevron_right),
@@ -228,7 +228,7 @@ class ProfileTab extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(on ? Icons.explore : Icons.explore_off,
-                        color: on ? Colors.amber.shade700 : Colors.grey),
+                        color: on ? PassimColors.brand : Colors.grey),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(

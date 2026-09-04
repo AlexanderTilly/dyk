@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import '../theme/dyk_theme.dart';
 
 /// Circle-crop an image into a DYK map pin: yellow ring, white inner ring
 /// and a pointer tip. Returns null when the image can't be fetched.
@@ -27,10 +28,10 @@ Future<Uint8List?> buildPhotoPin(String url) async {
       ..lineTo(155, 200)
       ..lineTo(130, 252)
       ..close();
-    canvas.drawPath(tip, Paint()..color = const Color(0xFFFFC107));
+    canvas.drawPath(tip, Paint()..color = PassimColors.brand);
 
     canvas.drawCircle(
-        center, radius + 10, Paint()..color = const Color(0xFFFFC107));
+        center, radius + 10, Paint()..color = PassimColors.brand);
     canvas.drawCircle(center, radius + 3, Paint()..color = Colors.white);
 
     canvas.save();

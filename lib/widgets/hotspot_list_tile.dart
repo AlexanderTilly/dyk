@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../i18n/i18n.dart';
 import '../models/hotspot.dart';
 import 'category_badge.dart';
+import '../theme/dyk_theme.dart';
 
 /// Photo row with a small category badge — same look as the Nearby list.
 class HotspotListTile extends StatelessWidget {
@@ -59,7 +60,7 @@ class HotspotListTile extends StatelessWidget {
                               shape: BoxShape.circle,
                               border: Border.all(
                                   color: dark
-                                      ? const Color(0xFF1A1A1A)
+                                      ? PassimColors.ink
                                       : Colors.white,
                                   width: 2),
                             ),
@@ -95,7 +96,7 @@ class HotspotListTile extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: Colors.amber.shade700),
+                        color: PassimColors.brand),
                   ),
                 ],
               ),

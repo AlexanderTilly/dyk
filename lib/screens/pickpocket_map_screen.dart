@@ -8,6 +8,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import '../models/pickpocket_report.dart';
 import '../services/dyk_repository.dart';
+import '../theme/dyk_theme.dart';
 
 /// Full-screen map showing only active pickpocket reports. Tapping a pin
 /// reveals the reporter's description.
@@ -108,7 +109,7 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0E1726))),
+                          color: PassimColors.ink)),
                 ),
                 Text(_ago(r.createdAt),
                     style:
@@ -121,7 +122,7 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
                   ? r.description!
                   : 'No description provided.',
               style: TextStyle(
-                  fontSize: 15, height: 1.4, color: Color(0xFF26313F)),
+                  fontSize: 15, height: 1.4, color: PassimColors.surface),
             ),
             const SizedBox(height: 16),
             Container(
@@ -204,7 +205,7 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
                 ),
                 child: const Text(
                   'No active pickpocket reports right now. Stay alert and report anything you see.',
-                  style: TextStyle(color: Color(0xFF26313F)),
+                  style: TextStyle(color: PassimColors.surface),
                 ),
               ),
             ),

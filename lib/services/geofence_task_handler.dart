@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../theme/dyk_theme.dart';
 
 const _supabaseUrl = 'https://jqykkyhoxpykhixwgwyw.supabase.co';
 const _anonKey = 'sb_publishable_HCRDnKdePmnT0ukTyVlFCg_q0MRPyhK';
@@ -383,7 +384,7 @@ class GeofenceTaskHandler extends TaskHandler {
       channelDescription: 'Alerts when you are near a historic site',
       importance: Importance.high,
       priority: Priority.high,
-      color: const Color(0xFFFFC107),
+      color: PassimColors.brand,
       colorized: true,
       largeIcon: imgPath != null
           ? FilePathAndroidBitmap(imgPath)

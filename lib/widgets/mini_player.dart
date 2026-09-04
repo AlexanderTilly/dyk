@@ -35,7 +35,7 @@ class MiniPlayer extends StatelessWidget {
             return Container(
               height: 54,
               decoration: BoxDecoration(
-                color: Color(0xFF1A1A1A),
+                color: PassimColors.ink,
                 border: Border(
                   top: BorderSide(color: DykColors.yellow, width: 2),
                 ),

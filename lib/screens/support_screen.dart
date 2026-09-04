@@ -87,7 +87,7 @@ class _SupportScreenState extends State<SupportScreen> {
         child: Container(
           color: dark
               ? Colors.black.withValues(alpha: 0.72)
-              : const Color(0xFFFAF6EE).withValues(alpha: 0.85),
+              : PassimColors.sand.withValues(alpha: 0.85),
           child: _sent
               ? Center(
                   child: Padding(

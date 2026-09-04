@@ -5,6 +5,7 @@ import '../../i18n/i18n.dart';
 import '../../services/onboarding_music.dart';
 import '../../widgets/dyk_page_route.dart';
 import 'interests_screen.dart';
+import '../../theme/dyk_theme.dart';
 
 class WelcomeScreen extends StatefulWidget {
   final VoidCallback onFinished;
@@ -61,7 +62,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       TextSpan(
                         text: 'hidden gems',
                         style: TextStyle(
-                          color: Colors.amber.shade400,
+                          color: PassimColors.brand,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -85,7 +86,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     for (final code in I18n.supported)
                       ChoiceChip(
                         selected: I18n.instance.code == code,
-                        selectedColor: Colors.amber.shade400,
+                        selectedColor: PassimColors.brand,
                         backgroundColor: Colors.black45,
                         labelStyle: TextStyle(
                           color: I18n.instance.code == code

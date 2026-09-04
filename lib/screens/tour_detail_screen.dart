@@ -194,7 +194,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   Widget build(BuildContext context) {
     final t = widget.tour;
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: PassimColors.ink,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -202,7 +202,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
             // over the image; DYK tours keep the hotspot-style layout.
             expandedHeight: 320,
             pinned: true,
-            backgroundColor: const Color(0xFF1A1A1A),
+            backgroundColor: PassimColors.ink,
             foregroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
@@ -218,7 +218,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.center,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Color(0xFF1A1A1A)],
+                        colors: [Colors.transparent, PassimColors.ink],
                       ),
                     ),
                   ),

@@ -104,7 +104,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         child: Container(
           color: dark
               ? Colors.black.withValues(alpha: 0.72)
-              : const Color(0xFFFAF6EE).withValues(alpha: 0.85),
+              : PassimColors.sand.withValues(alpha: 0.85),
           child: entries.isEmpty
           ? Center(
               child: Padding(
@@ -194,7 +194,7 @@ class _NotificationCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color: Colors.amber.shade700,
+                              color: PassimColors.brand,
                             )),
                       ),
                       Text(timeAgo(entry.at),

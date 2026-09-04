@@ -114,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   fontSize: 12,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
-                  color: Colors.amber.shade700)),
+                  color: PassimColors.brand)),
           const SizedBox(height: 12),
           ...children,
         ],
@@ -170,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Container(
           color: dark
               ? Colors.black.withValues(alpha: 0.72)
-              : const Color(0xFFFAF6EE).withValues(alpha: 0.85),
+              : PassimColors.sand.withValues(alpha: 0.85),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -308,7 +308,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading:
-                      Icon(Icons.info_outline, color: Colors.amber.shade700),
+                      Icon(Icons.info_outline, color: PassimColors.brand),
                   title: const Text('Did You Know?'),
                   subtitle: Text(tr('tagline')),
                 ),
@@ -317,7 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   builder: (context, snap) => ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.new_releases_outlined,
-                        color: Colors.amber.shade700),
+                        color: PassimColors.brand),
                     title: Text(tr('app_version')),
                     subtitle: Text(snap.hasData
                         ? '${snap.data!.version} (build ${snap.data!.buildNumber})'
@@ -327,7 +327,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading:
-                      Icon(Icons.help_outline, color: Colors.amber.shade700),
+                      Icon(Icons.help_outline, color: PassimColors.brand),
                   title: Text(tr('help_support')),
                   subtitle: Text(tr('help_reply')),
                   trailing: const Icon(Icons.chevron_right),
@@ -344,7 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading:
-                        Icon(Icons.logout, color: Colors.amber.shade700),
+                        Icon(Icons.logout, color: PassimColors.brand),
                     title: Text(tr('sign_out')),
                     onTap: () async {
                       await widget.authService.signOut();

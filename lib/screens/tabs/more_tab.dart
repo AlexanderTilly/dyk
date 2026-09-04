@@ -219,7 +219,7 @@ class _MoreTabState extends State<MoreTab> {
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF0E1726))),
+                      color: PassimColors.ink)),
               const SizedBox(height: 4),
               Text(tr('pickpocket_help'),
                   style: TextStyle(color: Colors.grey)),

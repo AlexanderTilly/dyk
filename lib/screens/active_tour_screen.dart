@@ -300,7 +300,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     final wantsTime = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: PassimColors.ink,
         title: Text(tr('end_time_q'),
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.w900)),
@@ -402,8 +402,8 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
         66,
         Paint()
           ..shader = ui.Gradient.radial(center, 66, [
-            const Color(0xFFFFC107).withValues(alpha: 0.35),
-            const Color(0xFFFFC107).withValues(alpha: 0.0),
+            PassimColors.brand.withValues(alpha: 0.35),
+            PassimColors.brand.withValues(alpha: 0.0),
           ]));
     // Heading wedge (points up; the SDK rotates the image with bearing).
     final wedge = Path()
@@ -411,17 +411,17 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
       ..lineTo(56, 44)
       ..lineTo(84, 44)
       ..close();
-    canvas.drawPath(wedge, Paint()..color = const Color(0xFFFFC107));
+    canvas.drawPath(wedge, Paint()..color = PassimColors.brand);
     canvas.drawPath(
         wedge,
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3
-          ..color = const Color(0xFF1A1A1A));
+          ..color = PassimColors.ink);
     // White ring + gold core + dark center dot.
     canvas.drawCircle(center, 27, Paint()..color = Colors.white);
-    canvas.drawCircle(center, 21, Paint()..color = const Color(0xFFFFC107));
-    canvas.drawCircle(center, 7, Paint()..color = const Color(0xFF1A1A1A));
+    canvas.drawCircle(center, 21, Paint()..color = PassimColors.brand);
+    canvas.drawCircle(center, 7, Paint()..color = PassimColors.ink);
     final img = await rec.endRecording().toImage(140, 140);
     final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
     return bytes!.buffer.asUint8List();
@@ -515,7 +515,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     await _addBelowPuck(map, LineLayer(
       id: 'to-start-line',
       sourceId: 'to-start',
-      lineColor: 0xFFFFC107,
+      lineColor: PassimColors.brandArgb,
       lineWidth: 4.0,
       lineOpacity: 0.85,
       lineDasharray: [1.5, 2.0],
@@ -531,7 +531,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     await _addBelowPuck(map, LineLayer(
       id: 'route-glow',
       sourceId: 'route-remaining',
-      lineColor: 0xFFFFC107,
+      lineColor: PassimColors.brandArgb,
       lineWidth: 16.0,
       lineOpacity: 0.15,
       lineBlur: 4.0,
@@ -552,7 +552,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     await _addBelowPuck(map, LineLayer(
       id: 'route-casing',
       sourceId: 'route-remaining',
-      lineColor: 0xFF1A1A1A,
+      lineColor: PassimColors.inkArgb,
       lineWidth: 9.0,
       lineJoin: LineJoin.ROUND,
       lineCap: LineCap.ROUND,
@@ -560,7 +560,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     await _addBelowPuck(map, LineLayer(
       id: 'route-line',
       sourceId: 'route-remaining',
-      lineColor: 0xFFFFC107,
+      lineColor: PassimColors.brandArgb,
       lineWidth: 6.0,
       lineJoin: LineJoin.ROUND,
       lineCap: LineCap.ROUND,
@@ -574,7 +574,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
       sourceId: 'route-remaining',
       textField: '>',
       textSize: 17.0,
-      textColor: 0xFF1A1A1A,
+      textColor: PassimColors.inkArgb,
       symbolPlacement: SymbolPlacement.LINE,
       symbolSpacing: 34.0,
       textAllowOverlap: true,
@@ -637,7 +637,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
         textAnchor: TextAnchor.TOP,
         textOffset: [0, 0.6],
         textSize: 12,
-        textColor: isStart && !isLoop ? 0xFFFFC107 : 0xFFFFFFFF,
+        textColor: isStart && !isLoop ? PassimColors.brandArgb : PassimColors.whiteArgb,
         textHaloColor: 0xFF000000,
         textHaloWidth: 1.5,
       ));
@@ -987,7 +987,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
             'Hotspot Alerts',
             importance: Importance.high,
             priority: Priority.high,
-            color: Color(0xFFFFC107),
+            color: PassimColors.brand,
             colorized: true,
           ),
           iOS: DarwinNotificationDetails(presentSound: true),
@@ -1035,7 +1035,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
           final goBack = await showDialog<bool>(
             context: context,
             builder: (ctx) => AlertDialog(
-              backgroundColor: const Color(0xFF1A1A1A),
+              backgroundColor: PassimColors.ink,
               title: Text(tr('tour_done_title'),
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.w900)),
@@ -1087,7 +1087,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: PassimColors.ink,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1141,7 +1141,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
   void _showStopList() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: PassimColors.ink,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1328,7 +1328,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A),
+            color: PassimColors.ink,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: DykColors.yellow, width: 1.5),
             boxShadow: const [
@@ -1358,7 +1358,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
+          color: PassimColors.ink,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: DykColors.yellow, width: 1.5),
           boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 10)],
@@ -1424,7 +1424,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
       appBar: AppBar(
         title: Text(widget.tour.title,
             maxLines: 1, overflow: TextOverflow.ellipsis),
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: PassimColors.ink,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -1500,7 +1500,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A),
+                color: PassimColors.ink,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: DykColors.yellow, width: 1.5),
               ),
@@ -1587,7 +1587,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     final action = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: PassimColors.ink,
         title: Text(tr('leave_tour_q'),
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.w900)),
@@ -1803,8 +1803,8 @@ class _GoldPulsePainter extends CustomPainter {
     // Soft glow.
     final glow = Paint()
       ..shader = RadialGradient(colors: [
-        const Color(0xFFFFC107).withValues(alpha: 0.45 * fade),
-        const Color(0xFFFFC107).withValues(alpha: 0.12 * fade),
+        PassimColors.brand.withValues(alpha: 0.45 * fade),
+        PassimColors.brand.withValues(alpha: 0.12 * fade),
         Colors.transparent,
       ], stops: const [0, 0.45, 1])
           .createShader(
@@ -1814,14 +1814,14 @@ class _GoldPulsePainter extends CustomPainter {
     final ring = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.5 * (1 - t) + 1
-      ..color = const Color(0xFFFFC107).withValues(alpha: (1 - t) * 0.9);
+      ..color = PassimColors.brand.withValues(alpha: (1 - t) * 0.9);
     canvas.drawCircle(center, 20 + t * size.width * 0.8, ring);
     final t2 = ((t - 0.25) / 0.75).clamp(0.0, 1.0);
     if (t2 > 0) {
       final ring2 = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5 * (1 - t2) + 1
-        ..color = const Color(0xFFFFC107).withValues(alpha: (1 - t2) * 0.6);
+        ..color = PassimColors.brand.withValues(alpha: (1 - t2) * 0.6);
       canvas.drawCircle(center, 20 + t2 * size.width * 0.8, ring2);
     }
   }

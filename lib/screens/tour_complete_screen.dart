@@ -50,7 +50,7 @@ class TourCompleteScreen extends StatelessWidget {
     final timeLabel =
         mins >= 90 ? '${(mins / 60).toStringAsFixed(1)} h' : '$mins min';
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: PassimColors.ink,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(28),

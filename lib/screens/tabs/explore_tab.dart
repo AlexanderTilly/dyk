@@ -404,7 +404,7 @@ class _NotificationCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Colors.amber.shade700,
+                            color: PassimColors.brand,
                           )),
                     ),
                     Text(timeAgo(entry.at),

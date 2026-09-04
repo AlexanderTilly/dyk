@@ -24,6 +24,7 @@ import 'tabs/profile_tab.dart';
 import 'tabs/saved_tab.dart';
 import 'tabs/tours_tab.dart';
 import '../i18n/i18n.dart';
+import '../theme/dyk_theme.dart';
 
 class AppShell extends StatefulWidget {
   final AppState appState;
@@ -113,8 +114,8 @@ class _AppShellState extends State<AppShell> {
     final onRefresh = widget.onRefresh;
     if (onRefresh == null) return child;
     return RefreshIndicator(
-      color: const Color(0xFFFFC107),
-      backgroundColor: const Color(0xFF1A1A1A),
+      color: PassimColors.brand,
+      backgroundColor: PassimColors.ink,
       onRefresh: onRefresh,
       child: child,
     );
@@ -167,7 +168,7 @@ class _AppShellState extends State<AppShell> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: dark ? const Color(0xFF1A1A1A) : Colors.white,
+      backgroundColor: dark ? PassimColors.ink : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -236,21 +237,21 @@ class _AppShellState extends State<AppShell> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 1.1,
-                                    color: Colors.amber.shade700),
+                                    color: PassimColors.brand),
                               ),
                             ),
                             for (final pack in byCountry[country]!)
                               ListTile(
                                 leading: Icon(Icons.location_city,
                                     color: pack.id == widget.activePackId
-                                        ? const Color(0xFFFFC107)
+                                        ? PassimColors.brand
                                         : null),
                                 title: Text(pack.city,
                                     style: const TextStyle(
                                         fontWeight: FontWeight.w700)),
                                 trailing: pack.id == widget.activePackId
                                     ? const Icon(Icons.check_circle,
-                                        color: Color(0xFFFFC107))
+                                        color: PassimColors.brand)
                                     : null,
                                 onTap: () {
                                   Navigator.of(context).pop();
@@ -294,7 +295,7 @@ class _AppShellState extends State<AppShell> {
             child: Container(
               color: dark
                   ? Colors.black.withValues(alpha: 0.72)
-                  : const Color(0xFFFAF6EE).withValues(alpha: 0.85),
+                  : PassimColors.sand.withValues(alpha: 0.85),
               child: ProfileTab(
                 savedStore: widget.savedStore,
                 notificationLog: widget.notificationLog,
@@ -342,21 +343,21 @@ class _AppShellState extends State<AppShell> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFC107),
+                    color: PassimColors.brand,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.place,
-                          size: 14, color: Color(0xFF1A1A1A)),
+                          size: 14, color: PassimColors.ink),
                       const SizedBox(width: 3),
                       Flexible(
                         child: Text(
                           label,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: PassimColors.ink,
                             fontWeight: FontWeight.w900,
                             fontSize: 12,
                             letterSpacing: 0.5,
@@ -364,7 +365,7 @@ class _AppShellState extends State<AppShell> {
                         ),
                       ),
                       const Icon(Icons.keyboard_arrow_down,
-                          size: 16, color: Color(0xFF1A1A1A)),
+                          size: 16, color: PassimColors.ink),
                     ],
                   ),
                 ),
@@ -385,14 +386,14 @@ class _AppShellState extends State<AppShell> {
               onTap: _openProfile,
               child: CircleAvatar(
                 radius: 18,
-                backgroundColor: const Color(0xFFFFC107),
+                backgroundColor: PassimColors.brand,
                 backgroundImage: widget.authService.isSignedIn
                     ? AssetImage(widget.authService.avatarAsset)
                     : null,
                 child: widget.authService.isSignedIn
                     ? null
                     : const Icon(Icons.person,
-                        color: Color(0xFF1A1A1A), size: 20),
+                        color: PassimColors.ink, size: 20),
               ),
             ),
           ),
@@ -410,7 +411,7 @@ class _AppShellState extends State<AppShell> {
           // Scrim — artwork visible but clearly behind the content.
           color: dark
               ? Colors.black.withValues(alpha: 0.72)
-              : const Color(0xFFFAF6EE).withValues(alpha: 0.85),
+              : PassimColors.sand.withValues(alpha: 0.85),
           child: IndexedStack(
         index: _index,
         children: [
@@ -474,7 +475,7 @@ class _AppShellState extends State<AppShell> {
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.amber.shade700,
+        selectedItemColor: PassimColors.brand,
         unselectedItemColor: dark ? Colors.white54 : Colors.black45,
         items: [
           BottomNavigationBarItem(icon: const Icon(Icons.map_outlined), label: tr('nav_explore')),

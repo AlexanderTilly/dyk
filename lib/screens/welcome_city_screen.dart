@@ -61,7 +61,7 @@ class WelcomeCityScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(tr('welcome_to'),
                       style: TextStyle(
-                          color: Colors.amber.shade300,
+                          color: PassimColors.brand,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 3,
                           fontSize: 13)),

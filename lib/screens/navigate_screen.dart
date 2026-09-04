@@ -85,7 +85,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
       await map.style.addLayer(LineLayer(
         id: 'nav-glow',
         sourceId: 'nav-route',
-        lineColor: 0xFFFFC107,
+        lineColor: PassimColors.brandArgb,
         lineWidth: 16.0,
         lineOpacity: 0.15,
         lineBlur: 4.0,
@@ -95,7 +95,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
       await map.style.addLayer(LineLayer(
         id: 'nav-casing',
         sourceId: 'nav-route',
-        lineColor: 0xFF1A1A1A,
+        lineColor: PassimColors.inkArgb,
         lineWidth: 9.0,
         lineJoin: LineJoin.ROUND,
         lineCap: LineCap.ROUND,
@@ -103,7 +103,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
       await map.style.addLayer(LineLayer(
         id: 'nav-line',
         sourceId: 'nav-route',
-        lineColor: 0xFFFFC107,
+        lineColor: PassimColors.brandArgb,
         lineWidth: 6.0,
         lineJoin: LineJoin.ROUND,
         lineCap: LineCap.ROUND,
@@ -263,7 +263,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
         height: 42,
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: selected ? DykColors.yellow : const Color(0xFF1A1A1A),
+          color: selected ? DykColors.yellow : PassimColors.ink,
           shape: BoxShape.circle,
           border: Border.all(
               color: selected ? DykColors.yellow : Colors.white24,
@@ -282,7 +282,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(h.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: PassimColors.ink,
         foregroundColor: Colors.white,
       ),
       body: Stack(
@@ -304,7 +304,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
+                  color: PassimColors.ink,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: DykColors.yellow, width: 1.5),
                 ),
@@ -400,7 +400,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A),
+                color: PassimColors.ink,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: DykColors.yellow, width: 1.5),
               ),

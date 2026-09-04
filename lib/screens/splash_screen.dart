@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/dyk_theme.dart';
 
 /// Branded loading screen shown on launch — onboarding background with a
 /// pulsing logo so it's clear the app is starting up.
@@ -66,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 26,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    color: Color(0xFFFFC107),
+                    color: PassimColors.brand,
                   ),
                 ),
               ],

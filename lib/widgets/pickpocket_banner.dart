@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/dyk_theme.dart';
 
 /// "See and report Pickpocket activity" call-to-action banner shown on the
 /// Explore tab. Styled to match the DYK safety design (white card, blue
@@ -52,7 +53,7 @@ class PickpocketBanner extends StatelessWidget {
                   Text(
                     'See and report',
                     style: TextStyle(
-                      color: Color(0xFF0E1726),
+                      color: PassimColors.ink,
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
                     ),

@@ -378,8 +378,8 @@ class _NearbyTabState extends State<NearbyTab> {
       id: 'clusters',
       sourceId: _srcId,
       filter: ['has', 'point_count'],
-      circleColor: 0xFFFFC107,
-      circleStrokeColor: 0xFF1A1A1A,
+      circleColor: PassimColors.brandArgb,
+      circleStrokeColor: PassimColors.inkArgb,
       circleStrokeWidth: 3.0,
       circleRadiusExpression: [
         'step',
@@ -399,7 +399,7 @@ class _NearbyTabState extends State<NearbyTab> {
       filter: ['has', 'point_count'],
       textFieldExpression: ['get', 'point_count_abbreviated'],
       textSize: 14.0,
-      textColor: 0xFF1A1A1A,
+      textColor: PassimColors.inkArgb,
       textIgnorePlacement: true,
       textAllowOverlap: true,
     ));
@@ -536,7 +536,7 @@ class _NearbyTabState extends State<NearbyTab> {
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0E1726))),
+                          color: PassimColors.ink)),
                 ),
                 Text(ago,
                     style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -548,7 +548,7 @@ class _NearbyTabState extends State<NearbyTab> {
                   ? r.description!
                   : 'No description provided.',
               style: const TextStyle(
-                  fontSize: 15, height: 1.4, color: Color(0xFF26313F)),
+                  fontSize: 15, height: 1.4, color: PassimColors.surface),
             ),
           ],
         ),
@@ -820,7 +820,7 @@ class _NearbyTabState extends State<NearbyTab> {
                 builder: (context, ctrl) => Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF1A1A1A)
+                        ? PassimColors.ink
                         : Colors.white,
                     borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(20)),
@@ -952,7 +952,7 @@ class _NearbyTabState extends State<NearbyTab> {
                               shape: BoxShape.circle,
                               border: Border.all(
                                   color: dark
-                                      ? const Color(0xFF1A1A1A)
+                                      ? PassimColors.ink
                                       : Colors.white,
                                   width: 2),
                             ),
@@ -981,7 +981,7 @@ class _NearbyTabState extends State<NearbyTab> {
                     style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: Colors.amber.shade700),
+                        color: PassimColors.brand),
                   ),
                 ],
               ),

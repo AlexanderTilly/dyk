@@ -19,7 +19,7 @@ Widget _dykImage(String src, {double? width, double? height, BoxFit fit = BoxFit
   Widget fallback(_, __, ___) => Container(
         width: width,
         height: height,
-        color: const Color(0xFF2A2A2A),
+        color: PassimColors.surface,
         child: const Icon(Icons.image_not_supported_outlined,
             color: Colors.white24, size: 32),
       );
@@ -110,14 +110,14 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
           if (h.subtitle.isNotEmpty) ...[
             Text(h.subtitle,
                 style: TextStyle(
-                    color: Colors.amber.shade300,
+                    color: PassimColors.brand,
                     fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
           ],
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF232323),
+              color: PassimColors.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: DykColors.yellow.withValues(alpha: 0.4)),
             ),
@@ -267,7 +267,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                       ),
                     )
                   else
-                    Container(color: const Color(0xFF2A2A2A)),
+                    Container(color: PassimColors.surface),
                   // Page dots (only when there's more than one image).
                   if (h.images.length > 1)
                     Positioned(
@@ -353,7 +353,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                         if (h.subtitle.isNotEmpty)
                           Text(h.subtitle,
                               style: TextStyle(
-                                color: Colors.amber.shade300,
+                                color: PassimColors.brand,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               )),
@@ -501,7 +501,7 @@ class _FactCard extends StatelessWidget {
   void _openFull(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: PassimColors.ink,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
@@ -560,7 +560,7 @@ class _FactCard extends StatelessWidget {
         width: 260,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF232323),
+          color: PassimColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: DykColors.yellow.withValues(alpha: 0.4)),
         ),
@@ -612,7 +612,7 @@ class _ARButton extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF2A2A2A), Color(0xFF1A1A1A)],
+          colors: [PassimColors.surface, PassimColors.ink],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: DykColors.yellow),
@@ -695,7 +695,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
       return Container(
         height: 200,
         decoration: BoxDecoration(
-          color: const Color(0xFF232323),
+          color: PassimColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(
@@ -853,7 +853,7 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF232323),
+        color: PassimColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10),
       ),

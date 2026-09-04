@@ -1,10 +1,41 @@
 import 'package:flutter/material.dart';
 
-class DykColors {
-  static const yellow = Color(0xFFFFC107);
-  static const black = Color(0xFF1A1A1A);
-  static const cream = Color(0xFFFAF6EE);
+/// Passim brand palette — the single source of truth for colour.
+///
+/// Nothing outside this class should hardcode a brand colour: a hex literal
+/// in a screen is how a rebrand turns into a week of hunting. Semantic names
+/// (ink, surface, sand) rather than "navy" or "black" so the next palette
+/// change stays a one-file edit.
+class PassimColors {
+  /// Amber accent — buttons, pins, highlights.
+  static const brand = Color(0xFFFFC21A);
+
+  /// Deep navy: app background in dark mode, and text on light surfaces.
+  static const ink = Color(0xFF071A2F);
+
+  /// Raised navy: cards and sheets sitting on [ink].
+  static const surface = Color(0xFF223247);
+
+  /// Warm off-white: light-mode background.
+  static const sand = Color(0xFFF4F1E8);
+
+  /// Success / "unlocked" green. Not a brand colour, kept for status only.
   static const green = Color(0xFF22C55E);
+
+  // Mapbox style layers take raw ARGB ints rather than [Color], so the same
+  // palette is mirrored here. Keep the pairs in sync.
+  static const brandArgb = 0xFFFFC21A;
+  static const inkArgb = 0xFF071A2F;
+  static const whiteArgb = 0xFFFFFFFF;
+}
+
+/// Previous brand names, kept so the 200-plus existing references keep
+/// working while screens migrate to [PassimColors]. Same values.
+class DykColors {
+  static const yellow = PassimColors.brand;
+  static const black = PassimColors.ink;
+  static const cream = PassimColors.sand;
+  static const green = PassimColors.green;
 }
 
 ThemeData dykLightTheme() => _base(Brightness.light);
@@ -15,16 +46,17 @@ ThemeData _base(Brightness b) {
   return ThemeData(
     useMaterial3: true,
     brightness: b,
-    scaffoldBackgroundColor: dark ? DykColors.black : DykColors.cream,
+    scaffoldBackgroundColor: dark ? PassimColors.ink : PassimColors.sand,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: DykColors.yellow,
+      seedColor: PassimColors.brand,
       brightness: b,
-      primary: DykColors.yellow,
+      primary: PassimColors.brand,
+      surface: dark ? PassimColors.surface : PassimColors.sand,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: DykColors.yellow,
-        foregroundColor: DykColors.black,
+        backgroundColor: PassimColors.brand,
+        foregroundColor: PassimColors.ink,
         textStyle: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),

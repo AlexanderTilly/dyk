@@ -23,11 +23,11 @@ class InternalAdBanner extends StatelessWidget {
                   ad.imageUrl!,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) =>
-                      Container(color: const Color(0xFF2A2A2A)),
+                      Container(color: PassimColors.surface),
                 ),
               )
             else
-              Positioned.fill(child: Container(color: const Color(0xFF2A2A2A))),
+              Positioned.fill(child: Container(color: PassimColors.surface)),
             // Dark scrim for legibility
             Positioned.fill(
               child: DecoratedBox(

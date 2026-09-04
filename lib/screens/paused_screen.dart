@@ -56,7 +56,7 @@ class PausedScreen extends StatelessWidget {
               Center(
                 child: Text(
                   'support@diduknow.app',
-                  style: TextStyle(color: Colors.amber.shade300, fontSize: 13),
+                  style: TextStyle(color: PassimColors.brand, fontSize: 13),
                 ),
               ),
               const SizedBox(height: 24),
