@@ -37,7 +37,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: Column(
               children: [
                 const Spacer(flex: 3),
-                const PassimLogo(height: 96, glow: 18),
+                const PassimLogo(height: 96),
                 const Spacer(flex: 2),
                 Text(
                   tr('welcome_line1'),

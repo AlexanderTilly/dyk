@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 import '../theme/dyk_theme.dart';
@@ -56,40 +54,18 @@ class PassimBackground extends StatelessWidget {
 
 enum Scrim { light, heavy }
 
-/// The wordmark with a soft amber glow behind it.
-///
-/// A BoxShadow would halo the image's bounding box; blurring a tinted copy of
-/// the logo itself makes the glow follow the letterforms and the pin.
+/// The wordmark, drawn plain.
 class PassimLogo extends StatelessWidget {
   final double height;
-  final double glow;
 
-  const PassimLogo({super.key, this.height = 40, this.glow = 10});
+  const PassimLogo({super.key, this.height = 40});
 
   @override
-  Widget build(BuildContext context) {
-    final image = Image.asset(
-      'assets/images/passim_logo.png',
-      height: height,
-      fit: BoxFit.contain,
-    );
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        ImageFiltered(
-          imageFilter: ui.ImageFilter.blur(sigmaX: glow, sigmaY: glow),
-          child: ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              PassimColors.brand.withValues(alpha: 0.55),
-              BlendMode.srcATop,
-            ),
-            child: image,
-          ),
-        ),
-        image,
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Image.asset(
+        'assets/images/passim_logo.png',
+        height: height,
+        fit: BoxFit.contain,
+      );
 }
 
 /// The same navy scrim as a decoration, for screens that already own their
