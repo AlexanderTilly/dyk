@@ -6,6 +6,7 @@ import '../services/dyk_repository.dart';
 import '../services/entitlements.dart';
 import '../widgets/unlock_buttons.dart';
 import '../i18n/i18n.dart';
+import '../widgets/passim_background.dart';
 
 /// "View Plans" — the real unlock flow: per-city or Premium (all cities).
 class PremiumScreen extends StatelessWidget {
@@ -53,7 +54,7 @@ class PremiumScreen extends StatelessWidget {
           ),
         ),
         child: Container(
-          color: Colors.black.withValues(alpha: 0.75),
+          decoration: passimScrim(),
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),

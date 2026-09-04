@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/dyk_theme.dart';
+import '../widgets/passim_background.dart';
 
 /// Branded loading screen shown on launch — onboarding background with a
 /// pulsing logo so it's clear the app is starting up.
@@ -46,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         ),
         child: Container(
-          color: Colors.black.withValues(alpha: 0.45),
+          decoration: passimScrim(strength: Scrim.light),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,

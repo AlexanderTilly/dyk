@@ -9,6 +9,7 @@ import '../widgets/category_badge.dart';
 import 'auth_screen.dart';
 import 'support_screen.dart';
 import '../i18n/i18n.dart';
+import '../widgets/passim_background.dart';
 
 /// User settings: profile (name + avatar), notifications & interests,
 /// about, and account actions (sign out / delete account).
@@ -168,9 +169,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         child: Container(
-          color: dark
-              ? Colors.black.withValues(alpha: 0.72)
-              : PassimColors.sand.withValues(alpha: 0.85),
+          decoration: dark
+              ? passimScrim()
+              : BoxDecoration(
+                  color: PassimColors.sand.withValues(alpha: 0.85)),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [

@@ -7,6 +7,7 @@ import '../services/entitlements.dart';
 import '../theme/dyk_theme.dart';
 import '../widgets/unlock_buttons.dart';
 import '../i18n/i18n.dart';
+import '../widgets/passim_background.dart';
 
 /// Shown when the app switches to a new city the user hasn't unlocked.
 class WelcomeCityScreen extends StatelessWidget {
@@ -42,7 +43,7 @@ class WelcomeCityScreen extends StatelessWidget {
           ),
         ),
         child: Container(
-          color: Colors.black.withValues(alpha: 0.72),
+          decoration: passimScrim(),
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),

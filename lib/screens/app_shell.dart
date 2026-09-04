@@ -25,6 +25,7 @@ import 'tabs/saved_tab.dart';
 import 'tabs/tours_tab.dart';
 import '../i18n/i18n.dart';
 import '../theme/dyk_theme.dart';
+import '../widgets/passim_background.dart';
 
 class AppShell extends StatefulWidget {
   final AppState appState;
@@ -293,9 +294,10 @@ class _AppShellState extends State<AppShell> {
               ),
             ),
             child: Container(
-              color: dark
-                  ? Colors.black.withValues(alpha: 0.72)
-                  : PassimColors.sand.withValues(alpha: 0.85),
+              decoration: dark
+              ? passimScrim()
+              : BoxDecoration(
+                  color: PassimColors.sand.withValues(alpha: 0.85)),
               child: ProfileTab(
                 savedStore: widget.savedStore,
                 notificationLog: widget.notificationLog,
@@ -373,11 +375,7 @@ class _AppShellState extends State<AppShell> {
             ),
           );
         }),
-        title: Image.asset(
-          'assets/images/passim_logo.png',
-          height: 56,
-          fit: BoxFit.contain,
-        ),
+        title: const PassimLogo(height: 34),
         // Right: profile avatar → opens the Profile screen.
         actions: [
           Padding(
@@ -409,9 +407,10 @@ class _AppShellState extends State<AppShell> {
         ),
         child: Container(
           // Scrim — artwork visible but clearly behind the content.
-          color: dark
-              ? Colors.black.withValues(alpha: 0.72)
-              : PassimColors.sand.withValues(alpha: 0.85),
+          decoration: dark
+              ? passimScrim()
+              : BoxDecoration(
+                  color: PassimColors.sand.withValues(alpha: 0.85)),
           child: IndexedStack(
         index: _index,
         children: [

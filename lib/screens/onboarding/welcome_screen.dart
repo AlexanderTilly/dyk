@@ -6,6 +6,7 @@ import '../../services/onboarding_music.dart';
 import '../../widgets/dyk_page_route.dart';
 import 'interests_screen.dart';
 import '../../theme/dyk_theme.dart';
+import '../../widgets/passim_background.dart';
 
 class WelcomeScreen extends StatefulWidget {
   final VoidCallback onFinished;
@@ -28,24 +29,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
+      body: PassimBackground(
+        scrim: Scrim.light,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
               children: [
                 const Spacer(flex: 3),
-                Image.asset(
-                  'assets/images/passim_logo.png',
-                  height: 220,
-                  fit: BoxFit.contain,
-                ),
+                const PassimLogo(height: 96, glow: 18),
                 const Spacer(flex: 2),
                 Text(
                   tr('welcome_line1'),

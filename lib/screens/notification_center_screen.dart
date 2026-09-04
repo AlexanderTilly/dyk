@@ -9,6 +9,7 @@ import '../utils/time_ago.dart';
 import '../services/notification_router.dart';
 import '../services/saved_store.dart';
 import '../theme/dyk_theme.dart';
+import '../widgets/passim_background.dart';
 
 /// Full history of geofence notifications. Tap to open, swipe to remove,
 /// or clear everything with "Rensa".
@@ -102,9 +103,10 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
           ),
         ),
         child: Container(
-          color: dark
-              ? Colors.black.withValues(alpha: 0.72)
-              : PassimColors.sand.withValues(alpha: 0.85),
+          decoration: dark
+              ? passimScrim()
+              : BoxDecoration(
+                  color: PassimColors.sand.withValues(alpha: 0.85)),
           child: entries.isEmpty
           ? Center(
               child: Padding(

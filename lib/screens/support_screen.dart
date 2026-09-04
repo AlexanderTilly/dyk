@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../theme/dyk_theme.dart';
 import '../i18n/i18n.dart';
+import '../widgets/passim_background.dart';
 
 /// Help & Support — sends a message straight to the admin panel's
 /// Support page. Works for guests too (they type their email).
@@ -85,9 +86,10 @@ class _SupportScreenState extends State<SupportScreen> {
           ),
         ),
         child: Container(
-          color: dark
-              ? Colors.black.withValues(alpha: 0.72)
-              : PassimColors.sand.withValues(alpha: 0.85),
+          decoration: dark
+              ? passimScrim()
+              : BoxDecoration(
+                  color: PassimColors.sand.withValues(alpha: 0.85)),
           child: _sent
               ? Center(
                   child: Padding(
