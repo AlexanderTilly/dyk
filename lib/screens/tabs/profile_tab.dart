@@ -292,7 +292,7 @@ class ProfileTab extends StatelessWidget {
           menuRow(Icons.info_outline, tr('about_app'), () {
             showAboutDialog(
               context: context,
-              applicationName: 'Did You Know?',
+              applicationName: 'Passim',
               children: const [
                 Text('Explore cities. Discover stories. Unlock hidden gems.'),
               ],

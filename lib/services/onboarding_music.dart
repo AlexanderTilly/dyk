@@ -20,8 +20,8 @@ class OnboardingMusic {
           'assets/audio/onboarding.mp3',
           tag: MediaItem(
             id: 'onboarding_music',
-            title: 'Did You Know?',
-            artist: 'Did You Know?',
+            title: 'Passim',
+            artist: 'Passim',
           ),
         ),
         // Skip the quiet intro — the song has found its groove by 0:13.

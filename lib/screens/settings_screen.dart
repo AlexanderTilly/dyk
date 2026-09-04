@@ -309,7 +309,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading:
                       Icon(Icons.info_outline, color: PassimColors.brand),
-                  title: const Text('Did You Know?'),
+                  title: const Text('Passim'),
                   subtitle: Text(tr('tagline')),
                 ),
                 FutureBuilder<PackageInfo>(

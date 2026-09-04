@@ -37,8 +37,8 @@ class AudioService {
       {String? title, String? artUrl, String? hotspotId}) async {
     final tag = MediaItem(
       id: source,
-      title: title ?? 'Did You Know?',
-      artist: 'Did You Know?',
+      title: title ?? 'Passim',
+      artist: 'Passim',
       artUri: artUrl != null ? Uri.tryParse(artUrl) : null,
     );
     nowPlaying.value = NowPlayingInfo(

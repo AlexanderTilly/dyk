@@ -75,7 +75,7 @@ class MiniPlayer extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            info.title ?? 'Did You Know?',
+                            info.title ?? 'Passim',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

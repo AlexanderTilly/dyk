@@ -134,7 +134,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                         fontWeight: FontWeight.w800)),
                 const SizedBox(height: 6),
                 const Text(
-                  'Full narration, the story and all Did You Know? facts.',
+                  'Full narration, the story and every fact.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white60, fontSize: 13),
                 ),

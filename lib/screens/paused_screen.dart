@@ -41,7 +41,7 @@ class PausedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Access to Did You Know? is temporarily on hold. '
+                'Access to Passim is temporarily on hold. '
                 'If you think this is a mistake, please contact our support team.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white70, height: 1.5),

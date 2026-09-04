@@ -550,7 +550,7 @@ class _DykAppState extends State<DykApp> {
       animation: I18n.instance,
       builder: (context, _) => MaterialApp(
         navigatorKey: _navKey,
-        title: 'Did You Know?',
+        title: 'Passim',
         debugShowCheckedModeBanner: false,
         theme: dykLightTheme(),
         darkTheme: dykDarkTheme(),
