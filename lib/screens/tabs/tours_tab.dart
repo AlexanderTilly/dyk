@@ -301,7 +301,7 @@ extension _ToursSections on _ToursTabState {
                     t.heroImage != null
                         ? CachedNetworkImage(
                             imageUrl: t.heroImage!, fit: BoxFit.cover)
-                        : Container(color: Colors.white10),
+                        : Container(color: PassimColors.surface),
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -397,7 +397,7 @@ extension _ToursSections on _ToursTabState {
                 margin: const EdgeInsets.only(right: 12),
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
-                  color: Colors.white10,
+                  color: PassimColors.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -409,7 +409,7 @@ extension _ToursSections on _ToursTabState {
                               imageUrl: t.heroImage!,
                               width: double.infinity,
                               fit: BoxFit.cover)
-                          : Container(color: Colors.white10),
+                          : Container(color: PassimColors.surface),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8),
@@ -488,7 +488,7 @@ extension _ToursSections on _ToursTabState {
                     children: [
                       CircleAvatar(
                         radius: 32,
-                        backgroundColor: Colors.white10,
+                        backgroundColor: PassimColors.surface,
                         backgroundImage: e.value.first.creatorAvatar != null
                             ? CachedNetworkImageProvider(
                                 e.value.first.creatorAvatar!)
@@ -540,7 +540,7 @@ class _TourCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         decoration: BoxDecoration(
-          color: dark ? Colors.white10 : Colors.white,
+          color: dark ? PassimColors.surface : Colors.white,
           borderRadius: BorderRadius.circular(18),
         ),
         clipBehavior: Clip.antiAlias,

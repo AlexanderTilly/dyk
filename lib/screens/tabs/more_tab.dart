@@ -170,7 +170,7 @@ class _MoreTabState extends State<MoreTab> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: dark ? Colors.white10 : Colors.white,
+              color: dark ? PassimColors.surface : Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(

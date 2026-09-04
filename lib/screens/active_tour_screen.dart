@@ -1186,7 +1186,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
         radius: 15,
         backgroundColor: visited
             ? Colors.white24
-            : (isTarget ? DykColors.yellow : Colors.white10),
+            : (isTarget ? DykColors.yellow : PassimColors.surface),
         child: visited
             ? const Icon(Icons.check, size: 16, color: Colors.white)
             : Text('${i + 1}',

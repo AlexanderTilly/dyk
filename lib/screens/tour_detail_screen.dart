@@ -277,7 +277,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white10,
+                        color: PassimColors.surface,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
@@ -403,7 +403,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                             margin: const EdgeInsets.only(right: 12),
                             clipBehavior: Clip.antiAlias,
                             decoration: BoxDecoration(
-                              color: Colors.white10,
+                              color: PassimColors.surface,
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Column(
@@ -418,7 +418,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                               imageUrl: s.image!,
                                               fit: BoxFit.cover)
                                           : Container(
-                                              color: Colors.white10,
+                                              color: PassimColors.surface,
                                               child: const Icon(
                                                   Icons.place_outlined,
                                                   color: Colors.white24)),
@@ -629,7 +629,7 @@ class _ChecklistChipState extends State<_ChecklistChip> {
         decoration: BoxDecoration(
           color: _done
               ? DykColors.yellow.withValues(alpha: 0.18)
-              : Colors.white10,
+              : PassimColors.surface,
           borderRadius: BorderRadius.circular(99),
           border: Border.all(
               color: _done ? DykColors.yellow : Colors.white12, width: 1),
@@ -698,7 +698,7 @@ class _StopRow extends StatelessWidget {
                       : Container(
                           width: 56,
                           height: 56,
-                          color: Colors.white10,
+                          color: PassimColors.surface,
                           child: const Icon(Icons.place,
                               color: Colors.white38, size: 26),
                         ),

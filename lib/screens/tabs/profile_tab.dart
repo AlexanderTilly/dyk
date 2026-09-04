@@ -78,7 +78,7 @@ class ProfileTab extends StatelessWidget {
         Container(
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
-            color: dark ? Colors.white10 : Colors.white,
+            color: dark ? PassimColors.surface : Colors.white,
             borderRadius: BorderRadius.circular(14),
           ),
           child: ListTile(
@@ -186,7 +186,7 @@ class ProfileTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
-              color: dark ? Colors.white10 : Colors.white,
+              color: dark ? PassimColors.surface : Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -222,7 +222,7 @@ class ProfileTab extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
-                  color: dark ? Colors.white10 : Colors.white,
+                  color: dark ? PassimColors.surface : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(

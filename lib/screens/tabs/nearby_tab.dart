@@ -666,7 +666,7 @@ class _NearbyTabState extends State<NearbyTab> {
                                 )
                               : null,
                           filled: true,
-                          fillColor: dark ? Colors.white10 : Colors.white,
+                          fillColor: dark ? PassimColors.surface : Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
@@ -918,7 +918,7 @@ class _NearbyTabState extends State<NearbyTab> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: dark ? Colors.white10 : Colors.black.withValues(alpha: 0.04),
+          color: dark ? PassimColors.surface : Colors.black.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(

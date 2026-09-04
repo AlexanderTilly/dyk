@@ -74,7 +74,7 @@ class TourCompleteScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 decoration: BoxDecoration(
-                  color: Colors.white10,
+                  color: PassimColors.surface,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                       color: DykColors.yellow.withValues(alpha: 0.5),

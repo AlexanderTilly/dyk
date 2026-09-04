@@ -27,7 +27,7 @@ class HotspotListTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: dark ? Colors.white10 : Colors.black.withValues(alpha: 0.04),
+          color: dark ? PassimColors.surface : Colors.black.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(

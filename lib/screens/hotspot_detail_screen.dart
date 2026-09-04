@@ -855,7 +855,7 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
       decoration: BoxDecoration(
         color: PassimColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: PassimColors.surface),
       ),
       child: Row(
         children: [

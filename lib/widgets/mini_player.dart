@@ -57,7 +57,7 @@ class MiniPlayer extends StatelessWidget {
                           : Container(
                               width: 38,
                               height: 38,
-                              color: Colors.white10,
+                              color: PassimColors.surface,
                               child: const Icon(Icons.headphones,
                                   color: DykColors.yellow, size: 20),
                             ),

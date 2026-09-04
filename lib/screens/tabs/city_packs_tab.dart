@@ -40,7 +40,7 @@ class CityPacksTab extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 14),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: dark ? Colors.white10 : Colors.white,
+                color: dark ? PassimColors.surface : Colors.white,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
