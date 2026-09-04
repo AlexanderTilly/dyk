@@ -161,7 +161,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text(tr('settings'), style: const TextStyle(fontWeight: FontWeight.w900)),
       ),
       body: Container(
-          color: dark ? PassimColors.ink : PassimColors.sand,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/landing_background.jpg'),
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        child: Container(
+          decoration: dark
+              ? passimScrim()
+              : BoxDecoration(
+                  color: PassimColors.sand.withValues(alpha: 0.85)),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -357,6 +368,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
         ),
+      ),
     );
   }
 }

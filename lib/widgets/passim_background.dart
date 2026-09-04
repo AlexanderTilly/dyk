@@ -26,8 +26,8 @@ class PassimBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (top, bottom) = switch (scrim) {
-      Scrim.light => (0.45, 0.70),
-      Scrim.heavy => (0.70, 0.88),
+      Scrim.light => (0.05, 0.30),
+      Scrim.heavy => (0.25, 0.62),
     };
     return DecoratedBox(
       decoration: const BoxDecoration(
@@ -96,8 +96,8 @@ class PassimLogo extends StatelessWidget {
 /// background container.
 BoxDecoration passimScrim({Scrim strength = Scrim.heavy}) {
   final (top, bottom) = switch (strength) {
-    Scrim.light => (0.45, 0.70),
-    Scrim.heavy => (0.70, 0.88),
+    Scrim.light => (0.05, 0.30),
+    Scrim.heavy => (0.25, 0.62),
   };
   return BoxDecoration(
     gradient: LinearGradient(
