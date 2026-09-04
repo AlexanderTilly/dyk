@@ -95,18 +95,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.jpg'),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-          ),
-        ),
-        child: Container(
-          decoration: dark
-              ? passimScrim()
-              : BoxDecoration(
-                  color: PassimColors.sand.withValues(alpha: 0.85)),
+          color: dark ? PassimColors.ink : PassimColors.sand,
           child: entries.isEmpty
           ? Center(
               child: Padding(
@@ -141,7 +130,6 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
               },
             ),
         ),
-      ),
     );
   }
 }
