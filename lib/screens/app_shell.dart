@@ -26,6 +26,7 @@ import 'tabs/tours_tab.dart';
 import '../i18n/i18n.dart';
 import '../theme/dyk_theme.dart';
 import '../widgets/passim_background.dart';
+import '../widgets/passim_nav_bar.dart';
 
 class AppShell extends StatefulWidget {
   final AppState appState;
@@ -325,6 +326,9 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      // The glass bar blurs whatever is behind it — without this the blur
+      // would have nothing to work with.
+      extendBody: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -470,19 +474,20 @@ class _AppShellState extends State<AppShell> {
             audioService: widget.audioService,
             onOpenHotspot: _openHotspotById,
           ),
-          BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: PassimColors.brand,
-        unselectedItemColor: dark ? Colors.white54 : Colors.black45,
-        items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.map_outlined), label: tr('nav_explore')),
-          BottomNavigationBarItem(icon: const Icon(Icons.location_on_outlined), label: tr('nav_nearby')),
-          BottomNavigationBarItem(icon: const Icon(Icons.route_outlined), label: tr('nav_tours')),
-          BottomNavigationBarItem(icon: const Icon(Icons.favorite_outline), label: tr('nav_saved')),
-          BottomNavigationBarItem(icon: const Icon(Icons.grid_view_outlined), label: tr('nav_more')),
-        ],
+          PassimNavBar(
+            currentIndex: _index,
+            onTap: (i) => setState(() => _index = i),
+            items: [
+              PassimNavItem(
+                  Icons.map_outlined, Icons.map, tr('nav_explore')),
+              PassimNavItem(Icons.location_on_outlined, Icons.location_on,
+                  tr('nav_nearby')),
+              PassimNavItem(Icons.route_outlined, Icons.route, tr('nav_tours')),
+              PassimNavItem(
+                  Icons.favorite_outline, Icons.favorite, tr('nav_saved')),
+              PassimNavItem(
+                  Icons.grid_view_outlined, Icons.grid_view, tr('nav_more')),
+            ],
           ),
         ],
       ),
