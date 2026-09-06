@@ -10,6 +10,7 @@ import 'auth_screen.dart';
 import 'support_screen.dart';
 import '../i18n/i18n.dart';
 import '../widgets/passim_background.dart';
+import '../theme/theme_prefs.dart';
 
 /// User settings: profile (name + avatar), notifications & interests,
 /// about, and account actions (sign out / delete account).
@@ -273,6 +274,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ]),
               ),
+
+              // --- Appearance ---
+              _section(tr('appearance'), [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final (mode, label) in const [
+                      (ThemeMode.system, 'theme_system'),
+                      (ThemeMode.light, 'theme_light'),
+                      (ThemeMode.dark, 'theme_dark'),
+                    ])
+                      ChoiceChip(
+                        selected: ThemePrefs.instance.mode == mode,
+                        selectedColor: DykColors.yellow,
+                        label: Text(tr(label)),
+                        onSelected: (_) async {
+                          await ThemePrefs.instance.setMode(mode);
+                          if (mounted) setState(() {});
+                        },
+                      ),
+                  ],
+                ),
+              ]),
 
               // --- Language ---
               _section(tr('language'), [
