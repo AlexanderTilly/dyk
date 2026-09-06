@@ -103,10 +103,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
           ),
         ),
         child: Container(
-          decoration: dark
-              ? passimScrim()
-              : BoxDecoration(
-                  color: PassimColors.sand.withValues(alpha: 0.85)),
+          decoration: passimScrim(context),
           child: entries.isEmpty
           ? Center(
               child: Padding(

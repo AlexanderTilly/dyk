@@ -54,7 +54,7 @@ class PremiumScreen extends StatelessWidget {
           ),
         ),
         child: Container(
-          decoration: passimScrim(),
+          decoration: passimScrim(context),
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),

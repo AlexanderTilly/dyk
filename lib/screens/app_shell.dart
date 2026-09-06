@@ -280,7 +280,6 @@ class _AppShellState extends State<AppShell> {
   void _openProfile() {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) {
-        final dark = Theme.of(context).brightness == Brightness.dark;
         return Scaffold(
           appBar: AppBar(
             title: Text(tr('profile'),
@@ -295,10 +294,7 @@ class _AppShellState extends State<AppShell> {
               ),
             ),
             child: Container(
-              decoration: dark
-              ? passimScrim()
-              : BoxDecoration(
-                  color: PassimColors.sand.withValues(alpha: 0.85)),
+              decoration: passimScrim(context),
               child: ProfileTab(
                 savedStore: widget.savedStore,
                 notificationLog: widget.notificationLog,
@@ -324,7 +320,6 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       // The glass bar blurs whatever is behind it — without this the blur
       // would have nothing to work with.
@@ -420,10 +415,7 @@ class _AppShellState extends State<AppShell> {
         ),
         child: Container(
           // Scrim — artwork visible but clearly behind the content.
-          decoration: dark
-              ? passimScrim()
-              : BoxDecoration(
-                  color: PassimColors.sand.withValues(alpha: 0.85)),
+          decoration: passimScrim(context),
           child: IndexedStack(
         index: _index,
         children: [

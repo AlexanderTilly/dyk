@@ -71,7 +71,6 @@ class _SupportScreenState extends State<SupportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: Text(tr('help_support'),
@@ -86,10 +85,7 @@ class _SupportScreenState extends State<SupportScreen> {
           ),
         ),
         child: Container(
-          decoration: dark
-              ? passimScrim()
-              : BoxDecoration(
-                  color: PassimColors.sand.withValues(alpha: 0.85)),
+          decoration: passimScrim(context),
           child: _sent
               ? Center(
                   child: Padding(

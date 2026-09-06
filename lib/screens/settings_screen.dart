@@ -153,7 +153,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final signedIn = widget.authService.isSignedIn;
-    final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -169,10 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         child: Container(
-          decoration: dark
-              ? passimScrim()
-              : BoxDecoration(
-                  color: PassimColors.sand.withValues(alpha: 0.85)),
+          decoration: passimScrim(context),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [

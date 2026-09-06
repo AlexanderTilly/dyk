@@ -112,7 +112,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         ),
         child: Container(
-          decoration: passimScrim(strength: Scrim.light),
+          decoration: passimScrim(context, strength: Scrim.light),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
