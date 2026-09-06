@@ -4,6 +4,7 @@ import '../../i18n/i18n.dart';
 import '../../theme/dyk_theme.dart';
 import '../../widgets/category_badge.dart';
 import '../../widgets/dyk_page_route.dart';
+import '../../widgets/passim_background.dart';
 import 'consent_screen.dart';
 
 class InterestOption {
@@ -51,7 +52,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.jpg'),
+            image: AssetImage(passimArtwork(context)),
             fit: BoxFit.cover,
           ),
         ),

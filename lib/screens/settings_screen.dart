@@ -160,9 +160,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text(tr('settings'), style: const TextStyle(fontWeight: FontWeight.w900)),
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.jpg'),
+            image: AssetImage(passimArtwork(context)),
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
           ),
