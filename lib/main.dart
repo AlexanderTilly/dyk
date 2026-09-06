@@ -196,8 +196,11 @@ class _DykAppState extends State<DykApp> {
     _startForegroundPresence();
     // Language switch → re-fetch content so translations apply immediately.
     I18n.instance.addListener(_onLanguageChanged);
-    // Branded splash for a moment on launch.
-    Future.delayed(const Duration(milliseconds: 1900), () {
+    // Branded splash on launch. This has to outlast the splash's own 2200ms
+    // entrance animation or the pin is cut off mid-drop — the two numbers
+    // only make sense together, and three seconds is the ceiling: a splash is
+    // charming on the first launch and slow on the fiftieth.
+    Future.delayed(const Duration(milliseconds: 3000), () {
       if (mounted) setState(() => _booting = false);
     });
   }

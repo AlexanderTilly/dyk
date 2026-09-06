@@ -151,7 +151,7 @@ class _ExploreTabState extends State<ExploreTab> with WidgetsBindingObserver {
                       decoration: BoxDecoration(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? PassimColors.surface
-                            : Colors.white,
+                            : PassimColors.card,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Center(
@@ -374,7 +374,7 @@ class _NotificationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: dark ? PassimColors.surface : Colors.white,
+        color: dark ? PassimColors.surface : PassimColors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

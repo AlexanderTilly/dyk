@@ -8,7 +8,7 @@ from PIL import Image
 
 SRC_DARK = "assets/images/passim_logo.png"
 SRC_LIGHT = "design/Passim_logo_bluetext.png"
-SRC_BG = "design/Background.png"
+SRC_BG = "design/Passim_light_back.png"
 
 
 def split_row(path):

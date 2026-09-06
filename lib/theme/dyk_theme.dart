@@ -32,9 +32,12 @@ class PassimColors {
   /// Anything still literal is therefore unreviewed.
   static const onPhoto = Colors.white;
 
-  /// Card and sheet surface in light mode. Pure white against sand gives the
-  /// separation that a tinted card would lose.
-  static const card = Color(0xFFFFFFFF);
+  /// Card and sheet surface in light mode.
+  ///
+  /// Warm off-white rather than pure white: it still lifts off [sand], but
+  /// pure white beside a cream background reads as clinical — the palette is
+  /// warm everywhere else and the cards were the one place breaking it.
+  static const card = Color(0xFFFDFAF0);
 
   // Mapbox style layers take raw ARGB ints rather than [Color], so the same
   // palette is mirrored here. Keep the pairs in sync.

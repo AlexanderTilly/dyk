@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _entrance = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2200),
     );
 
     // Fall accelerates (easeInCubic) — gravity, not a glide. Landing is at

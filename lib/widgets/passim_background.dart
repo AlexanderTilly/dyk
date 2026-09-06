@@ -81,12 +81,13 @@ BoxDecoration passimScrim(BuildContext context,
     {Scrim strength = Scrim.heavy}) {
   final dark = Theme.of(context).brightness == Brightness.dark;
   final (top, bottom) = switch (strength) {
-    // Light mode needs a heavier veil than dark: sand over a bright photo
-    // separates less than navy does, so the same alpha would leave text
-    // sitting on texture. Dark-mode values are untouched; the light-mode
-    // values apply roughly the same bump [Scrim.heavy] already uses.
+    // Light mode needs more veil than dark — sand over a bright photo
+    // separates less than navy does — but the heavy value was far too much:
+    // ink on sand has enormous contrast headroom (roughly 10% luminance
+    // against 94%), so 0.80 at the bottom was bleaching the artwork away
+    // rather than protecting anything. Dark-mode values are untouched.
     Scrim.light => dark ? (0.05, 0.30) : (0.25, 0.48),
-    Scrim.heavy => dark ? (0.25, 0.62) : (0.45, 0.80),
+    Scrim.heavy => dark ? (0.25, 0.62) : (0.20, 0.55),
   };
   final base = dark ? PassimColors.ink : PassimColors.sand;
   return BoxDecoration(
