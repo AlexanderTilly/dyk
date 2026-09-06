@@ -32,6 +32,9 @@ class PassimNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final tint = dark ? PassimColors.ink : PassimColors.sand;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
       child: ClipRRect(
@@ -42,15 +45,20 @@ class PassimNavBar extends StatelessWidget {
             decoration: BoxDecoration(
               // Translucent so the blur is visible; without any tint the text
               // loses contrast over bright photos.
-              color: PassimColors.ink.withValues(alpha: 0.62),
+              color: tint.withValues(alpha: dark ? 0.62 : 0.78),
               borderRadius: BorderRadius.circular(26),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.10),
+                color: dark
+                    ? PassimColors.onPhoto.withValues(alpha: 0.10)
+                    : PassimColors.ink.withValues(alpha: 0.08),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
+                  // A heavy black shadow under a light bar reads as dirt, so
+                  // the light mode gets a much softer one.
+                  color: PassimColors.ink
+                      .withValues(alpha: dark ? 0.35 : 0.12),
                   blurRadius: 24,
                   offset: const Offset(0, 8),
                 ),
@@ -93,7 +101,12 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colour = selected ? PassimColors.brand : Colors.white70;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final colour = selected
+        ? PassimColors.brand
+        : (dark
+            ? PassimColors.onPhoto.withValues(alpha: 0.70)
+            : PassimColors.ink.withValues(alpha: 0.60));
     return Expanded(
       child: InkWell(
         onTap: onTap,
