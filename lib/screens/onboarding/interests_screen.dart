@@ -57,18 +57,9 @@ class _InterestsScreenState extends State<InterestsScreen> {
           ),
         ),
         child: Container(
-          // Dark scrim so text and cards stay readable over the artwork.
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.55),
-                Colors.black.withValues(alpha: 0.35),
-                Colors.black.withValues(alpha: 0.65),
-              ],
-            ),
-          ),
+          // The shared scrim, so this screen flips with the theme instead of
+          // staying black under a light app.
+          decoration: passimScrim(context),
           child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -77,21 +68,12 @@ class _InterestsScreenState extends State<InterestsScreen> {
             children: [
               const SizedBox(height: 16),
               Text(tr('ob_interests_title'),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    shadows: const [
-                      Shadow(color: Colors.black87, blurRadius: 8),
-                    ],
-                  )),
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
-              const Text(
-                "Make it yours. Pick one or pick them all. You'll only be notified about what's interesting to you.",
-                style: TextStyle(
-                  color: Colors.white,
-                  shadows: [Shadow(color: Colors.black87, blurRadius: 6)],
-                ),
-              ),
+              Text(tr('ob_interests_sub')),
               const SizedBox(height: 24),
               Expanded(
                 child: ListView(
@@ -123,7 +105,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                             ),
                           );
                         },
-                  child: const Text('CONTINUE'),
+                  child: Text(tr('continue_btn')),
                 ),
               ),
             ],
@@ -149,6 +131,10 @@ class _InterestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    // The card is an opaque surface, so its text takes the surface's contrast
+    // rather than the artwork's.
+    final onCard = dark ? PassimColors.onPhoto : PassimColors.ink;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedScale(
@@ -160,19 +146,22 @@ class _InterestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          // Solid dark gray card — fully opaque so the background art
-          // never bleeds through the content.
-          color: const Color(0xFF2B2B2B),
+          // Fully opaque so the artwork never bleeds through the content —
+          // but the theme's surface, not a fixed grey that only worked when
+          // the app was dark-only.
+          color: dark ? PassimColors.surface : PassimColors.card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? DykColors.yellow : Colors.white12,
+            color: selected
+                ? PassimColors.brand
+                : PassimColors.ink.withValues(alpha: dark ? 0.30 : 0.10),
             width: 2.5,
           ),
           boxShadow: [
-            const BoxShadow(
-              color: Colors.black54,
+            BoxShadow(
+              color: PassimColors.ink.withValues(alpha: dark ? 0.45 : 0.14),
               blurRadius: 14,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
             if (selected)
               BoxShadow(
@@ -191,20 +180,23 @@ class _InterestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(option.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
-                          color: Colors.white)),
+                          color: onCard)),
                   const SizedBox(height: 2),
                   Text(option.description,
-                      style: const TextStyle(
-                          fontSize: 12, color: Colors.white70)),
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: onCard.withValues(alpha: 0.70))),
                 ],
               ),
             ),
             Icon(
               selected ? Icons.check_circle : Icons.circle_outlined,
-              color: selected ? DykColors.yellow : Colors.white38,
+              color: selected
+                  ? PassimColors.brand
+                  : onCard.withValues(alpha: 0.38),
             ),
           ],
         ),

@@ -86,7 +86,7 @@ class _BackgroundLocationScreenState extends State<BackgroundLocationScreen>
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 64)),
               const SizedBox(height: 24),
-              Text(_granted ? 'You\'re all set!' : tr('ob_never_miss'),
+              Text(_granted ? tr('ob_all_set') : tr('ob_never_miss'),
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
@@ -109,8 +109,7 @@ class _BackgroundLocationScreenState extends State<BackgroundLocationScreen>
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(
-                    tr('ob_bg_hint') + '\n'
-                    'Without it, DYK only works while the app is open.',
+                    tr('ob_bg_hint'),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 13),
                   ),
@@ -120,7 +119,7 @@ class _BackgroundLocationScreenState extends State<BackgroundLocationScreen>
               if (_granted)
                 ElevatedButton(
                   onPressed: _next,
-                  child: const Text('CONTINUE'),
+                  child: Text(tr('continue_btn')),
                 )
               else ...[
                 ElevatedButton(

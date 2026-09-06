@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../services/device_profile_service.dart';
 import '../theme/dyk_theme.dart';
 import '../i18n/i18n.dart';
+import '../widgets/passim_background.dart';
 
 class AuthScreen extends StatefulWidget {
   final AuthService authService;
@@ -20,6 +21,9 @@ class _AuthScreenState extends State<AuthScreen> {
   final _password = TextEditingController();
   String? _gender; // 'female' | 'male' — picks the default avatar
   bool _loading = false;
+  // Typing a password blind on a phone keyboard is where most failed sign-ups
+  // come from, so the field can be revealed. Defaults to hidden.
+  bool _showPassword = false;
   String? _error;
   String? _info;
   // Set after a successful sign-up that requires email confirmation —
@@ -73,12 +77,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: dark ? Colors.white : DykColors.black,
       ),
       body: SafeArea(
         child: _awaitingConfirm
@@ -88,7 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset('assets/images/passim_logo.png', height: 110),
+              const PassimLogo(height: 110),
               const SizedBox(height: 16),
               Text(
                 _isSignUp ? tr('create_account_title') : tr('welcome_back'),
@@ -153,10 +155,18 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 12),
               TextField(
                 controller: _password,
-                obscureText: true,
+                obscureText: !_showPassword,
                 decoration: InputDecoration(
                   labelText: tr('password'),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(_showPassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined),
+                    tooltip: tr(_showPassword ? 'hide_password' : 'show_password'),
+                    onPressed: () =>
+                        setState(() => _showPassword = !_showPassword),
+                  ),
                 ),
               ),
               if (_error != null) ...[
@@ -180,7 +190,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.black))
+                              strokeWidth: 2, color: PassimColors.ink))
                       : Text(_isSignUp ? tr('create_account_btn') : tr('sign_in_btn')),
                 ),
               ),
@@ -280,6 +290,7 @@ class _AvatarChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -291,7 +302,9 @@ class _AvatarChoice extends StatelessWidget {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? DykColors.yellow : Colors.black12,
+            color: selected
+                ? PassimColors.brand
+                : PassimColors.ink.withValues(alpha: dark ? 0.30 : 0.12),
             width: 2.5,
           ),
         ),

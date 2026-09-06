@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../theme/dyk_theme.dart';
+import '../widgets/passim_background.dart';
 
 /// Shown when a signed-in user's account has been paused by an admin.
 class PausedScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class PausedScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset('assets/images/passim_logo.png', height: 110),
+              const PassimLogo(height: 110),
               const SizedBox(height: 32),
               const Icon(Icons.pause_circle_outline,
                   size: 64, color: DykColors.yellow),

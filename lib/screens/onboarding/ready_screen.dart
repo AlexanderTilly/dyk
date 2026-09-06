@@ -54,14 +54,14 @@ class _ReadyScreenState extends State<ReadyScreen>
                       ?.copyWith(fontWeight: FontWeight.w900)),
               const SizedBox(height: 12),
               Text(
-                "Start walking and we'll let you know when something interesting is nearby.",
+                tr('ob_ready_sub'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 48),
               ElevatedButton(
                 onPressed: widget.onFinished,
-                child: const Text("LET'S GO"),
+                child: Text(tr('ob_lets_go')),
               ),
             ],
           ),

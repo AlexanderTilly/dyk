@@ -43,7 +43,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               const Text('🔔',
                   textAlign: TextAlign.center, style: TextStyle(fontSize: 64)),
               const SizedBox(height: 24),
-              Text('Notifications',
+              Text(tr('ob_notif_title'),
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
@@ -51,7 +51,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ?.copyWith(fontWeight: FontWeight.w900)),
               const SizedBox(height: 12),
               Text(
-                "Get notified when you're near something worth discovering.",
+                tr('ob_notif_why'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),

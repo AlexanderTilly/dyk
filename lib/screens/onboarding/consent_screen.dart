@@ -73,7 +73,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                           );
                         }
                       : null,
-                  child: const Text('CONTINUE'),
+                  child: Text(tr('continue_btn')),
                 ),
               ),
             ],
