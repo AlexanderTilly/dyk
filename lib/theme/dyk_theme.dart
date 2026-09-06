@@ -22,6 +22,16 @@ class PassimColors {
   /// Success / "unlocked" green. Not a brand colour, kept for status only.
   static const green = Color(0xFF22C55E);
 
+  /// White that is white *on purpose*: text and icons sitting over a photo, a
+  /// scrim, or the amber brand colour, where the surface is dark regardless of
+  /// the user's theme.
+  ///
+  /// The point is the name. A bare `Colors.white` cannot tell you whether it
+  /// is deliberate or a leftover from when this app was dark-only, and that
+  /// question cannot be answered by searching — only by reading every site.
+  /// Anything still literal is therefore unreviewed.
+  static const onPhoto = Colors.white;
+
   // Mapbox style layers take raw ARGB ints rather than [Color], so the same
   // palette is mirrored here. Keep the pairs in sync.
   static const brandArgb = 0xFFFFC21A;
@@ -43,21 +53,56 @@ ThemeData dykDarkTheme() => _base(Brightness.dark);
 
 ThemeData _base(Brightness b) {
   final dark = b == Brightness.dark;
+
+  // The one place that answers "what colour is ordinary text/iconography".
+  // Before this existed every screen answered for itself, and what they all
+  // answered was "white" — which is exactly why light mode was broken.
+  final onSurface = dark ? PassimColors.onPhoto : PassimColors.ink;
+  final surface = dark ? PassimColors.surface : Colors.white;
+  final background = dark ? PassimColors.ink : PassimColors.sand;
+
   return ThemeData(
     useMaterial3: true,
     brightness: b,
-    scaffoldBackgroundColor: dark ? PassimColors.ink : PassimColors.sand,
+    scaffoldBackgroundColor: background,
     colorScheme: ColorScheme.fromSeed(
       seedColor: PassimColors.brand,
       brightness: b,
       primary: PassimColors.brand,
-      surface: dark ? PassimColors.surface : PassimColors.sand,
+      onPrimary: PassimColors.ink,
+      surface: surface,
+      onSurface: onSurface,
+    ),
+    textTheme: Typography.material2021(platform: TargetPlatform.android)
+        .black
+        .apply(bodyColor: onSurface, displayColor: onSurface),
+    appBarTheme: AppBarTheme(
+      backgroundColor: background,
+      foregroundColor: onSurface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+    ),
+    cardTheme: CardThemeData(
+      color: surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    iconTheme: IconThemeData(color: onSurface),
+    dividerTheme: DividerThemeData(
+      color: onSurface.withValues(alpha: 0.12),
+      thickness: 1,
+    ),
+    listTileTheme: ListTileThemeData(
+      textColor: onSurface,
+      iconColor: onSurface,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: PassimColors.brand,
         foregroundColor: PassimColors.ink,
-        textStyle: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.5),
+        textStyle: const TextStyle(
+            fontWeight: FontWeight.w800, letterSpacing: 0.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
       ),
