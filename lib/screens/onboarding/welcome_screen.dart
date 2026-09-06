@@ -84,11 +84,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ChoiceChip(
                         selected: I18n.instance.code == code,
                         selectedColor: PassimColors.brand,
-                        backgroundColor: Colors.black45,
+                        // Chips sit over the artwork, so the unselected fill
+                        // stays translucent rather than an opaque block: the
+                        // same black45 as before in dark mode, a light-mode
+                        // equivalent that still lets the photo show through.
+                        backgroundColor: dark
+                            ? Colors.black45
+                            : PassimColors.sand.withValues(alpha: 0.45),
                         labelStyle: TextStyle(
                           color: I18n.instance.code == code
                               ? Colors.black
-                              : Colors.white,
+                              : onArtwork,
                           fontWeight: FontWeight.w800,
                         ),
                         label: Row(
@@ -110,7 +116,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Text(
                   tr('lang_hint'),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  // Same 54% fade as the rest of this screen's on-artwork
+                  // text, over whichever colour is readable for the mode.
+                  style:
+                      TextStyle(color: onArtwork.withValues(alpha: 0.54), fontSize: 12),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(

@@ -42,7 +42,7 @@ class WelcomeCityScreen extends StatelessWidget {
     final onArtworkMuted = onArtwork.withValues(alpha: 0.54);
     final onArtworkTertiary = onArtwork.withValues(alpha: 0.38);
     return Scaffold(
-      backgroundColor: const Color(0xFF141414),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
