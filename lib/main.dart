@@ -41,6 +41,7 @@ import 'services/notification_log.dart';
 import 'services/notification_service.dart';
 import 'services/saved_store.dart';
 import 'theme/dyk_theme.dart';
+import 'theme/theme_prefs.dart';
 
 const _palmaCitypackId = 'a1b2c3d4-0000-0000-0000-000000000001';
 
@@ -71,6 +72,7 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   await I18n.instance.load(prefs);
+  await ThemePrefs.instance.load(prefs);
   final appState = AppState(prefs);
   final notificationLog = NotificationLog(prefs);
   final savedStore = SavedStore(prefs);
@@ -544,16 +546,17 @@ class _DykAppState extends State<DykApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuild the whole app when the language changes (home is created
-    // inside the builder so every screen picks up the new strings).
+    // Rebuild the whole app when the language or the theme changes (home is
+    // created inside the builder so every screen picks up both).
     return AnimatedBuilder(
-      animation: I18n.instance,
+      animation: Listenable.merge([I18n.instance, ThemePrefs.instance]),
       builder: (context, _) => MaterialApp(
         navigatorKey: _navKey,
         title: 'Passim',
         debugShowCheckedModeBanner: false,
         theme: dykLightTheme(),
         darkTheme: dykDarkTheme(),
+        themeMode: ThemePrefs.instance.mode,
         builder: (context, child) =>
             WithForegroundTask(child: child ?? const SizedBox.shrink()),
         home: _buildHome(),
