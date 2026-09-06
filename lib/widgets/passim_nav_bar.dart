@@ -102,8 +102,11 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    // Amber on the sand-tinted pill is roughly 1.4:1 contrast in light mode —
+    // unreadable at this size — so light mode uses ink for the selected
+    // label/icon instead, keeping the amber pill behind it as the marker.
     final colour = selected
-        ? PassimColors.brand
+        ? (dark ? PassimColors.brand : PassimColors.ink)
         : (dark
             ? PassimColors.onPhoto.withValues(alpha: 0.70)
             : PassimColors.ink.withValues(alpha: 0.60));

@@ -32,6 +32,15 @@ class WelcomeCityScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Text sits on the artwork/scrim, so it must follow the theme rather
+    // than assume a dark photo: onPhoto (white) in dark mode, ink over the
+    // light artwork. The 70%/54%/38% variants preserve the existing
+    // secondary/tertiary hierarchy on top of whichever base colour applies.
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final onArtwork = dark ? PassimColors.onPhoto : PassimColors.ink;
+    final onArtworkSecondary = onArtwork.withValues(alpha: 0.7);
+    final onArtworkMuted = onArtwork.withValues(alpha: 0.54);
+    final onArtworkTertiary = onArtwork.withValues(alpha: 0.38);
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
       body: Container(
@@ -54,7 +63,7 @@ class WelcomeCityScreen extends StatelessWidget {
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text(tr('maybe_later'),
-                          style: const TextStyle(color: Colors.white54)),
+                          style: TextStyle(color: onArtworkMuted)),
                     ),
                   ),
                   const Spacer(),
@@ -70,7 +79,7 @@ class WelcomeCityScreen extends StatelessWidget {
                     cityName.toUpperCase(),
                     textAlign: TextAlign.center,
                     style: GoogleFonts.bebasNeue(
-                        color: Colors.white, fontSize: 56, height: 1.0),
+                        color: onArtwork, fontSize: 56, height: 1.0),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -78,8 +87,8 @@ class WelcomeCityScreen extends StatelessWidget {
                         ? '$hotspotCount ${tr('welcome_tagline')}'
                         : tr('welcome_tagline'),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        color: Colors.white70, fontSize: 15, height: 1.4),
+                    style: TextStyle(
+                        color: onArtworkSecondary, fontSize: 15, height: 1.4),
                   ),
                   const SizedBox(height: 28),
                   UnlockButtons(
@@ -93,7 +102,7 @@ class WelcomeCityScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(tr('free_spots_note'),
-                      style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                      style: TextStyle(color: onArtworkTertiary, fontSize: 12)),
                   const Spacer(),
                 ],
               ),

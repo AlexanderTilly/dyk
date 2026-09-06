@@ -16,6 +16,8 @@ const migratedFiles = [
   'lib/widgets/passim_nav_bar.dart',
   'lib/screens/splash_screen.dart',
   'lib/theme/dyk_theme.dart',
+  'lib/screens/premium_screen.dart',
+  'lib/screens/welcome_city_screen.dart',
 ];
 
 /// The theme is the app's colour contract. Screens that state no colour must

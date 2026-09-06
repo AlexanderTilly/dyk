@@ -7,6 +7,7 @@ import '../services/entitlements.dart';
 import '../widgets/unlock_buttons.dart';
 import '../i18n/i18n.dart';
 import '../widgets/passim_background.dart';
+import '../theme/dyk_theme.dart';
 
 /// "View Plans" — the real unlock flow: per-city or Premium (all cities).
 class PremiumScreen extends StatelessWidget {
@@ -29,6 +30,15 @@ class PremiumScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Text sits on the artwork/scrim, so it must follow the theme rather
+    // than assume a dark photo: onPhoto (white) in dark mode, ink over the
+    // light artwork. The 70%/38% variants preserve the existing secondary
+    // and tertiary hierarchy on top of whichever base colour applies.
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final onArtwork = dark ? PassimColors.onPhoto : PassimColors.ink;
+    final onArtworkSecondary = onArtwork.withValues(alpha: 0.7);
+    final onArtworkTertiary = onArtwork.withValues(alpha: 0.38);
+
     Widget perk(String emoji, String text) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
@@ -37,14 +47,17 @@ class PremiumScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                   child: Text(text,
-                      style:
-                          const TextStyle(color: Colors.white70, fontSize: 15))),
+                      style: TextStyle(
+                          color: onArtworkSecondary, fontSize: 15))),
             ],
           ),
         );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF141414),
+      // Follows the theme's scaffold background instead of a hardcoded
+      // dark value, so light mode doesn't show a black flash behind the
+      // scrim/artwork.
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -64,7 +77,7 @@ class PremiumScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.topLeft,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: Icon(Icons.arrow_back, color: onArtwork),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -75,7 +88,7 @@ class PremiumScreen extends StatelessWidget {
                   Center(
                     child: Text(tr('go_premium_caps'),
                         style: GoogleFonts.bebasNeue(
-                            color: Colors.white, fontSize: 48, height: 1.0)),
+                            color: onArtwork, fontSize: 48, height: 1.0)),
                   ),
                   const SizedBox(height: 14),
                   perk('🌍', tr('perk_cities')),
@@ -100,7 +113,7 @@ class PremiumScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   Center(
                     child: Text(tr('free_spots_note'),
-                        style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                        style: TextStyle(color: onArtworkTertiary, fontSize: 12)),
                   ),
                   const Spacer(),
                 ],

@@ -28,6 +28,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Text sits directly on the artwork/scrim here, so it must follow the
+    // theme rather than assume a dark photo: PassimColors.onPhoto (white) in
+    // dark mode, PassimColors.ink over the light artwork.
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final onArtwork = dark ? PassimColors.onPhoto : PassimColors.ink;
     return Scaffold(
       body: PassimBackground(
         scrim: Scrim.light,
@@ -41,8 +46,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 const Spacer(flex: 2),
                 Text(
                   tr('welcome_line1'),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: onArtwork,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -61,8 +66,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       const TextSpan(text: '.'),
                     ],
                   ),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: onArtwork,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
