@@ -130,6 +130,16 @@ Deno.serve(async (req) => {
       audio_base64: toBase64(audioBuffer),
       content_type: 'audio/mpeg',
       chars: clean.length,
+      // What actually produced this clip. Without it, a voice that drifts —
+      // because a secret changed, or because ElevenLabs silently ignored an
+      // unsupported language_code — can only be diagnosed by reading old
+      // commits and guessing. That happened with Spanish in August 2026.
+      used: {
+        voice_id: voiceId,
+        model_id: modelId,
+        language_code: languageCode ?? null,
+        voice_settings: voiceSettings,
+      },
     })
   } catch (e) {
     return json({ error: `Unexpected error: ${e}` }, 500)
