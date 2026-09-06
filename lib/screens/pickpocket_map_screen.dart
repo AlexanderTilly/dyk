@@ -167,6 +167,7 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: Text(tr('pickpocket_activity'),
@@ -184,7 +185,7 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
               ),
               zoom: 14.0,
             ),
-            styleUri: MapboxStyles.DARK,
+            styleUri: dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
             onMapCreated: _onMapCreated,
           ),
           if (_reports.isEmpty)

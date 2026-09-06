@@ -38,6 +38,9 @@ class _NavigateScreenState extends State<NavigateScreen> {
   // walking | cycling | driving — auto-picked on first fix, user-switchable.
   String _mode = 'walking';
   bool _modeAutoPicked = false;
+  // Captured in build (where context is available) and read from
+  // _onMapCreated, which runs outside build's context.
+  bool _dark = false;
 
   @override
   void dispose() {
@@ -92,10 +95,14 @@ class _NavigateScreenState extends State<NavigateScreen> {
         lineJoin: LineJoin.ROUND,
         lineCap: LineCap.ROUND,
       ));
+      // Casing needs to contrast against the map background (not the line),
+      // so it goes opposite the theme rather than opposite the brand line.
+      final onMapArgb =
+          _dark ? PassimColors.whiteArgb : PassimColors.inkArgb;
       await map.style.addLayer(LineLayer(
         id: 'nav-casing',
         sourceId: 'nav-route',
-        lineColor: PassimColors.inkArgb,
+        lineColor: onMapArgb,
         lineWidth: 9.0,
         lineJoin: LineJoin.ROUND,
         lineCap: LineCap.ROUND,
@@ -278,6 +285,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _dark = Theme.of(context).brightness == Brightness.dark;
     final h = widget.hotspot;
     return Scaffold(
       appBar: AppBar(
@@ -293,7 +301,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
               center: Point(coordinates: Position(h.lng, h.lat)),
               zoom: 15,
             ),
-            styleUri: MapboxStyles.DARK,
+            styleUri: _dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
             onMapCreated: _onMapCreated,
           ),
           if (_steps.isNotEmpty && !_arrived)

@@ -59,6 +59,9 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
   Set<String> _visited = {};
   StreamSubscription<geo.Position>? _posSub;
   bool _completing = false;
+  // Captured in build (where context is available) and read from the async
+  // map-layer methods below, which run outside build's context.
+  bool _dark = false;
 
   // Route geometry, parsed once.
   List<List<double>> _routeCoords = []; // [lng, lat]
@@ -548,11 +551,14 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
       lineJoin: LineJoin.ROUND,
       lineCap: LineCap.ROUND,
     ));
-    // Remaining: dark casing + DYK yellow.
+    // Remaining: casing (opposite of the map background so it stays visible)
+    // + DYK yellow on top.
+    final onMapArgb =
+        _dark ? PassimColors.whiteArgb : PassimColors.inkArgb;
     await _addBelowPuck(map, LineLayer(
       id: 'route-casing',
       sourceId: 'route-remaining',
-      lineColor: PassimColors.inkArgb,
+      lineColor: onMapArgb,
       lineWidth: 9.0,
       lineJoin: LineJoin.ROUND,
       lineCap: LineCap.ROUND,
@@ -574,7 +580,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
       sourceId: 'route-remaining',
       textField: '>',
       textSize: 17.0,
-      textColor: PassimColors.inkArgb,
+      textColor: onMapArgb,
       symbolPlacement: SymbolPlacement.LINE,
       symbolSpacing: 34.0,
       textAllowOverlap: true,
@@ -1408,6 +1414,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
 
   @override
   Widget build(BuildContext context) {
+    _dark = Theme.of(context).brightness == Brightness.dark;
     final located =
         widget.stops.where((s) => s.lat != null && s.lng != null).toList();
     final centerLng = located.isNotEmpty ? located.first.lng! : 2.6500;
@@ -1442,7 +1449,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
               center: Point(coordinates: Position(centerLng, centerLat)),
               zoom: 15.0,
             ),
-            styleUri: MapboxStyles.DARK,
+            styleUri: _dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
             onMapCreated: _onMapCreated,
             onScrollListener: (_) {
               // Manual pan pauses follow mode.

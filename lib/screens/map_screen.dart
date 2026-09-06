@@ -66,6 +66,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7ED),
       appBar: AppBar(
@@ -98,7 +99,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           zoom: 14.5,
         ),
-        styleUri: MapboxStyles.MAPBOX_STREETS,
+        styleUri: dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
         onMapCreated: _onMapCreated,
       ),
     );
