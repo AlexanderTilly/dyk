@@ -26,11 +26,15 @@ class PassimColors {
   /// scrim, or the amber brand colour, where the surface is dark regardless of
   /// the user's theme.
   ///
-  /// The point is the name. A bare `Colors.white` cannot tell you whether it
+  /// The point is the name. A bare white literal cannot tell you whether it
   /// is deliberate or a leftover from when this app was dark-only, and that
   /// question cannot be answered by searching — only by reading every site.
   /// Anything still literal is therefore unreviewed.
   static const onPhoto = Colors.white;
+
+  /// Card and sheet surface in light mode. Pure white against sand gives the
+  /// separation that a tinted card would lose.
+  static const card = Color(0xFFFFFFFF);
 
   // Mapbox style layers take raw ARGB ints rather than [Color], so the same
   // palette is mirrored here. Keep the pairs in sync.
@@ -58,7 +62,7 @@ ThemeData _base(Brightness b) {
   // Before this existed every screen answered for itself, and what they all
   // answered was "white" — which is exactly why light mode was broken.
   final onSurface = dark ? PassimColors.onPhoto : PassimColors.ink;
-  final surface = dark ? PassimColors.surface : Colors.white;
+  final surface = dark ? PassimColors.surface : PassimColors.card;
   final background = dark ? PassimColors.ink : PassimColors.sand;
 
   return ThemeData(
