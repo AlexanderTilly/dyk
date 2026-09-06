@@ -17,6 +17,16 @@ const _typeLabels = {
   'custom': 'More Tours',
 };
 
+/// The bundled Palma hero, in the variant that suits the theme.
+///
+/// Only the fallback: a city that has a header image in admin uses that one,
+/// which comes from the network and cannot switch — so if Palma ever gets an
+/// admin header, the light variant has to be set there instead.
+String _bundledHeader(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? 'assets/images/headers/palma.png'
+        : 'assets/images/headers/palma_light.jpg';
+
 class ToursTab extends StatefulWidget {
   final List<Tour> tours;
   final DykRepositoryBase repo;
@@ -116,11 +126,11 @@ class _ToursTabState extends State<ToursTab> {
                   ? CachedNetworkImage(
                       imageUrl: widget.headerImage!,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => Image.asset(
-                          'assets/images/headers/palma.png',
-                          fit: BoxFit.cover),
+                      errorWidget: (_, __, ___) =>
+                          Image.asset(_bundledHeader(context),
+                              fit: BoxFit.cover),
                     )
-                  : Image.asset('assets/images/headers/palma.png',
+                  : Image.asset(_bundledHeader(context),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
                           Container(color: Colors.black26)),

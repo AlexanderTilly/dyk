@@ -35,8 +35,13 @@ class PassimNavBar extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final tint = dark ? PassimColors.ink : PassimColors.sand;
 
+    // The system inset belongs BELOW the pill, not inside it. It used to sit
+    // in a SafeArea within the glass, which made the bar grow by the height
+    // of the gesture bar or home indicator — reading as an empty row under
+    // the buttons rather than as a bar that hugs them.
+    final inset = MediaQuery.viewPaddingOf(context).bottom;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+      padding: EdgeInsets.fromLTRB(14, 0, 14, 10 + inset),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(26),
         child: BackdropFilter(
@@ -64,21 +69,21 @@ class PassimNavBar extends StatelessWidget {
                 ),
               ],
             ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    for (var i = 0; i < items.length; i++)
-                      _NavButton(
-                        item: items[i],
-                        selected: i == currentIndex,
-                        onTap: () => onTap(i),
-                      ),
-                  ],
-                ),
+            // No SafeArea here — see the padding above. The vertical padding
+            // is 4 rather than 8 because each button already carries 7 of its
+            // own; the two were stacking into 15 at each end.
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    _NavButton(
+                      item: items[i],
+                      selected: i == currentIndex,
+                      onTap: () => onTap(i),
+                    ),
+                ],
               ),
             ),
           ),
