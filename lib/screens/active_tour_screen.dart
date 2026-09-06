@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart' hide Visibility;
@@ -395,7 +394,6 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
   /// DYK puck drawn at runtime: soft gold halo, white ring, gold core and a
   /// heading wedge — matches the pins and the pulse.
   Future<Uint8List> _buildPuckImage() async {
-    const size = 140.0;
     final rec = ui.PictureRecorder();
     final canvas = Canvas(rec);
     const center = Offset(70, 70);

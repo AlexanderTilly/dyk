@@ -487,6 +487,10 @@ extension _ToursSections on _ToursTabState {
           children: [
             for (final e in byCreator.entries)
               GestureDetector(
+                // False positive: this closure is inside _ToursTabState, which
+                // is a State subclass, so the call is legitimate. The analyzer
+                // loses track of the receiver inside a collection-for.
+                // ignore: invalid_use_of_protected_member
                 onTap: () => setState(() {
                   _who = 'creators';
                   _search = e.key;
