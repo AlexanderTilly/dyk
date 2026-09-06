@@ -105,9 +105,9 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/landing_background.jpg'),
+            image: AssetImage(passimArtwork(context)),
             fit: BoxFit.cover,
           ),
         ),
@@ -132,6 +132,8 @@ class _SplashScreenState extends State<SplashScreen>
                             painter: _RipplePainter(
                               impact: _landRipple.value,
                               idle: _ripple.isAnimating ? _ripple.value : null,
+                              dark: Theme.of(context).brightness ==
+                                  Brightness.dark,
                             ),
                           ),
                         ),
@@ -170,10 +172,7 @@ class _SplashScreenState extends State<SplashScreen>
                       child: child,
                     ),
                   ),
-                  child: Image.asset(
-                    'assets/images/passim_logo.png',
-                    height: 116,
-                  ),
+                  child: const PassimLogo(height: 44, wordmarkOnly: true),
                 ),
               ],
             ),
@@ -193,7 +192,11 @@ class _RipplePainter extends CustomPainter {
   /// 0→1 repeating once the app is still loading; null before that.
   final double? idle;
 
-  _RipplePainter({required this.impact, this.idle});
+  /// Whether the current theme is dark — the ring colour needs to flip so
+  /// it stays visible against the background.
+  final bool dark;
+
+  _RipplePainter({required this.impact, this.idle, required this.dark});
 
   static const _maxRadius = 108.0;
 
@@ -211,7 +214,8 @@ class _RipplePainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.6
-        ..color = PassimColors.brand.withValues(alpha: opacity),
+        ..color = (dark ? PassimColors.brand : PassimColors.ink)
+            .withValues(alpha: opacity),
     );
   }
 
@@ -232,5 +236,5 @@ class _RipplePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RipplePainter old) =>
-      old.impact != impact || old.idle != idle;
+      old.impact != impact || old.idle != idle || old.dark != dark;
 }
