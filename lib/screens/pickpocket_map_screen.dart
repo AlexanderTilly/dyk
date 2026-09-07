@@ -9,6 +9,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../models/pickpocket_report.dart';
 import '../services/dyk_repository.dart';
 import '../theme/dyk_theme.dart';
+import '../services/map_style.dart';
 
 /// Full-screen map showing only active pickpocket reports. Tapping a pin
 /// reveals the reporter's description.
@@ -22,6 +23,26 @@ class PickpocketMapScreen extends StatefulWidget {
 
 class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
   MapboxMap? _map;
+  /// Cached so _onMapCreated, which runs outside build, can read it.
+  bool _dark = false;
+
+  /// Keeps the basemap in step with the theme.
+  ///
+  /// Mapbox reads `styleUri` only when the native view is created, and the
+  /// shell keeps tabs alive in an IndexedStack — so without this a map built
+  /// in one mode stayed in it until the app was killed. Re-applying the config
+  /// re-lights the basemap in place; the layers and images this screen added
+  /// survive.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    if (dark == _dark) return;
+    _dark = dark;
+    final map = _map;
+    if (map != null) applyPassimMapStyle(map, dark: dark);
+  }
+
   PointAnnotationManager? _annotations;
   List<PickpocketReport> _reports = [];
   Uint8List? _pinBytes;
@@ -31,6 +52,8 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
 
   void _onMapCreated(MapboxMap map) async {
     _map = map;
+    // One look for every map in the app; see lib/services/map_style.dart.
+    await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
     final puckBytes = await rootBundle.load('assets/images/location_puck.png');
     await map.location.updateSettings(LocationComponentSettings(
@@ -167,7 +190,6 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: Text(tr('pickpocket_activity'),
@@ -185,7 +207,7 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
               ),
               zoom: 14.0,
             ),
-            styleUri: dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
+            styleUri: passimMapStyle,
             onMapCreated: _onMapCreated,
           ),
           if (_reports.isEmpty)

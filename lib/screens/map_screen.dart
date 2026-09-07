@@ -4,6 +4,7 @@ import '../models/hotspot.dart';
 import '../services/audio_service.dart';
 import 'hotspot_detail_screen.dart';
 import 'list_screen.dart';
+import '../services/map_style.dart';
 
 class MapScreen extends StatefulWidget {
   final List<Hotspot> hotspots;
@@ -21,12 +22,34 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   MapboxMap? _mapboxMap;
+  /// Cached so _onMapCreated, which runs outside build, can read it.
+  bool _dark = false;
+
+  /// Keeps the basemap in step with the theme.
+  ///
+  /// Mapbox reads `styleUri` only when the native view is created, and the
+  /// shell keeps tabs alive in an IndexedStack — so without this a map built
+  /// in one mode stayed in it until the app was killed. Re-applying the config
+  /// re-lights the basemap in place; the layers and images this screen added
+  /// survive.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    if (dark == _dark) return;
+    _dark = dark;
+    final map = _mapboxMap;
+    if (map != null) applyPassimMapStyle(map, dark: dark);
+  }
+
 
   static const _palmaCenterLng = 2.6500;
   static const _palmaCenterLat = 39.5690;
 
   void _onMapCreated(MapboxMap mapboxMap) async {
     _mapboxMap = mapboxMap;
+    // One look for every map in the app; see lib/services/map_style.dart.
+    await applyPassimMapStyle(mapboxMap, dark: _dark);
     await _addHotspotAnnotations();
   }
 
@@ -66,7 +89,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7ED),
       appBar: AppBar(
@@ -99,7 +121,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           zoom: 14.5,
         ),
-        styleUri: dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
+        styleUri: passimMapStyle,
         onMapCreated: _onMapCreated,
       ),
     );

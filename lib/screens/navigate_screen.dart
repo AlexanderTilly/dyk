@@ -11,6 +11,7 @@ import '../models/hotspot.dart';
 import '../theme/dyk_theme.dart';
 import '../widgets/dyk_puck.dart';
 import '../widgets/photo_pin.dart';
+import '../services/map_style.dart';
 
 const _mapboxToken =
     'pk.eyJ1IjoibGl0dGxld2h5IiwiYSI6ImNtZHJnMjc2bzBoM2EybHNmMWtpNW4xd24ifQ.NMHAZQhN_eP_3wxFUfNhdw';
@@ -27,6 +28,24 @@ class NavigateScreen extends StatefulWidget {
 
 class _NavigateScreenState extends State<NavigateScreen> {
   MapboxMap? _map;
+
+  /// Keeps the basemap in step with the theme.
+  ///
+  /// Mapbox reads `styleUri` only when the native view is created, and the
+  /// shell keeps tabs alive in an IndexedStack — so without this a map built
+  /// in one mode stayed in it until the app was killed. Re-applying the config
+  /// re-lights the basemap in place; the layers and images this screen added
+  /// survive.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    if (dark == _dark) return;
+    _dark = dark;
+    final map = _map;
+    if (map != null) applyPassimMapStyle(map, dark: dark);
+  }
+
   StreamSubscription<geo.Position>? _posSub;
   geo.Position? _lastPos;
   List<Map<String, dynamic>> _steps = [];
@@ -50,6 +69,8 @@ class _NavigateScreenState extends State<NavigateScreen> {
 
   void _onMapCreated(MapboxMap map) async {
     _map = map;
+    // One look for every map in the app; see lib/services/map_style.dart.
+    await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
     await map.location.updateSettings(LocationComponentSettings(
       enabled: true,
@@ -301,7 +322,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
               center: Point(coordinates: Position(h.lng, h.lat)),
               zoom: 15,
             ),
-            styleUri: _dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
+            styleUri: passimMapStyle,
             onMapCreated: _onMapCreated,
           ),
           if (_steps.isNotEmpty && !_arrived)

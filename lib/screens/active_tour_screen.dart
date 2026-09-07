@@ -24,6 +24,7 @@ import 'stop_detail_screen.dart';
 import '../models/hotspot.dart';
 import '../widgets/photo_pin.dart';
 import 'tour_complete_screen.dart';
+import '../services/map_style.dart';
 
 class ActiveTourScreen extends StatefulWidget {
   final Tour tour;
@@ -54,6 +55,24 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
   }
 
   MapboxMap? _map;
+
+  /// Keeps the basemap in step with the theme.
+  ///
+  /// Mapbox reads `styleUri` only when the native view is created, and the
+  /// shell keeps tabs alive in an IndexedStack — so without this a map built
+  /// in one mode stayed in it until the app was killed. Re-applying the config
+  /// re-lights the basemap in place; the layers and images this screen added
+  /// survive.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    if (dark == _dark) return;
+    _dark = dark;
+    final map = _map;
+    if (map != null) applyPassimMapStyle(map, dark: dark);
+  }
+
   PointAnnotationManager? _points;
   Set<String> _visited = {};
   StreamSubscription<geo.Position>? _posSub;
@@ -430,6 +449,8 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
 
   void _onMapCreated(MapboxMap map) async {
     _map = map;
+    // One look for every map in the app; see lib/services/map_style.dart.
+    await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
     await map.location.updateSettings(LocationComponentSettings(
       enabled: true,
@@ -1447,7 +1468,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
               center: Point(coordinates: Position(centerLng, centerLat)),
               zoom: 15.0,
             ),
-            styleUri: _dark ? MapboxStyles.DARK : MapboxStyles.MAPBOX_STREETS,
+            styleUri: passimMapStyle,
             onMapCreated: _onMapCreated,
             onScrollListener: (_) {
               // Manual pan pauses follow mode.
