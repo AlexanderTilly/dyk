@@ -25,6 +25,10 @@ dependencies:
   flutter_cache_manager: ^3.3.1
   supabase_flutter: ^2.8.0
   shared_preferences: ^2.2.0
+  # Crash and error reporting. Sentry over Crashlytics deliberately: one DSN
+  # and no per-platform config files, so nothing extra has to be present in
+  # the Codemagic build for iOS to sign and ship.
+  sentry_flutter: ^8.9.0
   flutter_foreground_task: ^8.10.0
   device_info_plus: ^10.1.0
   package_info_plus: ^8.0.0

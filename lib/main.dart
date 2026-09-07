@@ -11,6 +11,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'services/crash_reporting.dart';
 import 'i18n/i18n.dart';
 import 'models/city_pack.dart';
 import 'models/hot_deal.dart';
@@ -49,6 +50,13 @@ const _mapboxToken =
     'pk.eyJ1IjoibGl0dGxld2h5IiwiYSI6ImNtZHJnMjc2bzBoM2EybHNmMWtpNW4xd24ifQ.NMHAZQhN_eP_3wxFUfNhdw';
 
 void main() async {
+  // Everything startup does sits inside the reporter: errors before the first
+  // frame are the hardest to reproduce, so they are the ones most worth
+  // catching.
+  await initCrashReporting(_boot);
+}
+
+Future<void> _boot() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Narration keeps playing when the app is backgrounded, with play/pause
