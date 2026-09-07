@@ -1,12 +1,6 @@
-// mapbox_maps_flutter exports its own `Color`, so ui.Color is spelled out
-// rather than imported bare — the same collision that made `Position` need an
-// alias elsewhere in this app.
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
-import '../theme/dyk_theme.dart';
 
 /// One map look, applied everywhere.
 ///
@@ -17,18 +11,13 @@ import '../theme/dyk_theme.dart';
 /// 3D buildings and landmarks survive in both. Palma's cathedral renders as
 /// an actual model, which is the point in a tourist app.
 ///
-/// The palette is deliberately muted. A guide's map should be quiet so the
-/// amber pins are the only saturated thing on screen and the eye goes
-/// straight to them; a colourful basemap competes with the content it exists
-/// to carry.
+/// The colours are Mapbox's own. What this file changes is the time of day,
+/// the 3D, and the labels — the things that belong to us. See the note in
+/// [applyPassimMapStyle] for why hand-tinting the ground was a mistake.
 const String passimMapStyle = MapboxStyles.STANDARD;
 
 /// Mapbox addresses the basemap inside a style by its import id.
 const String _basemap = 'basemap';
-
-/// Hex string in the form Mapbox config properties expect.
-String _hex(ui.Color c) =>
-    '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 
 /// Apply the Passim look to [map] for the given brightness.
 ///
@@ -44,17 +33,17 @@ Future<void> applyPassimMapStyle(MapboxMap map, {required bool dark}) async {
     // including how the 3D extrusions are shaded.
     await set('lightPreset', dark ? 'night' : 'day');
 
-    // Monochrome drains the basemap of competing hue. This is the single
-    // biggest reason the map reads as considered rather than generic.
-    await set('theme', 'monochrome');
-
-    // Ground and water tinted towards the app's own surfaces, so the map
-    // belongs to the screen it sits in rather than looking pasted on.
-    await set('colorLand', _hex(dark ? PassimColors.ink : PassimColors.sand));
-    await set('colorWater',
-        _hex(dark ? const ui.Color(0xFF0B2136) : const ui.Color(0xFFDDE6EC)));
-    await set('colorGreenspace',
-        _hex(dark ? const ui.Color(0xFF12283B) : const ui.Color(0xFFE4E8DA)));
+    // Mapbox's own palette, deliberately.
+    //
+    // The first attempt set theme 'monochrome' and tinted colorLand to sand.
+    // Buildings take their tone from the ground, so near-white land under a
+    // desaturating theme produced near-white buildings on near-white ground —
+    // the 3D was still there and you could not see it. Standard's default
+    // palette already separates ground, built-up area and water properly, and
+    // is better tuned than anything worth hand-rolling here.
+    //
+    // 'faded' is the middle setting if this ever reads as too colourful.
+    await set('theme', 'default');
 
     // Keep the 3D: it is why the tilted camera on Nearby is worth having.
     await set('show3dObjects', true);
