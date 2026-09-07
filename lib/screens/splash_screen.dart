@@ -113,7 +113,13 @@ class _SplashScreenState extends State<SplashScreen>
         ),
         child: Container(
           decoration: passimScrim(context, strength: Scrim.light),
-          child: Center(
+          // Slightly above centre, not on it. The composition has its weight
+          // at the bottom — the pin lands low in its stage and the ripples
+          // spread below it — so a geometrically centred group reads as
+          // sitting low. Lifting it a tenth of the height puts the optical
+          // centre where the eye expects it.
+          child: Align(
+            alignment: const Alignment(0, -0.10),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
