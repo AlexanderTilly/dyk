@@ -324,15 +324,15 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
         backgroundColor: PassimColors.ink,
         title: Text(tr('end_time_q'),
             style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w900)),
+                color: PassimColors.onPhoto, fontWeight: FontWeight.w900)),
         content: Text(
             '~${(_plannedMinutes / 60).toStringAsFixed(1)} h',
-            style: const TextStyle(color: Colors.white70)),
+            style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.7))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(tr('no_time_goal'),
-                style: const TextStyle(color: Colors.white54)),
+                style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.54))),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -439,7 +439,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
           ..strokeWidth = 3
           ..color = PassimColors.ink);
     // White ring + gold core + dark center dot.
-    canvas.drawCircle(center, 27, Paint()..color = Colors.white);
+    canvas.drawCircle(center, 27, Paint()..color = PassimColors.onPhoto);
     canvas.drawCircle(center, 21, Paint()..color = PassimColors.brand);
     canvas.drawCircle(center, 7, Paint()..color = PassimColors.ink);
     final img = await rec.endRecording().toImage(140, 140);
@@ -1063,14 +1063,14 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
               backgroundColor: PassimColors.ink,
               title: Text(tr('tour_done_title'),
                   style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w900)),
+                      color: PassimColors.onPhoto, fontWeight: FontWeight.w900)),
               content: Text(tr('tour_back_q'),
-                  style: const TextStyle(color: Colors.white70)),
+                  style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.7))),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
                   child: Text(tr('im_done'),
-                      style: const TextStyle(color: Colors.white54)),
+                      style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.54))),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -1180,7 +1180,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                 padding: const EdgeInsets.only(left: 16, bottom: 6),
                 child: Text(tr('stop_list'),
                     style: const TextStyle(
-                        color: Colors.white,
+                        color: PassimColors.onPhoto,
                         fontSize: 18,
                         fontWeight: FontWeight.w900)),
               ),
@@ -1210,39 +1210,39 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
       leading: CircleAvatar(
         radius: 15,
         backgroundColor: visited
-            ? Colors.white24
+            ? PassimColors.onPhoto.withValues(alpha: 0.24)
             : (isTarget ? DykColors.yellow : PassimColors.surface),
         child: visited
-            ? const Icon(Icons.check, size: 16, color: Colors.white)
+            ? const Icon(Icons.check, size: 16, color: PassimColors.onPhoto)
             : Text('${i + 1}',
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w900,
-                    color: isTarget ? DykColors.black : Colors.white)),
+                    color: isTarget ? DykColors.black : PassimColors.onPhoto)),
       ),
       title: Text(
         s.title ?? 'Stop ${i + 1}',
         style: TextStyle(
-          color: skipped ? Colors.white30 : Colors.white,
+          color: skipped ? PassimColors.onPhoto.withValues(alpha: 0.3) : PassimColors.onPhoto,
           fontWeight: FontWeight.w700,
           decoration: skipped ? TextDecoration.lineThrough : null,
-          decorationColor: Colors.white30,
+          decorationColor: PassimColors.onPhoto.withValues(alpha: 0.3),
         ),
       ),
       subtitle: visited
           ? Text(tr('revisit_hint'),
-              style: const TextStyle(color: Colors.white38, fontSize: 12))
+              style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.38), fontSize: 12))
           : skipped
               ? Text(tr('skipped'),
                   style:
-                      const TextStyle(color: Colors.white38, fontSize: 12))
+                      TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.38), fontSize: 12))
               : null,
       trailing: visited
           ? null
           : IconButton(
               icon: Icon(
                 skipped ? Icons.visibility_off : Icons.visibility,
-                color: skipped ? Colors.white30 : Colors.white54,
+                color: skipped ? PassimColors.onPhoto.withValues(alpha: 0.3) : PassimColors.onPhoto.withValues(alpha: 0.54),
                 size: 20,
               ),
               onPressed: () {
@@ -1367,11 +1367,11 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
               const SizedBox(width: 8),
               Text(_fmtDist(distance),
                   style: const TextStyle(
-                      color: Colors.white,
+                      color: PassimColors.onPhoto,
                       fontWeight: FontWeight.w900,
                       fontSize: 15)),
               const SizedBox(width: 4),
-              const Icon(Icons.expand_more, color: Colors.white54, size: 18),
+              Icon(Icons.expand_more, color: PassimColors.onPhoto.withValues(alpha: 0.54), size: 18),
             ],
           ),
         ),
@@ -1414,7 +1414,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        color: Colors.white,
+                        color: PassimColors.onPhoto,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                         height: 1.25),
@@ -1422,7 +1422,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                 ],
               ),
             ),
-            const Icon(Icons.expand_less, color: Colors.white38, size: 20),
+            Icon(Icons.expand_less, color: PassimColors.onPhoto.withValues(alpha: 0.38), size: 20),
           ],
         ),
       ),
@@ -1447,11 +1447,16 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
         if (!didPop) _confirmLeave();
       },
       child: Scaffold(
+      // The whole body is a full-bleed live map; this AppBar and every
+      // floating card/sheet below (progress card, nav banner, stop sheets,
+      // dialogs) are a turn-by-turn HUD that sits on top of it, so they keep
+      // the fixed dark/brand chrome in both themes rather than following
+      // scaffoldBackgroundColor — same reasoning as onPhoto text over media.
       appBar: AppBar(
         title: Text(widget.tour.title,
             maxLines: 1, overflow: TextOverflow.ellipsis),
         backgroundColor: PassimColors.ink,
-        foregroundColor: Colors.white,
+        foregroundColor: PassimColors.onPhoto,
         actions: [
           IconButton(
             tooltip: 'Overview',
@@ -1537,8 +1542,8 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                     children: [
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        icon: const Icon(Icons.chevron_left,
-                            color: Colors.white70),
+                        icon: Icon(Icons.chevron_left,
+                            color: PassimColors.onPhoto.withValues(alpha: 0.7)),
                         onPressed: () => _stepTarget(-1),
                       ),
                       widget.tour.transportMode == 'walking'
@@ -1558,14 +1563,14 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                             style: const TextStyle(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 15,
-                                color: Colors.white),
+                                color: PassimColors.onPhoto),
                           ),
                         ),
                       ),
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        icon: const Icon(Icons.chevron_right,
-                            color: Colors.white70),
+                        icon: Icon(Icons.chevron_right,
+                            color: PassimColors.onPhoto.withValues(alpha: 0.7)),
                         onPressed: () => _stepTarget(1),
                       ),
                       GestureDetector(
@@ -1585,7 +1590,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                     child: LinearProgressIndicator(
                       value: total > 0 ? done / total : 0,
                       minHeight: 6,
-                      backgroundColor: Colors.white12,
+                      backgroundColor: PassimColors.onPhoto.withValues(alpha: 0.12),
                       valueColor: const AlwaysStoppedAnimation<Color>(
                           DykColors.yellow),
                     ),
@@ -1595,8 +1600,8 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                     const SizedBox(height: 5),
                     Text(
                       '${StepStore.fmt(StepStore.stepsFromMeters(_tourMeters))} ${tr('of')} ${StepStore.fmt(StepStore.stepsFromMeters(widget.tour.distanceMeters!))} ${tr('steps_unit')}',
-                      style: const TextStyle(
-                          color: Colors.white54, fontSize: 11.5),
+                      style: TextStyle(
+                          color: PassimColors.onPhoto.withValues(alpha: 0.54), fontSize: 11.5),
                     ),
                   ],
                 ],
@@ -1616,14 +1621,14 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
         backgroundColor: PassimColors.ink,
         title: Text(tr('leave_tour_q'),
             style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w900)),
+                color: PassimColors.onPhoto, fontWeight: FontWeight.w900)),
         content: Text(tr('leave_tour_sub'),
-            style: const TextStyle(color: Colors.white70)),
+            style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.7))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'quit'),
             child: Text(tr('quit_tour'),
-                style: const TextStyle(color: Colors.white54)),
+                style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.54))),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -1688,7 +1693,7 @@ class _StopSheet extends StatelessWidget {
         children: [
           Text('${tr('welcome_stop')} ${stop.title ?? ''}',
               style: const TextStyle(
-                  color: Colors.white,
+                  color: PassimColors.onPhoto,
                   fontSize: 22,
                   fontWeight: FontWeight.w900)),
           if (stop.dwellMinutes > 0) ...[
@@ -1697,13 +1702,13 @@ class _StopSheet extends StatelessWidget {
               stop.dwellMinutes >= 60
                   ? '${tr('suggested_stay')}${(stop.dwellMinutes / 60).toStringAsFixed(stop.dwellMinutes % 60 == 0 ? 0 : 1)} h'
                   : '${tr('suggested_stay')}${stop.dwellMinutes} min',
-              style: const TextStyle(color: Colors.white54, fontSize: 13),
+              style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.54), fontSize: 13),
             ),
           ],
           const SizedBox(height: 10),
           if (stop.blurb != null)
             Text(stop.blurb!,
-                style: const TextStyle(color: Colors.white70, height: 1.4)),
+                style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.7), height: 1.4)),
           if (hasAudio) ...[
             const SizedBox(height: 16),
             SizedBox(
@@ -1789,8 +1794,8 @@ class _StopSheet extends StatelessWidget {
             child: onReadMore != null
                 ? OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white30),
+                      foregroundColor: PassimColors.onPhoto,
+                      side: BorderSide(color: PassimColors.onPhoto.withValues(alpha: 0.3)),
                     ),
                     icon: const Icon(Icons.arrow_forward, size: 18),
                     label: Text(tr('continue_tour'),

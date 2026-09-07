@@ -40,7 +40,7 @@ class CityPacksTab extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 14),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: dark ? PassimColors.surface : Colors.white,
+                color: dark ? PassimColors.surface : PassimColors.card,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
@@ -61,11 +61,12 @@ class CityPacksTab extends StatelessWidget {
                             color: DykColors.green,
                             borderRadius: BorderRadius.circular(99),
                           ),
+                          // Fixed green "downloaded" badge, not theme-derived.
                           child: const Text('DOWNLOADED',
                               style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white)),
+                                  color: PassimColors.onPhoto)),
                         ),
                     ],
                   ),

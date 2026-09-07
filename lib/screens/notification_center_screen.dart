@@ -57,7 +57,9 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
               child: Text(tr('cancel'))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+                // Button bg is a fixed red, not theme-derived.
+                backgroundColor: Colors.redAccent,
+                foregroundColor: PassimColors.onPhoto),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(tr('clear')),
           ),
@@ -130,7 +132,8 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
                       color: Colors.redAccent,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(Icons.delete_outline, color: Colors.white),
+                    child: const Icon(Icons.delete_outline,
+                        color: PassimColors.onPhoto), // fixed red bg
                   ),
                   onDismissed: (_) => _remove(i),
                   child: _NotificationCard(entry: e, dark: dark),
@@ -163,7 +166,7 @@ class _NotificationCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: dark ? PassimColors.surface : Colors.white,
+          color: dark ? PassimColors.surface : PassimColors.card,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(

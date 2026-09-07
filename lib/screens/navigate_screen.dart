@@ -294,12 +294,17 @@ class _NavigateScreenState extends State<NavigateScreen> {
           color: selected ? DykColors.yellow : PassimColors.ink,
           shape: BoxShape.circle,
           border: Border.all(
-              color: selected ? DykColors.yellow : Colors.white24,
+              // Chip floats directly on the live map, not inside a card.
+              color: selected
+                  ? DykColors.yellow
+                  : PassimColors.onPhoto.withValues(alpha: 0.24),
               width: 1.5),
         ),
         child: Icon(icon,
             size: 22,
-            color: selected ? DykColors.black : Colors.white70),
+            color: selected
+                ? DykColors.black
+                : PassimColors.onPhoto.withValues(alpha: 0.7)),
       ),
     );
   }
@@ -311,8 +316,10 @@ class _NavigateScreenState extends State<NavigateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(h.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        // AppBar background is fixed ink regardless of theme (this screen's
+        // body is a live map), so the foreground stays onPhoto to match.
         backgroundColor: PassimColors.ink,
-        foregroundColor: Colors.white,
+        foregroundColor: PassimColors.onPhoto,
       ),
       body: Stack(
         children: [
@@ -363,7 +370,8 @@ class _NavigateScreenState extends State<NavigateScreen> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                                color: Colors.white,
+                                // Card floats on the map with a fixed ink bg.
+                                color: PassimColors.onPhoto,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13),
                           ),
@@ -444,15 +452,17 @@ class _NavigateScreenState extends State<NavigateScreen> {
                     child: Text(
                       '${_fmt(_remaining)} ${tr('to_go')}',
                       style: const TextStyle(
-                          color: Colors.white,
+                          // Card floats on the map with a fixed ink bg.
+                          color: PassimColors.onPhoto,
                           fontWeight: FontWeight.w900,
                           fontSize: 15),
                     ),
                   ),
                   if (_mode == 'driving')
                     Text(tr('parking_note'),
-                        style: const TextStyle(
-                            color: Colors.white38, fontSize: 10)),
+                        style: TextStyle(
+                            color: PassimColors.onPhoto.withValues(alpha: 0.38),
+                            fontSize: 10)),
                 ],
               ),
             ),

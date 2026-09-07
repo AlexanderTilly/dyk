@@ -105,7 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: dark ? PassimColors.surface : Colors.white,
+        color: dark ? PassimColors.surface : PassimColors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -264,7 +264,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           selected:
                               widget.appState.interests.contains(k),
                           selectedColor: DykColors.yellow,
-                          checkmarkColor: Colors.white,
+                          // Selected chip bg is fixed brand amber.
+                          checkmarkColor: PassimColors.onPhoto,
                           avatar: CategoryBadge(category: k, size: 24),
                           label: Text(tr('cat_$k')),
                           onSelected: (_) =>

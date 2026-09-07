@@ -61,7 +61,7 @@ class HotspotListTile extends StatelessWidget {
                               border: Border.all(
                                   color: dark
                                       ? PassimColors.ink
-                                      : Colors.white,
+                                      : PassimColors.card,
                                   width: 2),
                             ),
                             child: CategoryBadge(

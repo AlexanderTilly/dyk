@@ -112,7 +112,10 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
   void _showReport(PickpocketReport r) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      // Sheet content below (title/description) uses fixed PassimColors.ink /
+      // .surface text, not theme-derived, so the sheet itself stays a fixed
+      // light card in both themes rather than flipping independently.
+      backgroundColor: PassimColors.card,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -195,7 +198,9 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
         title: Text(tr('pickpocket_activity'),
             style: TextStyle(fontWeight: FontWeight.w800)),
         backgroundColor: const Color(0xFF1559D6),
-        foregroundColor: Colors.white,
+        // AppBar bg is a fixed brand blue, not theme-derived, so the
+        // foreground stays white in both themes.
+        foregroundColor: PassimColors.onPhoto,
       ),
       body: Stack(
         children: [
@@ -218,7 +223,8 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  // Same fixed-light-card reasoning as the report sheet above.
+                  color: PassimColors.card,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
@@ -238,7 +244,7 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
             child: FloatingActionButton(
               heroTag: 'pickpocketFindMe',
               backgroundColor: const Color(0xFF1559D6),
-              foregroundColor: Colors.white,
+              foregroundColor: PassimColors.onPhoto,
               onPressed: _centerOnUser,
               child: const Icon(Icons.my_location),
             ),

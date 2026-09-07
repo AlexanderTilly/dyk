@@ -32,7 +32,9 @@ Future<Uint8List?> buildPhotoPin(String url) async {
 
     canvas.drawCircle(
         center, radius + 10, Paint()..color = PassimColors.brand);
-    canvas.drawCircle(center, radius + 3, Paint()..color = Colors.white);
+    // Inner ring on a map pin — fixed white regardless of theme.
+    canvas.drawCircle(
+        center, radius + 3, Paint()..color = PassimColors.onPhoto);
 
     canvas.save();
     canvas.clipPath(

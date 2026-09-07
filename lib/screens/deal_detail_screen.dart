@@ -28,15 +28,17 @@ class DealDetailScreen extends StatelessWidget {
           SliverAppBar(
             expandedHeight: hero != null ? 260 : 120,
             pinned: true,
+            // Background is either the hero photo (with scrim) or a fixed
+            // ink fallback — dark either way, regardless of theme.
             backgroundColor: DykColors.black,
-            foregroundColor: Colors.white,
+            foregroundColor: PassimColors.onPhoto,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding:
                   const EdgeInsets.only(left: 16, right: 16, bottom: 14),
               title: Text(deal.businessName,
                   maxLines: 2,
                   style: const TextStyle(
-                      color: Colors.white,
+                      color: PassimColors.onPhoto,
                       fontWeight: FontWeight.w900,
                       shadows: [Shadow(blurRadius: 8, color: Colors.black)])),
               background: hero != null

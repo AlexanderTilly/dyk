@@ -60,8 +60,8 @@ class _ToursTabState extends State<ToursTab> {
     final color = selected
         ? DykColors.yellow
         : Theme.of(context).brightness == Brightness.dark
-            ? Colors.white70
-            : Colors.black54;
+            ? PassimColors.onPhoto.withValues(alpha: 0.7)
+            : PassimColors.ink.withValues(alpha: 0.54);
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -203,7 +203,11 @@ class _ToursTabState extends State<ToursTab> {
             Container(
                 width: 1,
                 height: 34,
-                color: Colors.white24,
+                // Divider on the scaffold background, not media — flips with theme.
+                color: (Theme.of(context).brightness == Brightness.dark
+                        ? PassimColors.onPhoto
+                        : PassimColors.ink)
+                    .withValues(alpha: 0.24),
                 margin: const EdgeInsets.symmetric(horizontal: 4)),
             _chip(tr('mode_walking'), _mode == 'walking',
                 () => setState(() => _mode = _mode == 'walking' ? null : 'walking'),
@@ -351,14 +355,16 @@ extension _ToursSections on _ToursTabState {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  color: Colors.white,
+                                  // On the hero image + gradient scrim, not the theme.
+                                  color: PassimColors.onPhoto,
                                   fontWeight: FontWeight.w900,
                                   fontSize: 18,
                                   height: 1.1)),
                           const SizedBox(height: 4),
                           Row(children: [
                             Icon(transportIcon(t.transportMode),
-                                color: Colors.white70, size: 14),
+                                color: PassimColors.onPhoto.withValues(alpha: 0.7),
+                                size: 14),
                             const SizedBox(width: 4),
                             Text(
                               [
@@ -369,8 +375,9 @@ extension _ToursSections on _ToursTabState {
                                       ? '~${(t.estMinutes! / 60).toStringAsFixed(1)} h'
                                       : '~${t.estMinutes} min',
                               ].join(' · '),
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 12),
+                              style: TextStyle(
+                                  color: PassimColors.onPhoto.withValues(alpha: 0.7),
+                                  fontSize: 12),
                             ),
                           ]),
                         ],
@@ -452,8 +459,11 @@ extension _ToursSections on _ToursTabState {
                                 style: TextStyle(
                                     fontSize: 9.5,
                                     fontWeight: FontWeight.w900,
+                                    // Pill background is a fixed brand colour
+                                    // (green/yellow) in both themes, not a
+                                    // surface that flips.
                                     color: t.isFree
-                                        ? Colors.white
+                                        ? PassimColors.onPhoto
                                         : DykColors.black)),
                           ),
                         ],
@@ -508,8 +518,13 @@ extension _ToursSections on _ToursTabState {
                                 e.value.first.creatorAvatar!)
                             : null,
                         child: e.value.first.creatorAvatar == null
-                            ? const Icon(Icons.person,
-                                color: Colors.white54)
+                            ? Icon(Icons.person,
+                                // Placeholder avatar sits on PassimColors.surface,
+                                // which flips with the theme — icon follows it.
+                                color: Theme.of(context)
+                                    .iconTheme
+                                    .color
+                                    ?.withValues(alpha: 0.54))
                             : null,
                       ),
                       const SizedBox(height: 6),
@@ -554,7 +569,7 @@ class _TourCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         decoration: BoxDecoration(
-          color: dark ? PassimColors.surface : Colors.white,
+          color: dark ? PassimColors.surface : PassimColors.card,
           borderRadius: BorderRadius.circular(18),
         ),
         clipBehavior: Clip.antiAlias,
@@ -654,8 +669,9 @@ class _TourCard extends StatelessWidget {
                             style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
+                                // Same fixed-brand-colour pill as above.
                                 color: tour.isFree
-                                    ? Colors.white
+                                    ? PassimColors.onPhoto
                                     : DykColors.black)),
                       ),
                     ],

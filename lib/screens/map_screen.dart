@@ -5,6 +5,7 @@ import '../services/audio_service.dart';
 import 'hotspot_detail_screen.dart';
 import 'list_screen.dart';
 import '../services/map_style.dart';
+import '../theme/dyk_theme.dart';
 
 class MapScreen extends StatefulWidget {
   final List<Hotspot> hotspots;
@@ -94,7 +95,8 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: const Text('Palma Explorer'),
         backgroundColor: const Color(0xFFF97316),
-        foregroundColor: Colors.white,
+        // AppBar bg is a fixed orange, not theme-derived.
+        foregroundColor: PassimColors.onPhoto,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [

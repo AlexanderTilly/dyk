@@ -4,6 +4,7 @@ import '../models/hotspot.dart';
 import '../services/audio_service.dart';
 import '../widgets/hotspot_list_tile.dart';
 import 'hotspot_detail_screen.dart';
+import '../theme/dyk_theme.dart';
 
 class ListScreen extends StatelessWidget {
   final List<Hotspot> hotspots;
@@ -22,7 +23,8 @@ class ListScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(tr('all_locations')),
         backgroundColor: const Color(0xFFF97316),
-        foregroundColor: Colors.white,
+        // AppBar bg is a fixed orange, not theme-derived.
+        foregroundColor: PassimColors.onPhoto,
         elevation: 0,
       ),
       body: ListView.builder(

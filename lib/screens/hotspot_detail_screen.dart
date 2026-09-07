@@ -20,8 +20,8 @@ Widget _dykImage(String src, {double? width, double? height, BoxFit fit = BoxFit
         width: width,
         height: height,
         color: PassimColors.surface,
-        child: const Icon(Icons.image_not_supported_outlined,
-            color: Colors.white24, size: 32),
+        child: Icon(Icons.image_not_supported_outlined,
+            color: PassimColors.onPhoto.withValues(alpha: 0.24), size: 32),
       );
   if (src.startsWith('http')) {
     return Image.network(src, width: width, height: height, fit: fit, errorBuilder: fallback);
@@ -129,14 +129,14 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                 Text(tr('unlock_city_story').replaceFirst('{city}', city),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                        color: Colors.white,
+                        color: PassimColors.onPhoto,
                         fontSize: 17,
                         fontWeight: FontWeight.w800)),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Full narration, the story and every fact.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white60, fontSize: 13),
+                  style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.6), fontSize: 13),
                 ),
                 const SizedBox(height: 20),
                 if (widget.entitlements != null &&
@@ -177,8 +177,12 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final h = widget.hotspot;
+    // Body text below the hero sits on the ordinary themed scaffold
+    // background (fixed dark scrim only applies to the hero area itself),
+    // so it needs to flip with the theme rather than staying onPhoto.
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final onBg = dark ? PassimColors.onPhoto : PassimColors.ink;
     return Scaffold(
-      backgroundColor: DykColors.black,
       bottomNavigationBar: widget.onContinueTour == null
           ? SafeArea(
               child: Padding(
@@ -230,7 +234,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
             expandedHeight: 380,
             pinned: true,
             backgroundColor: DykColors.black,
-            iconTheme: const IconThemeData(color: Colors.white),
+            iconTheme: const IconThemeData(color: PassimColors.onPhoto),
             actions: [
               IconButton(
                 icon: Icon(_saved ? Icons.favorite : Icons.favorite_border,
@@ -247,7 +251,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.ios_share, color: Colors.white),
+                icon: const Icon(Icons.ios_share, color: PassimColors.onPhoto),
                 onPressed: () {},
               ),
             ],
@@ -287,7 +291,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                               decoration: BoxDecoration(
                                 color: i == _imageIndex
                                     ? DykColors.yellow
-                                    : Colors.white60,
+                                    : PassimColors.onPhoto.withValues(alpha: 0.6),
                                 borderRadius: BorderRadius.circular(99),
                               ),
                             ),
@@ -344,7 +348,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                         Text(
                           h.name.toUpperCase(),
                           style: GoogleFonts.bebasNeue(
-                            color: Colors.white,
+                            color: PassimColors.onPhoto,
                             fontSize: 38,
                             height: 1.0,
                             letterSpacing: 0.5,
@@ -395,7 +399,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                     children: [
                       Text('THE STORY',
                           style: GoogleFonts.bebasNeue(
-                            color: Colors.white,
+                            color: onBg,
                             fontSize: 22,
                             letterSpacing: 1,
                           )),
@@ -406,8 +410,8 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                         overflow: _storyExpanded
                             ? TextOverflow.visible
                             : TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: onBg.withValues(alpha: 0.7),
                           fontSize: 14.5,
                           height: 1.6,
                         ),
@@ -465,7 +469,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text('WATCH',
                       style: GoogleFonts.bebasNeue(
-                        color: Colors.white,
+                        color: onBg,
                         fontSize: 22,
                         letterSpacing: 1,
                       )),
@@ -522,7 +526,7 @@ class _FactCard extends StatelessWidget {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: PassimColors.onPhoto.withValues(alpha: 0.24),
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
@@ -540,7 +544,7 @@ class _FactCard extends StatelessWidget {
                   controller: controller,
                   child: Text(text,
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: PassimColors.onPhoto,
                           fontSize: 16,
                           height: 1.55)),
                 ),
@@ -583,8 +587,8 @@ class _FactCard extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     )),
                 const Spacer(),
-                const Icon(Icons.open_in_full,
-                    color: Colors.white38, size: 14),
+                Icon(Icons.open_in_full,
+                    color: PassimColors.onPhoto.withValues(alpha: 0.38), size: 14),
               ],
             ),
             const SizedBox(height: 8),
@@ -593,11 +597,11 @@ class _FactCard extends StatelessWidget {
                   maxLines: 5,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Colors.white, fontSize: 13.5, height: 1.45)),
+                      color: PassimColors.onPhoto, fontSize: 13.5, height: 1.45)),
             ),
             const SizedBox(height: 6),
             Text(tr('tap_to_read'),
-                style: TextStyle(color: Colors.white38, fontSize: 11)),
+                style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.38), fontSize: 11)),
           ],
         ),
       ),
@@ -627,11 +631,11 @@ class _ARButton extends StatelessWidget {
               children: [
                 Text(tr('view_ar'),
                     style: TextStyle(
-                        color: Colors.white,
+                        color: PassimColors.onPhoto,
                         fontWeight: FontWeight.w800,
                         fontSize: 16)),
                 Text(tr('view_ar_sub'),
-                    style: TextStyle(color: Colors.white54, fontSize: 12)),
+                    style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.54), fontSize: 12)),
               ],
             ),
           ),
@@ -750,7 +754,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
                         : '${_speed}x',
                     style: TextStyle(
                       color: _speed == 1.0
-                          ? Colors.white
+                          ? PassimColors.onPhoto
                           : DykColors.black,
                       fontWeight: FontWeight.w900,
                       fontSize: 12,
@@ -862,8 +866,8 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
           IconButton(
             visualDensity: VisualDensity.compact,
             tooltip: '-10 s',
-            icon: const Icon(Icons.replay_10,
-                color: Colors.white70, size: 26),
+            icon: Icon(Icons.replay_10,
+                color: PassimColors.onPhoto.withValues(alpha: 0.7), size: 26),
             onPressed: () =>
                 widget.audioService.skip(const Duration(seconds: -10)),
           ),
@@ -883,8 +887,8 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
           IconButton(
             visualDensity: VisualDensity.compact,
             tooltip: '+10 s',
-            icon: const Icon(Icons.forward_10,
-                color: Colors.white70, size: 26),
+            icon: Icon(Icons.forward_10,
+                color: PassimColors.onPhoto.withValues(alpha: 0.7), size: 26),
             onPressed: () =>
                 widget.audioService.skip(const Duration(seconds: 10)),
           ),
@@ -898,7 +902,7 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
                   children: [
                     const Text('LISTEN TO THE STORY',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: PassimColors.onPhoto,
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
                           letterSpacing: 0.5,
@@ -911,14 +915,14 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
                             horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
                           color: _speed == 1.0
-                              ? Colors.white12
+                              ? PassimColors.onPhoto.withValues(alpha: 0.12)
                               : DykColors.yellow,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(_speedLabel,
                             style: TextStyle(
                               color: _speed == 1.0
-                                  ? Colors.white70
+                                  ? PassimColors.onPhoto.withValues(alpha: 0.7)
                                   : DykColors.black,
                               fontWeight: FontWeight.w900,
                               fontSize: 12,
@@ -936,7 +940,7 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
                     overlayShape:
                         const RoundSliderOverlayShape(overlayRadius: 12),
                     activeTrackColor: DykColors.yellow,
-                    inactiveTrackColor: Colors.white24,
+                    inactiveTrackColor: PassimColors.onPhoto.withValues(alpha: 0.24),
                     thumbColor: DykColors.yellow,
                   ),
                   child: Slider(
@@ -949,9 +953,9 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(_fmt(_pos),
-                        style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                        style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.54), fontSize: 11)),
                     Text(_fmt(_dur),
-                        style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                        style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.54), fontSize: 11)),
                   ],
                 ),
               ],
@@ -998,6 +1002,9 @@ class _ImageViewerState extends State<_ImageViewer> {
   Widget build(BuildContext context) {
     final caption = _captionFor(_index);
     return Scaffold(
+      // Fullscreen photo viewer: the whole scaffold IS the media backdrop
+      // (letterboxing around non-4:3 photos), so black is correct in both
+      // themes rather than following scaffoldBackgroundColor.
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -1026,7 +1033,7 @@ class _ImageViewerState extends State<_ImageViewer> {
             top: MediaQuery.of(context).padding.top + 8,
             left: 8,
             child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              icon: const Icon(Icons.close, color: PassimColors.onPhoto, size: 28),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
@@ -1044,7 +1051,7 @@ class _ImageViewerState extends State<_ImageViewer> {
                 ),
                 child: Text('${_index + 1} / ${widget.images.length}',
                     style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w700)),
+                        color: PassimColors.onPhoto, fontWeight: FontWeight.w700)),
               ),
             ),
           // Caption.
@@ -1067,7 +1074,7 @@ class _ImageViewerState extends State<_ImageViewer> {
                 child: Text(
                   caption,
                   style: const TextStyle(
-                      color: Colors.white, fontSize: 15, height: 1.4),
+                      color: PassimColors.onPhoto, fontSize: 15, height: 1.4),
                 ),
               ),
             ),

@@ -79,22 +79,22 @@ class MiniPlayer extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                                color: Colors.white,
+                                color: PassimColors.onPhoto, // bar bg is fixed PassimColors.ink regardless of theme
                                 fontWeight: FontWeight.w800,
                                 fontSize: 13),
                           ),
                           if (info.hotspotId != null)
                             Text(tr('tap_to_open'),
                                 style: TextStyle(
-                                    color: Colors.white38, fontSize: 10)),
+                                    color: PassimColors.onPhoto.withValues(alpha: 0.38), fontSize: 10)),
                         ],
                       ),
                     ),
                   ),
                   IconButton(
                   visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.replay_10,
-                      color: Colors.white70, size: 20),
+                  icon: Icon(Icons.replay_10,
+                      color: PassimColors.onPhoto.withValues(alpha: 0.7), size: 20),
                   onPressed: () =>
                       audioService.skip(const Duration(seconds: -10)),
                 ),
@@ -118,8 +118,8 @@ class MiniPlayer extends StatelessWidget {
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close,
-                        color: Colors.white54, size: 22),
+                    icon: Icon(Icons.close,
+                        color: PassimColors.onPhoto.withValues(alpha: 0.54), size: 22),
                     onPressed: audioService.stop,
                   ),
                 ],

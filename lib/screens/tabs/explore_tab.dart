@@ -248,8 +248,9 @@ class _InterestChip extends StatelessWidget {
                         color: DykColors.yellow,
                         shape: BoxShape.circle,
                       ),
+                      // Check icon on the fixed brand-amber badge.
                       child: const Icon(Icons.check,
-                          size: 14, color: Colors.white),
+                          size: 14, color: PassimColors.onPhoto),
                     ),
                   ),
               ],
@@ -301,7 +302,8 @@ class _SwipeableNotification extends StatelessWidget {
         icon: Icons.delete_outline,
         label: 'REMOVE',
         alignment: Alignment.centerRight,
-        textColor: Colors.white,
+        // Fixed red swipe-bg, not theme-derived.
+        textColor: PassimColors.onPhoto,
       ),
       onDismissed: (dir) {
         if (dir == DismissDirection.startToEnd) {

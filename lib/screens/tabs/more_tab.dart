@@ -170,7 +170,7 @@ class _MoreTabState extends State<MoreTab> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: dark ? PassimColors.surface : Colors.white,
+              color: dark ? PassimColors.surface : PassimColors.card,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -202,7 +202,6 @@ class _MoreTabState extends State<MoreTab> {
   void _openPickpocketChooser() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -219,17 +218,18 @@ class _MoreTabState extends State<MoreTab> {
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
-                      color: PassimColors.ink)),
+                      )),
               const SizedBox(height: 4),
               Text(tr('pickpocket_help'),
-                  style: TextStyle(color: Colors.grey)),
+                  style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
+                    // _ppBlue is a fixed action colour, not a theme surface.
                     backgroundColor: _ppBlue,
-                    foregroundColor: Colors.white,
+                    foregroundColor: PassimColors.onPhoto,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   icon: const Icon(Icons.report_gmailerrorred),
@@ -291,7 +291,7 @@ class _MoreTabState extends State<MoreTab> {
               child: Text(tr('no'))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: _ppBlue, foregroundColor: Colors.white),
+                backgroundColor: _ppBlue, foregroundColor: PassimColors.onPhoto),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(tr('yes')),
           ),
@@ -322,7 +322,7 @@ class _MoreTabState extends State<MoreTab> {
               child: Text(tr('cancel'))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: _ppBlue, foregroundColor: Colors.white),
+                backgroundColor: _ppBlue, foregroundColor: PassimColors.onPhoto),
             onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
             child: Text(tr('submit')),
           ),

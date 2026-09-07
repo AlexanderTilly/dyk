@@ -85,12 +85,14 @@ class SavedTab extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      // Fixed red swipe-to-delete bg, not theme-derived.
                       children: const [
-                        Icon(Icons.delete_outline, color: Colors.white),
+                        Icon(Icons.delete_outline,
+                            color: PassimColors.onPhoto),
                         SizedBox(width: 8),
                         Text('REMOVE',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: PassimColors.onPhoto,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 13)),
                       ],

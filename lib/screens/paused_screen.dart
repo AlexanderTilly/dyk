@@ -35,17 +35,20 @@ class PausedScreen extends StatelessWidget {
                 'Your account is paused',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white,
+                  // Screen bg is fixed DykColors.black regardless of theme.
+                  color: PassimColors.onPhoto,
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Access to Passim is temporarily on hold. '
                 'If you think this is a mistake, please contact our support team.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, height: 1.5),
+                style: TextStyle(
+                    color: PassimColors.onPhoto.withValues(alpha: 0.7),
+                    height: 1.5),
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
@@ -66,8 +69,9 @@ class PausedScreen extends StatelessWidget {
                   await authService.signOut();
                   onSignedOut();
                 },
-                child: const Text('Sign out',
-                    style: TextStyle(color: Colors.white54)),
+                child: Text('Sign out',
+                    style: TextStyle(
+                        color: PassimColors.onPhoto.withValues(alpha: 0.54))),
               ),
             ],
           ),

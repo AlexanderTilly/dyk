@@ -24,7 +24,10 @@ class PickpocketBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          // Card text/accents (ink, blue) are fixed, not theme-derived, so
+          // the card itself stays a fixed light surface in both themes —
+          // matches the DYK safety design referenced in the class doc.
+          color: PassimColors.card,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -83,7 +86,10 @@ class PickpocketBanner extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          // Card text/accents (ink, blue) are fixed, not theme-derived, so
+          // the card itself stays a fixed light surface in both themes —
+          // matches the DYK safety design referenced in the class doc.
+          color: PassimColors.card,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFE3E8F0)),
         ),

@@ -86,12 +86,16 @@ class _DealRedeemScreenState extends State<DealRedeemScreen>
     final code = _issue?['code'] as String?;
     final expired = _issue != null && _left == Duration.zero && _ticker != null && !_ticker!.isActive;
     final isScan = widget.deal.redeemMode == 'scan';
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final onBg = dark ? PassimColors.onPhoto : PassimColors.ink;
 
     return Scaffold(
-      backgroundColor: DykColors.black,
+      // Follows the theme like every other screen; nothing here needs a
+      // permanently-dark surface.
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        foregroundColor: onBg,
         title: Text(widget.deal.businessName,
             style: const TextStyle(fontWeight: FontWeight.w900)),
       ),
@@ -103,7 +107,7 @@ class _DealRedeemScreenState extends State<DealRedeemScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(_error!,
-                        style: const TextStyle(color: Colors.white70)),
+                        style: TextStyle(color: onBg.withValues(alpha: 0.7))),
                     const SizedBox(height: 16),
                     ElevatedButton(
                         onPressed: _start, child: Text(tr('try_again'))),
@@ -120,8 +124,8 @@ class _DealRedeemScreenState extends State<DealRedeemScreen>
                           children: [
                             Text(widget.deal.offerText,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    color: Colors.white,
+                                style: TextStyle(
+                                    color: onBg,
                                     fontSize: 20,
                                     fontWeight: FontWeight.w800,
                                     height: 1.3)),
@@ -129,6 +133,8 @@ class _DealRedeemScreenState extends State<DealRedeemScreen>
                             Container(
                               padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
+                                // QR must stay black-on-white in both themes
+                                // to remain scannable — left as a literal.
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
@@ -171,8 +177,8 @@ class _DealRedeemScreenState extends State<DealRedeemScreen>
                                   )
                                 : Text(
                                     '${tr('valid_for')} ${_fmt(_left)}',
-                                    style: const TextStyle(
-                                        color: Colors.white70,
+                                    style: TextStyle(
+                                        color: onBg.withValues(alpha: 0.7),
                                         fontWeight: FontWeight.w700,
                                         fontSize: 16),
                                   ),
@@ -182,8 +188,9 @@ class _DealRedeemScreenState extends State<DealRedeemScreen>
                                   ? tr('redeem_hint_scan')
                                   : tr('redeem_hint_show'),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.white54, fontSize: 13),
+                              style: TextStyle(
+                                  color: onBg.withValues(alpha: 0.54),
+                                  fontSize: 13),
                             ),
                           ],
                         );

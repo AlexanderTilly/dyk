@@ -52,7 +52,8 @@ class StopDetailScreen extends StatelessWidget {
             expandedHeight: img != null ? 260 : 120,
             pinned: true,
             backgroundColor: PassimColors.ink,
-            foregroundColor: Colors.white,
+            // Screen bg is fixed PassimColors.ink regardless of theme.
+            foregroundColor: PassimColors.onPhoto,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -81,7 +82,7 @@ class StopDetailScreen extends StatelessWidget {
                 children: [
                   Text(stop.title ?? '',
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: PassimColors.onPhoto,
                           fontSize: 26,
                           height: 1.15,
                           fontWeight: FontWeight.w900)),
@@ -107,8 +108,8 @@ class StopDetailScreen extends StatelessWidget {
                   ],
                   if (stop.blurb != null && stop.blurb!.isNotEmpty)
                     Text(stop.blurb!,
-                        style: const TextStyle(
-                            color: Colors.white70,
+                        style: TextStyle(
+                            color: PassimColors.onPhoto.withValues(alpha: 0.7),
                             fontSize: 15,
                             height: 1.55)),
                   if (stop.offerText != null) ...[

@@ -539,7 +539,6 @@ class _NearbyTabState extends State<NearbyTab> {
         : (d.inMinutes < 60 ? '${d.inMinutes} min ago' : '${d.inHours} h ago');
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -559,10 +558,10 @@ class _NearbyTabState extends State<NearbyTab> {
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: PassimColors.ink)),
+                          )),
                 ),
                 Text(ago,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
             const SizedBox(height: 14),
@@ -571,7 +570,7 @@ class _NearbyTabState extends State<NearbyTab> {
                   ? r.description!
                   : 'No description provided.',
               style: const TextStyle(
-                  fontSize: 15, height: 1.4, color: PassimColors.surface),
+                  fontSize: 15, height: 1.4),
             ),
           ],
         ),
@@ -689,7 +688,7 @@ class _NearbyTabState extends State<NearbyTab> {
                                 )
                               : null,
                           filled: true,
-                          fillColor: dark ? PassimColors.surface : Colors.white,
+                          fillColor: dark ? PassimColors.surface : PassimColors.card,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
@@ -790,10 +789,12 @@ class _NearbyTabState extends State<NearbyTab> {
                                                   color: DykColors.yellow,
                                                   shape: BoxShape.circle,
                                                 ),
+                                                // Icon sits on the amber
+                                                // brand badge, not the theme.
                                                 child: const Icon(
                                                     Icons.check,
                                                     size: 11,
-                                                    color: Colors.white),
+                                                    color: PassimColors.onPhoto),
                                               ),
                                             ),
                                         ],
@@ -843,7 +844,7 @@ class _NearbyTabState extends State<NearbyTab> {
                   decoration: BoxDecoration(
                     color: Theme.of(context).brightness == Brightness.dark
                         ? PassimColors.ink
-                        : Colors.white,
+                        : PassimColors.card,
                     borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(20)),
                     boxShadow: const [
@@ -972,10 +973,12 @@ class _NearbyTabState extends State<NearbyTab> {
                             padding: const EdgeInsets.all(1.5),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
+                              // Ring matches the sheet's own background so the
+                              // badge reads as a cut-out, same as line ~846.
                               border: Border.all(
                                   color: dark
                                       ? PassimColors.ink
-                                      : Colors.white,
+                                      : PassimColors.card,
                                   width: 2),
                             ),
                             child:

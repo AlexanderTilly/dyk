@@ -53,9 +53,10 @@ class InternalAdBanner extends StatelessWidget {
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(99),
                 ),
-                child: const Text('FEATURED',
+                child: Text('FEATURED',
                     style: TextStyle(
-                        color: Colors.white70,
+                        // Tag sits on the photo scrim, stays white in both themes.
+                        color: PassimColors.onPhoto.withValues(alpha: 0.7),
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.5)),
@@ -77,7 +78,7 @@ class InternalAdBanner extends StatelessWidget {
                       children: [
                         Text(ad.title.toUpperCase(),
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: PassimColors.onPhoto, // title over photo scrim
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.3,
@@ -87,8 +88,9 @@ class InternalAdBanner extends StatelessWidget {
                           Text(ad.subtitle!,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 12.5)),
+                              style: TextStyle(
+                                  color: PassimColors.onPhoto.withValues(alpha: 0.7),
+                                  fontSize: 12.5)),
                         ],
                       ],
                     ),

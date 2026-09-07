@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
+import '../theme/dyk_theme.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final AudioService audioService;
@@ -51,7 +52,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        // Fixed orange/brown palette design, not theme-derived — stays a
+        // light card in both themes.
+        color: PassimColors.card,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -120,7 +123,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   ),
                   child: Icon(
                     _isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
+                    color: PassimColors.onPhoto, // icon on fixed orange circle
                     size: 20,
                   ),
                 ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/dyk_theme.dart';
+
 /// Small painted flag for the language picker. Painted (not emoji) because
 /// Catalonia has no emoji flag and emoji flags render inconsistently.
 class FlagIcon extends StatelessWidget {
@@ -60,7 +62,9 @@ class _FlagPainter extends CustomPainter {
         canvas.drawRect(Rect.fromLTWH(0, 0, w, h), p);
         // White diagonals.
         p
-          ..color = Colors.white
+          // Flag colours are fixed regardless of theme (it's a small painted
+          // graphic, not themed UI) — PassimColors.onPhoto for the white bits.
+          ..color = PassimColors.onPhoto
           ..strokeWidth = h * 0.28
           ..style = PaintingStyle.stroke;
         canvas.drawLine(Offset.zero, Offset(w, h), p);
@@ -73,7 +77,9 @@ class _FlagPainter extends CustomPainter {
         canvas.drawLine(Offset(w, 0), Offset(0, h), p);
         // White cross.
         p
-          ..color = Colors.white
+          // Flag colours are fixed regardless of theme (it's a small painted
+          // graphic, not themed UI) — PassimColors.onPhoto for the white bits.
+          ..color = PassimColors.onPhoto
           ..strokeWidth = h * 0.36;
         canvas.drawLine(Offset(w / 2, 0), Offset(w / 2, h), p);
         canvas.drawLine(Offset(0, h / 2), Offset(w, h / 2), p);

@@ -193,8 +193,13 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final t = widget.tour;
+    // The hero + its fade-out strip stay fixed dark chrome (like the
+    // hotspot detail screen's hero), but everything below it — stats card
+    // text aside, which sits on the fixed-dark PassimColors.surface card —
+    // is on the plain scaffold background and must flip with the theme.
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final onBg = dark ? PassimColors.onPhoto : PassimColors.ink;
     return Scaffold(
-      backgroundColor: PassimColors.ink,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -203,7 +208,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
             expandedHeight: 320,
             pinned: true,
             backgroundColor: PassimColors.ink,
-            foregroundColor: Colors.white,
+            foregroundColor: PassimColors.onPhoto,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -248,15 +253,15 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                           const SizedBox(height: 8),
                           Text(t.title,
                               style: const TextStyle(
-                                  color: Colors.white,
+                                  color: PassimColors.onPhoto,
                                   fontSize: 30,
                                   height: 1.05,
                                   fontWeight: FontWeight.w900)),
                           if (t.subtitle != null) ...[
                             const SizedBox(height: 4),
                             Text(t.subtitle!,
-                                style: const TextStyle(
-                                    color: Colors.white70, fontSize: 14)),
+                                style: TextStyle(
+                                    color: PassimColors.onPhoto.withValues(alpha: 0.7), fontSize: 14)),
                           ],
                         ],
                       ),
@@ -356,8 +361,8 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('“${t.creatorIntro}”',
-                                  style: const TextStyle(
-                                      color: Colors.white,
+                                  style: TextStyle(
+                                      color: onBg,
                                       fontStyle: FontStyle.italic,
                                       fontSize: 15,
                                       height: 1.5)),
@@ -365,8 +370,8 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                               Text(
                                 '${t.creatorName ?? ''}'
                                 '${t.creatorHandle != null ? ' · @${t.creatorHandle}' : ''}',
-                                style: const TextStyle(
-                                    color: Colors.white38,
+                                style: TextStyle(
+                                    color: onBg.withValues(alpha: 0.38),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700),
                               ),
@@ -379,14 +384,14 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                   ],
                   if (t.description != null) ...[
                     Text(tr('about_tour'),
-                        style: const TextStyle(
-                            color: Colors.white,
+                        style: TextStyle(
+                            color: onBg,
                             fontSize: 17,
                             fontWeight: FontWeight.w900)),
                     const SizedBox(height: 6),
                     Text(t.description!,
-                        style: const TextStyle(
-                            color: Colors.white70, height: 1.5)),
+                        style: TextStyle(
+                            color: onBg.withValues(alpha: 0.7), height: 1.5)),
                   ],
                   const SizedBox(height: 16),
                   if (t.isCreatorTour && !_loading && _stops.isNotEmpty) ...[
@@ -419,9 +424,9 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                               fit: BoxFit.cover)
                                           : Container(
                                               color: PassimColors.surface,
-                                              child: const Icon(
+                                              child: Icon(
                                                   Icons.place_outlined,
-                                                  color: Colors.white24)),
+                                                  color: PassimColors.onPhoto.withValues(alpha: 0.24))),
                                       Positioned(
                                         top: 8,
                                         left: 8,
@@ -446,7 +451,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                        color: Colors.white,
+                                        color: PassimColors.onPhoto,
                                         fontSize: 12,
                                         height: 1.2,
                                         fontWeight: FontWeight.w800),
@@ -462,8 +467,8 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                   ],
                   if (t.checklist.isNotEmpty) ...[
                     Text(tr('what_to_bring'),
-                        style: const TextStyle(
-                            color: Colors.white,
+                        style: TextStyle(
+                            color: onBg,
                             fontSize: 17,
                             fontWeight: FontWeight.w900)),
                     const SizedBox(height: 10),
@@ -488,7 +493,7 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                   Text(
                       tr('skip_hint'),
                       style:
-                          const TextStyle(color: Colors.white38, fontSize: 12)),
+                          TextStyle(color: onBg.withValues(alpha: 0.38), fontSize: 12)),
                   const SizedBox(height: 8),
                   if (_loading)
                     const Center(
@@ -558,9 +563,9 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
   }
 }
 
-const _statDivider = SizedBox(
+final _statDivider = SizedBox(
   height: 34,
-  child: VerticalDivider(color: Colors.white12, width: 16),
+  child: VerticalDivider(color: PassimColors.onPhoto.withValues(alpha: 0.12), width: 16),
 );
 
 /// One cell in the stats row: icon (or avatar) over a short label.
@@ -594,14 +599,14 @@ class _Stat extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-                color: Colors.white,
+                color: PassimColors.onPhoto,
                 fontSize: 12,
                 fontWeight: FontWeight.w800)),
         if (sub != null)
           Text(sub!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white38, fontSize: 10)),
+              style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.38), fontSize: 10)),
       ],
     );
   }
@@ -632,21 +637,21 @@ class _ChecklistChipState extends State<_ChecklistChip> {
               : PassimColors.surface,
           borderRadius: BorderRadius.circular(99),
           border: Border.all(
-              color: _done ? DykColors.yellow : Colors.white12, width: 1),
+              color: _done ? DykColors.yellow : PassimColors.onPhoto.withValues(alpha: 0.12), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               _done ? Icons.check : checklistIcon(widget.label),
-              color: _done ? DykColors.yellow : Colors.white70,
+              color: _done ? DykColors.yellow : PassimColors.onPhoto.withValues(alpha: 0.7),
               size: 16,
             ),
             const SizedBox(width: 6),
             Text(
               widget.label,
               style: TextStyle(
-                color: _done ? DykColors.yellow : Colors.white,
+                color: _done ? DykColors.yellow : PassimColors.onPhoto,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
@@ -674,6 +679,11 @@ class _StopRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = stop.title ?? 'Stop $index';
+    // This row sits directly on the plain scaffold background (the
+    // thumbnail itself is the only fixed-dark surface), so its text/icon
+    // colour must flip with the theme.
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final onBg = dark ? PassimColors.onPhoto : PassimColors.ink;
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: skipped ? 0.4 : 1.0,
@@ -699,8 +709,8 @@ class _StopRow extends StatelessWidget {
                           width: 56,
                           height: 56,
                           color: PassimColors.surface,
-                          child: const Icon(Icons.place,
-                              color: Colors.white38, size: 26),
+                          child: Icon(Icons.place,
+                              color: PassimColors.onPhoto.withValues(alpha: 0.38), size: 26),
                         ),
                 ),
                 Positioned(
@@ -709,10 +719,10 @@ class _StopRow extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 11,
                     backgroundColor:
-                        skipped ? Colors.white24 : DykColors.yellow,
+                        skipped ? PassimColors.onPhoto.withValues(alpha: 0.24) : DykColors.yellow,
                     child: skipped
-                        ? const Icon(Icons.remove,
-                            size: 13, color: Colors.white70)
+                        ? Icon(Icons.remove,
+                            size: 13, color: PassimColors.onPhoto.withValues(alpha: 0.7))
                         : Text('$index',
                             style: const TextStyle(
                                 color: DykColors.black,
@@ -731,22 +741,22 @@ class _StopRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          color: Colors.white,
+                          color: onBg,
                           fontWeight: FontWeight.w700,
                           decoration: skipped
                               ? TextDecoration.lineThrough
                               : TextDecoration.none,
-                          decorationColor: Colors.white54)),
+                          decorationColor: onBg.withValues(alpha: 0.54))),
                   if (skipped)
                     Text(tr('skipped_hint'),
-                        style: const TextStyle(
-                            color: Colors.white38, fontSize: 12))
+                        style: TextStyle(
+                            color: onBg.withValues(alpha: 0.38), fontSize: 12))
                   else if (stop.blurb != null)
                     Text(stop.blurb!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            color: Colors.white54, fontSize: 13)),
+                        style: TextStyle(
+                            color: onBg.withValues(alpha: 0.54), fontSize: 13)),
                 ],
               ),
             ),
@@ -757,7 +767,7 @@ class _StopRow extends StatelessWidget {
                 skipped
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: skipped ? Colors.white38 : DykColors.yellow,
+                color: skipped ? onBg.withValues(alpha: 0.38) : DykColors.yellow,
                 size: 22,
               ),
             ),

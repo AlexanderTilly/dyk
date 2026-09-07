@@ -41,7 +41,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.6,
-                      color: dark ? Colors.white70 : Colors.black87,
+                      color: dark
+                          ? PassimColors.onPhoto.withValues(alpha: 0.7)
+                          : PassimColors.ink.withValues(alpha: 0.87),
                     ),
                   ),
                 ),

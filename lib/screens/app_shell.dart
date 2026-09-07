@@ -170,7 +170,7 @@ class _AppShellState extends State<AppShell> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: dark ? PassimColors.ink : Colors.white,
+      backgroundColor: dark ? PassimColors.ink : PassimColors.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

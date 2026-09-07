@@ -31,7 +31,8 @@ Future<Uint8List> buildDykPuck() async {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3
         ..color = PassimColors.ink);
-  canvas.drawCircle(center, 27, Paint()..color = Colors.white);
+  // Map puck ring — fixed white regardless of theme, sits on a live map.
+  canvas.drawCircle(center, 27, Paint()..color = PassimColors.onPhoto);
   canvas.drawCircle(center, 21, Paint()..color = PassimColors.brand);
   canvas.drawCircle(center, 7, Paint()..color = PassimColors.ink);
   final img = await rec.endRecording().toImage(size, size);

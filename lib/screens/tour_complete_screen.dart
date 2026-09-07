@@ -32,13 +32,16 @@ class TourCompleteScreen extends StatelessWidget {
             Icon(icon, color: DykColors.yellow, size: 26),
           const SizedBox(height: 6),
           Text(value,
+              // Screen bg is fixed PassimColors.ink regardless of theme.
               style: const TextStyle(
-                  color: Colors.white,
+                  color: PassimColors.onPhoto,
                   fontSize: 18,
                   fontWeight: FontWeight.w900)),
           Text(label,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white54, fontSize: 11)),
+              style: TextStyle(
+                  color: PassimColors.onPhoto.withValues(alpha: 0.54),
+                  fontSize: 11)),
         ],
       ),
     );
@@ -68,7 +71,9 @@ class TourCompleteScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(tourTitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white70, fontSize: 15)),
+                  style: TextStyle(
+                      color: PassimColors.onPhoto.withValues(alpha: 0.7),
+                      fontSize: 15)),
               const SizedBox(height: 26),
               // Summary card.
               Container(
