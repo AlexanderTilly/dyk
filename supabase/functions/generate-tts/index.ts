@@ -75,15 +75,12 @@ Deno.serve(async (req) => {
     }
 
     // Fixed in config (changeable via secrets without code edits):
-    // multilingual_v2, NOT v3. v3 is the more expressive model and that is
-    // exactly the problem: it infers the accent from the text rather than
-    // taking it from the voice, and the inference lands differently between
-    // runs. Generating the same Spanish description twice produced two
-    // different accents from an identical voice id, model and language —
-    // which is how this was finally pinned down. multilingual_v2 maintains
-    // the speaker's own characteristics and accent, so the accent becomes a
-    // property of the voice you picked instead of a lottery.
-    const modelId = Deno.env.get('ELEVENLABS_MODEL_ID') ?? 'eleven_multilingual_v2'
+    // eleven_v3 — back to it after a trial of multilingual_v2 sounded worse,
+    // especially in Spanish and Catalan. v3 can vary between takes of the same
+    // text; what fixes the ACCENT is the voice, not the model: there is no
+    // Spain-vs-Latin-America setting (language_code is plain ISO 639-1, 'es'),
+    // so Castilian comes from choosing a Castilian voice.
+    const modelId = Deno.env.get('ELEVENLABS_MODEL_ID') ?? 'eleven_v3'
     const stability = parseFloat(Deno.env.get('ELEVENLABS_STABILITY') ?? '0.5')
 
     // Admin-controlled per generation:
@@ -111,7 +108,9 @@ Deno.serve(async (req) => {
     // admin report a language that was never enforced. Send it only where it
     // changes something, and report honestly below.
     const modelHonoursLanguageCode =
-      modelId === 'eleven_flash_v2_5' || modelId === 'eleven_turbo_v2_5'
+      modelId === 'eleven_v3' ||
+      modelId === 'eleven_flash_v2_5' ||
+      modelId === 'eleven_turbo_v2_5'
     const sentLanguageCode =
       modelHonoursLanguageCode && languageCode ? languageCode : undefined
 
