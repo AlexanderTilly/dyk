@@ -18,9 +18,46 @@ const _mapboxToken =
 
 /// In-app walking navigation to a single hotspot — the fastest footpath,
 /// turn-by-turn, no need to jump out to Google Maps.
+/// Somewhere to walk to.
+///
+/// This screen used to take a [Hotspot] and read five fields off it, which
+/// meant anything else with a position — a paying restaurant, say — could
+/// not reuse it. The screen only ever needed a point, a name and a picture.
+class NavDestination {
+  final double lat;
+  final double lng;
+  final String name;
+
+  /// Shown as the destination pin. A plain dot when absent.
+  final String? imageUrl;
+
+  /// How close counts as arrived. A hotspot's own radius can be tiny, and a
+  /// GPS fix in a narrow street is not, so it is clamped to something a
+  /// phone can actually resolve.
+  final double arrivalMeters;
+
+  const NavDestination({
+    required this.lat,
+    required this.lng,
+    required this.name,
+    this.imageUrl,
+    this.arrivalMeters = 50,
+  });
+}
+
 class NavigateScreen extends StatefulWidget {
-  final Hotspot hotspot;
-  const NavigateScreen({super.key, required this.hotspot});
+  final NavDestination destination;
+  const NavigateScreen({super.key, required this.destination});
+
+  /// Convenience for the common case — walking to a hotspot.
+  NavigateScreen.toHotspot(Hotspot h, {super.key})
+      : destination = NavDestination(
+          lat: h.lat,
+          lng: h.lng,
+          name: h.name,
+          imageUrl: h.images.isNotEmpty ? h.images.first : null,
+          arrivalMeters: h.radiusMeters.toDouble().clamp(30, 100),
+        );
 
   @override
   State<NavigateScreen> createState() => _NavigateScreenState();
@@ -83,9 +120,9 @@ class _NavigateScreenState extends State<NavigateScreen> {
     // Destination pin: the hotspot's own photo (badge-less fallback dot).
     try {
       final mgr = await map.annotations.createPointAnnotationManager();
-      final h = widget.hotspot;
+      final h = widget.destination;
       final photo =
-          h.images.isNotEmpty ? await buildPhotoPin(h.images.first) : null;
+          h.imageUrl != null ? await buildPhotoPin(h.imageUrl!) : null;
       await mgr.create(PointAnnotationOptions(
         geometry: Point(coordinates: Position(h.lng, h.lat)),
         image: photo,
@@ -151,7 +188,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
 
   Future<void> _fetchRoute(geo.Position pos) async {
     _routedFrom = pos;
-    final h = widget.hotspot;
+    final h = widget.destination;
     try {
       final url = Uri.parse(
           'https://api.mapbox.com/directions/v5/mapbox/$_mode/'
@@ -191,7 +228,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
 
   void _onPosition(geo.Position pos) {
     _lastPos = pos;
-    final h = widget.hotspot;
+    final h = widget.destination;
     final toTarget = geo.Geolocator.distanceBetween(
         pos.latitude, pos.longitude, h.lat, h.lng);
 
@@ -201,7 +238,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
       if (toTarget > 2500) _mode = 'driving';
     }
 
-    if (!_arrived && toTarget <= h.radiusMeters.toDouble().clamp(30, 100)) {
+    if (!_arrived && toTarget <= h.arrivalMeters) {
       setState(() => _arrived = true);
     }
 
@@ -312,7 +349,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
   @override
   Widget build(BuildContext context) {
     _dark = Theme.of(context).brightness == Brightness.dark;
-    final h = widget.hotspot;
+    final h = widget.destination;
     return Scaffold(
       appBar: AppBar(
         title: Text(h.name, maxLines: 1, overflow: TextOverflow.ellipsis),

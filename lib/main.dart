@@ -11,6 +11,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'services/ad_events.dart';
 import 'services/crash_reporting.dart';
 import 'i18n/i18n.dart';
 import 'models/city_pack.dart';
@@ -299,6 +300,22 @@ class _DykAppState extends State<DykApp> {
   // fed, which also makes the zone switching observable in the field.
   DateTime _lastPresence = DateTime.fromMillisecondsSinceEpoch(0);
 
+  /// Did anyone actually turn up at an ad they asked directions to?
+  ///
+  /// Only ads with a pending tap are watched. Counting an arrival for every
+  /// ad someone walks past would make the number meaningless, and it is the
+  /// meaningful one the advertiser is shown.
+  Future<void> _checkAdArrivals(geo.Position pos) async {
+    final pending = await AdEvents.awaitingArrival();
+    if (pending.isEmpty) return;
+    for (final ad in widget.ads) {
+      if (!pending.contains(ad.id) || !ad.hasDestination) continue;
+      final d = geo.Geolocator.distanceBetween(
+          pos.latitude, pos.longitude, ad.destLat!, ad.destLng!);
+      if (d <= AdEvents.arrivalMeters) await AdEvents.arrived(ad.id);
+    }
+  }
+
   Future<void> _onPreciseFix(geo.Position pos) async {
     // Steps explored: the same GPS-delta model the Android isolate uses, with
     // the same sanity window so a bus ride is not counted as walking. The
@@ -318,6 +335,8 @@ class _DykAppState extends State<DykApp> {
       _lastPresence = DateTime.now();
       unawaited(_reportPresenceAt(pos));
     }
+
+    await _checkAdArrivals(pos);
 
     final arrivedMs = prefs.getInt('city_arrived_at');
     final hits = _proximity.check(

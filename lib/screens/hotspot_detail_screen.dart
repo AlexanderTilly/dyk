@@ -202,7 +202,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) =>
-                            NavigateScreen(hotspot: widget.hotspot),
+                            NavigateScreen.toHotspot(widget.hotspot),
                       ),
                     ),
                   ),
