@@ -18,6 +18,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+// ElevenLabs per-request limit. Must equal TTS_MAX_CHARS in
+// dyk-admin/src/lib/limits.ts — the admin's character counter and
+// "Generate narration" button are gated on the same number.
 const MAX_CHARS = 5000
 
 function json(body: unknown, status = 200) {
