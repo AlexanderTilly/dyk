@@ -33,20 +33,20 @@ const _categoryMeta = {
   'hotdeal': ('🔥', 'Hot Deals'),
 };
 
-// Icon ids we try to register as Mapbox style images (each maps to a PNG in
+// Icon ids registered as Mapbox style images (each maps to a PNG in
 // assets/images/badges/). Missing files are skipped and fall back gracefully.
+//
+// Subcategories no longer get their own pin. The old per-subcategory art had
+// the category name baked into the picture, which is illegible at pin size —
+// which is the whole reason it is being replaced. A 30px circle cannot say
+// "work of art" as distinct from "building" anyway, so all of them now show
+// their parent category's mark and the distinction lives in the detail sheet.
 const _iconIds = [
-  'history',
-  'history_building',
-  'history_work_of_art',
-  'history_historical_figure',
-  'otium',
-  'otium_leisure',
-  'otium_art',
-  'otium_natural_spaces',
+  'pin_history',
+  'pin_otium',
+  'pin_headline',
+  'pin_hotdeal',
   'funfact',
-  'headline',
-  'hotdeal',
   'pickpocket',
 ];
 
@@ -327,10 +327,9 @@ class _NearbyTabState extends State<NearbyTab> {
   // a feature always references the right image; the missing-image listener
   // then ensures that image is loaded.
   String _iconFor(String category, String? subcategory) {
-    final combo = subcategory != null ? '${category}_$subcategory' : category;
-    if (_iconIds.contains(combo)) return combo;
-    if (_iconIds.contains(category)) return category;
-    return 'history';
+    // subcategory is deliberately ignored — see the note on _iconIds.
+    final id = 'pin_$category';
+    return _iconIds.contains(id) ? id : 'pin_history';
   }
 
   // GeoJSON of all visible places, used for the clustered source.
