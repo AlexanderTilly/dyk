@@ -42,6 +42,10 @@ import 'screens/splash_screen.dart';
 import 'services/notification_log.dart';
 import 'services/notification_service.dart';
 import 'services/saved_store.dart';
+import 'services/support_api.dart';
+import 'services/support_reply_checker.dart';
+import 'services/support_seen_store.dart';
+import 'screens/support_thread_screen.dart';
 import 'theme/dyk_theme.dart';
 import 'theme/theme_prefs.dart';
 
@@ -176,7 +180,7 @@ class DykApp extends StatefulWidget {
   State<DykApp> createState() => _DykAppState();
 }
 
-class _DykAppState extends State<DykApp> {
+class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
   final _navKey = GlobalKey<NavigatorState>();
   final _fgService = GeofenceForegroundService();
   // iOS cannot run the Android-style foreground service; this replaces it.
@@ -187,6 +191,7 @@ class _DykAppState extends State<DykApp> {
   final _authService = AuthService();
   final _deviceService = DeviceProfileService();
   final _entitlements = Entitlements();
+  SupportReplyChecker? _supportChecker;
   bool _paused = false;
   bool _booting = true;
   late List<Hotspot> _hotspots = widget.hotspots;
@@ -199,6 +204,7 @@ class _DykAppState extends State<DykApp> {
     super.initState();
     // Route to a hotspot/deal when its notification is tapped.
     NotificationRouter.pending.addListener(_handleNotificationTap);
+    WidgetsBinding.instance.addObserver(this);
     // Handle a payload that arrived during cold start.
     WidgetsBinding.instance.addPostFrameCallback((_) => _handleNotificationTap());
     _initTelemetry();
@@ -224,6 +230,26 @@ class _DykAppState extends State<DykApp> {
       final paused = await _deviceService.isPaused();
       if (paused && mounted) setState(() => _paused = true);
     }
+    await _checkSupportReplies();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _checkSupportReplies();
+  }
+
+  Future<void> _checkSupportReplies() async {
+    _supportChecker ??= SupportReplyChecker(
+      api: SupabaseSupportApi(),
+      store: await SupportSeenStore.load(),
+      installId: _deviceService.installId,
+      notify: ({required ticketId, required body}) => widget.notificationService.showSupportReplyNotification(
+        ticketId: ticketId,
+        title: tr('support_reply_notif_title'),
+        body: body,
+      ),
+    );
+    await _supportChecker!.check();
   }
 
   void _handleNotificationTap() {
@@ -267,6 +293,18 @@ class _DykAppState extends State<DykApp> {
       // AppShell greet the user with the welcome / unlock screen.
       final pack = widget.cityPacks.where((p) => p.id == id).firstOrNull;
       if (pack != null && pack.id != _activePackId) _downloadPack(pack);
+    } else if (type == 'support') {
+      SupportSeenStore.load().then((store) {
+        if (!mounted) return;
+        nav.push(MaterialPageRoute(
+          builder: (_) => SupportThreadScreen(
+            ticketId: id,
+            api: SupabaseSupportApi(),
+            installId: _deviceService.installId,
+            seenStore: store,
+          ),
+        ));
+      });
     }
   }
 
@@ -547,6 +585,7 @@ class _DykAppState extends State<DykApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _presenceTimer?.cancel();
     I18n.instance.removeListener(_onLanguageChanged);
     widget.audioService.dispose();

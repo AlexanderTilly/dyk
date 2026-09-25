@@ -33,24 +33,28 @@ const _notifStrings = <String, Map<String, String>>{
     'tap_story': 'Tap to hear the story',
     'welcome': 'Welcome to',
     'welcome_sub': 'Tap to unlock its stories, myths & hidden gems.',
+    'support_reply_title': 'Passim Support replied',
   },
   'es': {
     'now_at': 'Estás en',
     'tap_story': 'Toca para escuchar la historia',
     'welcome': 'Bienvenido a',
     'welcome_sub': 'Toca para descubrir sus historias, mitos y joyas ocultas.',
+    'support_reply_title': 'Soporte de Passim ha respondido',
   },
   'ca': {
     'now_at': 'Ets a',
     'tap_story': 'Toca per escoltar la història',
     'welcome': 'Benvingut a',
     'welcome_sub': 'Toca per descobrir històries, mites i racons amagats.',
+    'support_reply_title': 'Suport de Passim ha respost',
   },
   'de': {
     'now_at': 'Du bist jetzt an:',
     'tap_story': 'Tippe, um die Geschichte zu hören',
     'welcome': 'Willkommen in',
     'welcome_sub': 'Tippe für Geschichten, Mythen & versteckte Schätze.',
+    'support_reply_title': 'Passim Support hat geantwortet',
   },
 };
 
@@ -70,6 +74,8 @@ void startGeofenceCallback() {
 class GeofenceTaskHandler extends TaskHandler {
   final _notifications = FlutterLocalNotificationsPlugin();
   final Set<String> _triggered = {};
+  int _tick = 0;
+  static const _supportEveryTicks = 25; // 25 × 12 s ≈ 5 min
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
@@ -101,6 +107,9 @@ class GeofenceTaskHandler extends TaskHandler {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload();
+
+    _tick++;
+    if (_tick % _supportEveryTicks == 0) await _checkSupportReplies(prefs);
 
     // Steps explored: accumulate GPS movement (the active-tour screen counts
     // its own while 'tour_active' is set, so we skip to avoid double counts).
@@ -247,6 +256,63 @@ class GeofenceTaskHandler extends TaskHandler {
         },
         body: jsonEncode({'p_deal_id': dealId, 'p_user_key': userKey}),
       );
+    } catch (_) {}
+  }
+
+  /// Mirror of SupportReplyChecker for the background isolate: plain HTTP
+  /// against the same RPC, same SharedPreferences keys, same rule — a staff
+  /// reply newer than both the seen and the notified mark gets one
+  /// notification. Watermarks are UTC ISO-8601, compared as DateTimes.
+  Future<void> _checkSupportReplies(SharedPreferences prefs) async {
+    final installId = prefs.getString('anon_install_id');
+    if (installId == null || installId.length < 8) return;
+    try {
+      final res = await http.post(
+        Uri.parse('$_supabaseUrl/rest/v1/rpc/support_my_tickets'),
+        headers: {
+          'apikey': _anonKey,
+          'Authorization': 'Bearer $_anonKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'p_install_id': installId}),
+      );
+      if (res.statusCode != 200) return;
+      final list = jsonDecode(res.body);
+      if (list is! List) return;
+      for (final raw in list) {
+        final t = raw as Map<String, dynamic>;
+        if (t['last_from_customer'] == true) continue;
+        final id = t['id'] as String?;
+        final lastAtRaw = t['last_at'] as String?;
+        if (id == null || lastAtRaw == null) continue;
+        final lastAt = DateTime.parse(lastAtRaw).toUtc();
+        DateTime? mark(String key) {
+          final v = prefs.getString(key);
+          return v == null ? null : DateTime.parse(v).toUtc();
+        }
+        final seen = mark('support_seen_$id');
+        final notified = mark('support_notified_$id');
+        if (seen != null && !lastAt.isAfter(seen)) continue;
+        if (notified != null && !lastAt.isAfter(notified)) continue;
+        final body = (t['last_body'] as String?) ?? '';
+        await _notifications.show(
+          id.hashCode,
+          _ntr(prefs, 'support_reply_title'),
+          body.length > 80 ? body.substring(0, 80) : body,
+          NotificationDetails(
+            android: const AndroidNotificationDetails(
+              'support_channel',
+              'Support',
+              channelDescription: 'Replies from Passim Support',
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+            iOS: const DarwinNotificationDetails(),
+          ),
+          payload: 'support:$id',
+        );
+        await prefs.setString('support_notified_$id', lastAt.toIso8601String());
+      }
     } catch (_) {}
   }
 
