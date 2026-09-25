@@ -299,15 +299,15 @@ class GeofenceTaskHandler extends TaskHandler {
           id.hashCode,
           _ntr(prefs, 'support_reply_title'),
           body.length > 80 ? body.substring(0, 80) : body,
-          NotificationDetails(
-            android: const AndroidNotificationDetails(
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
               'support_channel',
               'Support',
               channelDescription: 'Replies from Passim Support',
               importance: Importance.high,
               priority: Priority.high,
             ),
-            iOS: const DarwinNotificationDetails(),
+            iOS: DarwinNotificationDetails(),
           ),
           payload: 'support:$id',
         );

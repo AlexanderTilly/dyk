@@ -192,6 +192,7 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
   final _deviceService = DeviceProfileService();
   final _entitlements = Entitlements();
   SupportReplyChecker? _supportChecker;
+  SupportSeenStore? _supportSeenStore;
   bool _paused = false;
   bool _booting = true;
   late List<Hotspot> _hotspots = widget.hotspots;
@@ -239,9 +240,15 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
   }
 
   Future<void> _checkSupportReplies() async {
+    _supportSeenStore ??= await SupportSeenStore.load();
+    // The Android background isolate may have written a new seen/notified
+    // watermark since this store was created — resync every time, or a
+    // reply it already notified about while the app was backgrounded gets
+    // notified again on resume. See SupportSeenStore.reload().
+    await _supportSeenStore!.reload();
     _supportChecker ??= SupportReplyChecker(
       api: SupabaseSupportApi(),
-      store: await SupportSeenStore.load(),
+      store: _supportSeenStore!,
       installId: _deviceService.installId,
       notify: ({required ticketId, required body}) => widget.notificationService.showSupportReplyNotification(
         ticketId: ticketId,

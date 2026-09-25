@@ -26,6 +26,13 @@ class SupportSeenStore {
   static Future<SupportSeenStore> load() async =>
       SupportSeenStore(await SharedPreferences.getInstance());
 
+  /// Forces a resync with the platform store. Needed before reading
+  /// watermarks that may have been written by a different isolate (the
+  /// Android foreground service) since this store was created —
+  /// SharedPreferences caches in memory per isolate and does not see
+  /// another isolate's writes without this.
+  Future<void> reload() => _prefs.reload();
+
   static String seenKey(String id) => 'support_seen_$id';
   static String notifiedKey(String id) => 'support_notified_$id';
 
