@@ -1287,7 +1287,7 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final mine = message.fromCustomer;
     final theme = Theme.of(context);
-    final bg = mine ? DykColors.yellow.withValues(alpha: 0.22) : theme.colorScheme.surfaceContainerHighest;
+    final bg = mine ? DykColors.yellow.withValues(alpha: 0.22) : theme.colorScheme.surface;
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -1323,7 +1323,6 @@ class _Bubble extends StatelessWidget {
 }
 ```
 
-If `theme.colorScheme.surfaceContainerHighest` does not exist in this Flutter version's theme, use `DykColors`'s existing surface colour (look in `lib/theme/dyk_theme.dart` for a card/surface colour) and say so in the report.
 
 - [ ] **Step 4: Run tests, analyze, commit**
 
@@ -1804,13 +1803,40 @@ In `_handleNotificationTap`, after the `deal` branch:
 
 - [ ] **Step 3: Android isolate — strings and the 5-minute check**
 
-In `geofence_task_handler.dart`, add to each language in `_notifStrings`:
+In `geofence_task_handler.dart`, `_notifStrings` is a map of four language maps, each ending with a `'welcome_sub'` entry. Add one new entry to each of the four language maps, immediately after that map's `'welcome_sub'` line — same map, not a new one:
+
 ```dart
-    'support_reply_title': 'Passim Support replied',            // en
-    'support_reply_title': 'Soporte de Passim ha respondido',   // es
-    'support_reply_title': 'Suport de Passim ha respost',       // ca
-    'support_reply_title': 'Passim Support hat geantwortet',    // de
+  'en': {
+    'now_at': 'You are now at',
+    'tap_story': 'Tap to hear the story',
+    'welcome': 'Welcome to',
+    'welcome_sub': 'Tap to unlock its stories, myths & hidden gems.',
+    'support_reply_title': 'Passim Support replied',
+  },
+  'es': {
+    'now_at': 'Estás en',
+    'tap_story': 'Toca para escuchar la historia',
+    'welcome': 'Bienvenido a',
+    'welcome_sub': 'Toca para descubrir sus historias, mitos y joyas ocultas.',
+    'support_reply_title': 'Soporte de Passim ha respondido',
+  },
+  'ca': {
+    'now_at': 'Ets a',
+    'tap_story': 'Toca per escoltar la història',
+    'welcome': 'Benvingut a',
+    'welcome_sub': 'Toca per descobrir històries, mites i racons amagats.',
+    'support_reply_title': 'Suport de Passim ha respost',
+  },
+  'de': {
+    'now_at': 'Du bist jetzt an:',
+    'tap_story': 'Tippe, um die Geschichte zu hören',
+    'welcome': 'Willkommen in',
+    'welcome_sub': 'Tippe für Geschichten, Mythen & versteckte Schätze.',
+    'support_reply_title': 'Passim Support hat geantwortet',
+  },
 ```
+
+Only the new `'support_reply_title'` line is inserted in each of the four blocks above — the rest is shown so the insertion point is unambiguous; do not duplicate the existing lines.
 Add a field to `GeofenceTaskHandler`:
 ```dart
   int _tick = 0;
@@ -1953,6 +1979,6 @@ git commit -m "docs: support inbox verified live on Android"
 - §7 release → T9.
 - §8 out of scope: nothing in the plan touches FCM, email, RLS reads, attachments.
 
-**Placeholder scan:** none. One explicit "check and report" instruction remains (T6 surface colour), gated on a fact in a file the executor can read, with both outcomes spelled out.
+**Placeholder scan:** none.
 
 **Type consistency:** `SupportTicketSummary` fields (`id, status, createdAt, lastBody, lastFromCustomer, lastAt, staffCount`) used identically in T3 tests, T4 checker, T7 card. `SupportApi` four methods — same signatures in T2 interface, T4/T6/T7 fakes, T7 `createTicket` call. `SupportSeenStore.watermarks/markSeen/markNotified/isUnseen/load` — T3 definition, T4 checker (`watermarks`, `markNotified`), T6 (`markSeen`), T7 (`isUnseen`, `load`), T8 (`load`). `SupportReplyChecker` constructor named params match T4 and T8. `showSupportReplyNotification({ticketId, title, body})` — T4 definition, T8 call. Prefs keys `support_seen_<id>` / `support_notified_<id>` and UTC ISO values — T3 store and T8 isolate.
