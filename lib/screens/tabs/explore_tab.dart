@@ -236,7 +236,7 @@ class _InterestChip extends StatelessWidget {
                       width: 2.5,
                     ),
                   ),
-                  child: CategoryBadge(category: categoryKey, size: 64),
+                  child: CategoryBadge(category: categoryKey, size: 48),
                 ),
                 if (active)
                   Positioned(

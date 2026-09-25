@@ -21,10 +21,19 @@ SRC = os.path.expanduser(
 )
 DEST = "assets/models/passim_puck.glb"
 
-# Passim amber. emissive keeps it readable at night, when the basemap goes
-# dark and a purely lit model would sink into the street.
-BASE_COLOR = [1.0, 0.761, 0.102, 1.0]   # #FFC21A
-EMISSIVE = [0.35, 0.26, 0.03]
+# Passim amber, converted to LINEAR. glTF's baseColorFactor is linear, not
+# sRGB — feeding it the hex values directly is why the first attempt came out
+# a washed-out pale yellow rather than the brand colour.
+def _srgb_to_linear(c):
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+
+BRAND_SRGB = (1.0, 0xC2 / 255, 0x1A / 255)          # #FFC21A
+BASE_COLOR = [_srgb_to_linear(c) for c in BRAND_SRGB] + [1.0]
+
+# A little self-lit so it holds its colour on a night basemap, but much less
+# than before: emissive stacks on top of the base colour and was bleaching it.
+EMISSIVE = [_srgb_to_linear(c) * 0.18 for c in BRAND_SRGB]
 ROUGHNESS = 0.38
 METALLIC = 0.05
 

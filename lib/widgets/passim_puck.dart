@@ -31,10 +31,11 @@ LocationComponentSettings passimPuckSettings() => LocationComponentSettings(
         locationPuck3D: LocationPuck3D(
           modelUri: passimPuckModel,
           modelScale: [_puckScale, _puckScale, _puckScale],
-          // The export stands upright in glTF's Y-up world, while Mapbox
-          // places models Z-up on the ground plane, so it needs tipping back
-          // onto its feet. The third value points it along the bearing.
-          modelRotation: [90.0, 0.0, 0.0],
+          // No rotation. The first attempt tipped it 90 degrees about X on the
+          // assumption that glTF's Y-up needed converting to Mapbox's Z-up —
+          // but Mapbox already does that, so the extra turn laid the pin flat
+          // on the street. Leave it alone and it stands.
+          modelRotation: [0.0, 0.0, 0.0],
           modelCastShadows: true,
           modelReceiveShadows: false,
           // Keeps a constant size on screen as you zoom, like the flat puck
