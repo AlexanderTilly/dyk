@@ -45,6 +45,7 @@ import 'services/saved_store.dart';
 import 'services/support_api.dart';
 import 'services/support_reply_checker.dart';
 import 'services/support_seen_store.dart';
+import 'screens/support_screen.dart';
 import 'screens/support_thread_screen.dart';
 import 'theme/dyk_theme.dart';
 import 'theme/theme_prefs.dart';
@@ -193,6 +194,7 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
   final _entitlements = Entitlements();
   SupportReplyChecker? _supportChecker;
   SupportSeenStore? _supportSeenStore;
+  bool _checkingSupportReplies = false;
   bool _paused = false;
   bool _booting = true;
   late List<Hotspot> _hotspots = widget.hotspots;
@@ -240,23 +242,29 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
   }
 
   Future<void> _checkSupportReplies() async {
-    _supportSeenStore ??= await SupportSeenStore.load();
-    // The Android background isolate may have written a new seen/notified
-    // watermark since this store was created — resync every time, or a
-    // reply it already notified about while the app was backgrounded gets
-    // notified again on resume. See SupportSeenStore.reload().
-    await _supportSeenStore!.reload();
-    _supportChecker ??= SupportReplyChecker(
-      api: SupabaseSupportApi(),
-      store: _supportSeenStore!,
-      installId: _deviceService.installId,
-      notify: ({required ticketId, required body}) => widget.notificationService.showSupportReplyNotification(
-        ticketId: ticketId,
-        title: tr('support_reply_notif_title'),
-        body: body,
-      ),
-    );
-    await _supportChecker!.check();
+    if (_checkingSupportReplies) return;
+    _checkingSupportReplies = true;
+    try {
+      _supportSeenStore ??= await SupportSeenStore.load();
+      // The Android background isolate may have written a new seen/notified
+      // watermark since this store was created — resync every time, or a
+      // reply it already notified about while the app was backgrounded gets
+      // notified again on resume. See SupportSeenStore.reload().
+      await _supportSeenStore!.reload();
+      _supportChecker ??= SupportReplyChecker(
+        api: SupabaseSupportApi(),
+        store: _supportSeenStore!,
+        installId: _deviceService.installId,
+        notify: ({required ticketId, required body}) => widget.notificationService.showSupportReplyNotification(
+          ticketId: ticketId,
+          title: tr('support_reply_notif_title'),
+          body: body,
+        ),
+      );
+      await _supportChecker!.check();
+    } finally {
+      _checkingSupportReplies = false;
+    }
   }
 
   void _handleNotificationTap() {
@@ -303,6 +311,7 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
     } else if (type == 'support') {
       SupportSeenStore.load().then((store) {
         if (!mounted) return;
+        nav.push(MaterialPageRoute(builder: (_) => SupportScreen(authService: _authService)));
         nav.push(MaterialPageRoute(
           builder: (_) => SupportThreadScreen(
             ticketId: id,

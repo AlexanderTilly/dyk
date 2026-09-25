@@ -89,7 +89,7 @@ class _SupportThreadScreenState extends State<SupportThreadScreen> {
   }
 
   String get _trimmed => _reply.text.trim();
-  bool get _canSend => !_sending && _trimmed.isNotEmpty && _trimmed.length <= maxChars;
+  bool get _canSend => !_sending && _thread != null && _trimmed.isNotEmpty && _trimmed.length <= maxChars;
 
   Future<void> _send() async {
     final body = _trimmed;

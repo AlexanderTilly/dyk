@@ -96,6 +96,12 @@ class GeofenceTaskHandler extends TaskHandler {
   }
 
   Future<void> _check() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+
+    _tick++;
+    if (_tick % _supportEveryTicks == 0) await _checkSupportReplies(prefs);
+
     Position pos;
     try {
       pos = await Geolocator.getCurrentPosition(
@@ -104,12 +110,6 @@ class GeofenceTaskHandler extends TaskHandler {
     } catch (_) {
       return;
     }
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-
-    _tick++;
-    if (_tick % _supportEveryTicks == 0) await _checkSupportReplies(prefs);
 
     // Steps explored: accumulate GPS movement (the active-tour screen counts
     // its own while 'tour_active' is set, so we skip to avoid double counts).
