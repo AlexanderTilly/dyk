@@ -62,7 +62,7 @@ A trigger `support_messages_set_status` **after insert** on `support_messages`:
 | Who | May |
 |---|---|
 | Admin (`is_admin()`) | select, insert, update, delete — everything, as on `support_tickets` today |
-| Signed-in customer | select and insert where the parent ticket's `user_id = auth.uid()`; inserts must have `author = 'customer'` and `author_user_id is null` (enforced in the policy's `with check`) |
+| Signed-in customer | select and insert where the parent ticket's `user_id = auth.uid()`; inserts must have `author = 'customer'` and `author_user_id is null` (enforced in the policy's `with check`). Requires an owner-select policy on `support_tickets` (`user_id = auth.uid()`), added in migration 046 — policy subqueries on a table are themselves RLS-filtered. |
 | Guest | nothing directly — see the RPCs below |
 | `michelle_ro` (if the role exists) | select — a `michelle_read` policy, created inside a `do $$ … if exists (select 1 from pg_roles where rolname = 'michelle_ro') … $$` block so the migration runs on a database where Michelle's role was never created |
 
