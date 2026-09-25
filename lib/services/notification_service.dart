@@ -139,4 +139,31 @@ class NotificationService {
       payload: 'deal:$dealId',
     );
   }
+
+  /// A staff reply on a support ticket. Tapping routes to the thread
+  /// (payload 'support:<ticketId>', handled in main.dart).
+  Future<void> showSupportReplyNotification({
+    required String ticketId,
+    required String title,
+    required String body,
+  }) async {
+    final androidDetails = AndroidNotificationDetails(
+      'support_channel',
+      'Support',
+      channelDescription: 'Replies from Passim Support',
+      importance: Importance.high,
+      priority: Priority.high,
+      color: dykNotificationColor,
+      colorized: true,
+      largeIcon: dykLargeIcon,
+    );
+    const iosDetails = DarwinNotificationDetails();
+    await _plugin.show(
+      ticketId.hashCode,
+      title,
+      body,
+      NotificationDetails(android: androidDetails, iOS: iosDetails),
+      payload: 'support:$ticketId',
+    );
+  }
 }
