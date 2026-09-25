@@ -49,7 +49,6 @@ const migratedFiles = [
   'lib/widgets/audio_player_widget.dart',
   'lib/widgets/category_badge.dart',
   'lib/widgets/dyk_page_route.dart',
-  'lib/widgets/dyk_puck.dart',
   'lib/widgets/flag_icon.dart',
   'lib/widgets/hotspot_list_tile.dart',
   'lib/widgets/internal_ad_banner.dart',

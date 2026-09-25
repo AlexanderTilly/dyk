@@ -18,13 +18,13 @@ import '../../services/entitlements.dart';
 import '../../services/saved_store.dart';
 import '../../theme/dyk_theme.dart';
 import '../../widgets/category_badge.dart';
-import '../../widgets/dyk_puck.dart';
 import '../../widgets/photo_pin.dart';
 import '../deal_detail_screen.dart';
 import '../hotspot_detail_screen.dart';
 import '../../i18n/i18n.dart';
 import '../../services/step_store.dart';
 import '../../services/map_style.dart';
+import '../../widgets/passim_puck.dart';
 
 const _categoryMeta = {
   'history': ('🏛️', 'History'),
@@ -182,14 +182,7 @@ class _NearbyTabState extends State<NearbyTab> {
     // One look for every map in the app; see lib/services/map_style.dart.
     await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
-    await map.location.updateSettings(LocationComponentSettings(
-      enabled: true,
-      pulsingEnabled: false, // the halo is baked into the puck
-      puckBearingEnabled: true, // compass wedge shows walking direction
-      locationPuck: LocationPuck(
-        locationPuck2D: DefaultLocationPuck2D(topImage: await buildDykPuck()),
-      ),
-    ));
+    await map.location.updateSettings(passimPuckSettings());
   }
 
   // Runs once the style is ready: register icons, load data, add the

@@ -9,9 +9,9 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../i18n/i18n.dart';
 import '../models/hotspot.dart';
 import '../theme/dyk_theme.dart';
-import '../widgets/dyk_puck.dart';
 import '../widgets/photo_pin.dart';
 import '../services/map_style.dart';
+import '../widgets/passim_puck.dart';
 
 const _mapboxToken =
     'pk.eyJ1IjoibGl0dGxld2h5IiwiYSI6ImNtZHJnMjc2bzBoM2EybHNmMWtpNW4xd24ifQ.NMHAZQhN_eP_3wxFUfNhdw';
@@ -109,14 +109,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
     // One look for every map in the app; see lib/services/map_style.dart.
     await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
-    await map.location.updateSettings(LocationComponentSettings(
-      enabled: true,
-      pulsingEnabled: false,
-      puckBearingEnabled: true,
-      locationPuck: LocationPuck(
-        locationPuck2D: DefaultLocationPuck2D(topImage: await buildDykPuck()),
-      ),
-    ));
+    await map.location.updateSettings(passimPuckSettings());
     // Destination pin: the hotspot's own photo (badge-less fallback dot).
     try {
       final mgr = await map.annotations.createPointAnnotationManager();

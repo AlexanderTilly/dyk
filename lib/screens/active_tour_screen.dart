@@ -25,6 +25,7 @@ import '../models/hotspot.dart';
 import '../widgets/photo_pin.dart';
 import 'tour_complete_screen.dart';
 import '../services/map_style.dart';
+import '../widgets/passim_puck.dart';
 
 class ActiveTourScreen extends StatefulWidget {
   final Tour tour;
@@ -410,57 +411,12 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
 
   // ---------- Map setup ----------
 
-  /// DYK puck drawn at runtime: soft gold halo, white ring, gold core and a
-  /// heading wedge — matches the pins and the pulse.
-  Future<Uint8List> _buildPuckImage() async {
-    final rec = ui.PictureRecorder();
-    final canvas = Canvas(rec);
-    const center = Offset(70, 70);
-    // Halo.
-    canvas.drawCircle(
-        center,
-        66,
-        Paint()
-          ..shader = ui.Gradient.radial(center, 66, [
-            PassimColors.brand.withValues(alpha: 0.35),
-            PassimColors.brand.withValues(alpha: 0.0),
-          ]));
-    // Heading wedge (points up; the SDK rotates the image with bearing).
-    final wedge = Path()
-      ..moveTo(70, 14)
-      ..lineTo(56, 44)
-      ..lineTo(84, 44)
-      ..close();
-    canvas.drawPath(wedge, Paint()..color = PassimColors.brand);
-    canvas.drawPath(
-        wedge,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3
-          ..color = PassimColors.ink);
-    // White ring + gold core + dark center dot.
-    canvas.drawCircle(center, 27, Paint()..color = PassimColors.onPhoto);
-    canvas.drawCircle(center, 21, Paint()..color = PassimColors.brand);
-    canvas.drawCircle(center, 7, Paint()..color = PassimColors.ink);
-    final img = await rec.endRecording().toImage(140, 140);
-    final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
-    return bytes!.buffer.asUint8List();
-  }
-
   void _onMapCreated(MapboxMap map) async {
     _map = map;
     // One look for every map in the app; see lib/services/map_style.dart.
     await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
-    await map.location.updateSettings(LocationComponentSettings(
-      enabled: true,
-      pulsingEnabled: false, // the halo is baked into the puck
-      puckBearingEnabled: true,
-      locationPuck: LocationPuck(
-        locationPuck2D: DefaultLocationPuck2D(
-            topImage: await _buildPuckImage()),
-      ),
-    ));
+    await map.location.updateSettings(passimPuckSettings());
     await _addRouteLayers(map);
     // Fixed tours keep the loop hidden until the user reaches the start;
     // flip visibility off here, on again in _setRevealed.
