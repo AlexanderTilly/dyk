@@ -33,6 +33,7 @@ SupportThread sample() => SupportThread(
       messages: [
         SupportMessage(id: 'm1', fromCustomer: true, body: 'the pin is wrong', createdAt: DateTime.utc(2026, 9, 23, 22)),
         SupportMessage(id: 'm2', fromCustomer: false, body: 'We moved it.', createdAt: DateTime.utc(2026, 9, 25, 9)),
+        SupportMessage(id: 'm3', fromCustomer: true, body: 'Great, appreciate it!', createdAt: DateTime.utc(2026, 9, 25, 10)),
       ],
     );
 
@@ -54,7 +55,8 @@ void main() {
     await pump(tester);
     expect(find.text('the pin is wrong'), findsOneWidget);
     expect(find.text('We moved it.'), findsOneWidget);
-    expect(find.text('You'), findsOneWidget);
+    expect(find.text('Great, appreciate it!'), findsOneWidget);
+    expect(find.text('You'), findsNWidgets(2));
     expect(find.text('Passim Support'), findsWidgets); // app bar + bubble label
     expect(find.textContaining('staff'), findsNothing);
     expect(find.textContaining('Michelle'), findsNothing);
