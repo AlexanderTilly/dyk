@@ -52,6 +52,18 @@ class DeviceProfileService {
     };
   }
 
+  /// The device's anonymous install id — the same value recordInstall()
+  /// writes, created here if this runs first. Support tickets carry it so a
+  /// guest can read replies on the same device.
+  Future<String> installId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString('anon_install_id');
+    if (existing != null && existing.isNotEmpty) return existing;
+    final fresh = const Uuid().v4();
+    await prefs.setString('anon_install_id', fresh);
+    return fresh;
+  }
+
   /// Anonymous install record — called on every launch. Best-effort.
   Future<void> recordInstall() async {
     String anonId;
