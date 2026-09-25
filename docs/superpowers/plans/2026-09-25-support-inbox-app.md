@@ -1353,12 +1353,18 @@ Expected: 5 pass, analyzer clean.
 // test/widgets/support_screen_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:palma_app/models/support_ticket.dart';
 import 'package:palma_app/screens/support_screen.dart';
 import 'package:palma_app/services/auth_service.dart';
 import 'package:palma_app/services/support_api.dart';
 import 'package:palma_app/services/support_seen_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// mocktail is already a dev dependency; AuthService.currentUser reads
+/// Supabase.instance.client, which is never initialised in a widget test,
+/// so a real AuthService cannot be constructed here.
+class MockAuthService extends Mock implements AuthService {}
 
 class FakeApi implements SupportApi {
   List<SupportTicketSummary> tickets = [];
@@ -1394,9 +1400,11 @@ Future<FakeApi> pump(WidgetTester tester, {List<SupportTicketSummary>? tickets, 
   final api = FakeApi();
   api.tickets = tickets ?? [];
   api.listError = listError;
+  final auth = MockAuthService();
+  when(() => auth.currentUser).thenReturn(null);
   await tester.pumpWidget(MaterialApp(
     home: SupportScreen(
-      authService: AuthService.forTests(),
+      authService: auth,
       api: api,
       installId: () async => 'install-1234567890',
       seenStore: () async => SupportSeenStore(await SharedPreferences.getInstance()),
@@ -1442,7 +1450,7 @@ void main() {
 }
 ```
 
-`AuthService.forTests()` does not exist yet. Read `lib/services/auth_service.dart`: it wraps a `SupabaseClient`. Add a minimal named constructor **only if** the class cannot be built without Supabase initialisation; the preferred route is to make `SupportScreen` read `authService.currentUser?.email` and `?.id` lazily (it already does) and pass a real `AuthService()` if its constructor does not touch `Supabase.instance` eagerly. Check, then either use `AuthService()` in the test or add `AuthService.forTests()` returning an instance whose `currentUser` is `null` — and document which in the report.
+The test uses `MockAuthService` (mocktail, already a dev dependency) rather than a real `AuthService`, because `AuthService.currentUser` reads `Supabase.instance.client`, which is never initialised in a widget test. `SupportScreen` itself is untouched by this — it only calls `widget.authService.currentUser?.email` / `?.id`, which mocktail's stub answers.
 
 - [ ] **Step 2: Run to verify it fails**
 
@@ -1718,7 +1726,7 @@ class _SupportScreenState extends State<SupportScreen> {
 ```bash
 flutter test test/widgets/support_screen_test.dart
 flutter analyze lib/screens/support_screen.dart
-git add lib/screens/support_screen.dart test/widgets/support_screen_test.dart   # plus lib/services/auth_service.dart only if forTests() was added
+git add lib/screens/support_screen.dart test/widgets/support_screen_test.dart
 git commit -m "feat(support): support screen shows conversations, sends tickets with install_id"
 ```
 Expected: 4 pass, analyzer clean. The two existing call sites compile unchanged (verify with `flutter analyze lib/screens/tabs/profile_tab.dart lib/screens/settings_screen.dart`).
@@ -1945,6 +1953,6 @@ git commit -m "docs: support inbox verified live on Android"
 - §7 release → T9.
 - §8 out of scope: nothing in the plan touches FCM, email, RLS reads, attachments.
 
-**Placeholder scan:** none. Two explicit "check and report" instructions (T6 surface colour, T7 `AuthService.forTests()`) are decisions gated on facts in files the executor can read, each with both outcomes spelled out.
+**Placeholder scan:** none. One explicit "check and report" instruction remains (T6 surface colour), gated on a fact in a file the executor can read, with both outcomes spelled out.
 
 **Type consistency:** `SupportTicketSummary` fields (`id, status, createdAt, lastBody, lastFromCustomer, lastAt, staffCount`) used identically in T3 tests, T4 checker, T7 card. `SupportApi` four methods — same signatures in T2 interface, T4/T6/T7 fakes, T7 `createTicket` call. `SupportSeenStore.watermarks/markSeen/markNotified/isUnseen/load` — T3 definition, T4 checker (`watermarks`, `markNotified`), T6 (`markSeen`), T7 (`isUnseen`, `load`), T8 (`load`). `SupportReplyChecker` constructor named params match T4 and T8. `showSupportReplyNotification({ticketId, title, body})` — T4 definition, T8 call. Prefs keys `support_seen_<id>` / `support_notified_<id>` and UTC ISO values — T3 store and T8 isolate.
