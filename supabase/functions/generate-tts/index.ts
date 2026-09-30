@@ -16,6 +16,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  // Without this the browser hides the x-used-* headers from JavaScript.
+  // Custom response headers are not readable by default, whatever the
+  // server sends — the same rule that makes access-control-allow-origin
+  // itself unreadable.
+  'Access-Control-Expose-Headers':
+    'x-used-voice, x-used-model, x-used-language, x-used-settings, x-chars',
 }
 
 // ElevenLabs per-request limit. Must equal TTS_MAX_CHARS in
@@ -28,17 +34,6 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
-}
-
-// ArrayBuffer → base64 (chunked to avoid call-stack limits on large audio).
-function toBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  const chunk = 0x8000
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk))
-  }
-  return btoa(binary)
 }
 
 Deno.serve(async (req) => {
@@ -125,8 +120,15 @@ Deno.serve(async (req) => {
     if (sentLanguageCode) payload.language_code = sentLanguageCode
 
     // --- ElevenLabs Text-to-Speech ---
+    // The STREAMING endpoint, deliberately. Supabase kills a function that
+    // has sent nothing after 150 seconds — an idle timeout, not a duration
+    // one — and eleven_v3 needs roughly 45ms per character, so anything past
+    // ~3,300 characters used to die before it could answer. Measured: 2,790
+    // characters took 124 seconds. Streaming puts the first bytes on the wire
+    // within a second or two, so the idle clock never runs out; the 400-second
+    // wall clock on Pro then covers even a full 5,000-character text.
     const ttsRes = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream?output_format=mp3_44100_128`,
       {
         method: 'POST',
         headers: {
@@ -143,21 +145,24 @@ Deno.serve(async (req) => {
       return json({ error: `ElevenLabs error (${ttsRes.status}): ${detail}` }, 502)
     }
 
-    const audioBuffer = await ttsRes.arrayBuffer()
-    return json({
-      audio_base64: toBase64(audioBuffer),
-      content_type: 'audio/mpeg',
-      chars: clean.length,
-      // What actually produced this clip. Without it, a voice that drifts —
-      // because a secret changed, or because ElevenLabs silently ignored an
-      // unsupported language_code — can only be diagnosed by reading old
-      // commits and guessing. That happened with Spanish in August 2026.
-      used: {
-        voice_id: voiceId,
-        model_id: modelId,
-        // What was actually sent, not what was asked for.
-        language_code: sentLanguageCode ?? null,
-        voice_settings: voiceSettings,
+    // Piped, not buffered: returning the upstream body hands the headers back
+    // immediately and the audio follows as it is produced. Buffering it here
+    // would reintroduce exactly the wait this change exists to remove.
+    //
+    // What produced the clip travels in headers now, because the body is the
+    // audio. Keeping it matters: a voice that drifts — because a secret
+    // changed, or because ElevenLabs silently ignored an unsupported
+    // language_code — can otherwise only be diagnosed by reading old commits
+    // and guessing. That happened with Spanish in August 2026.
+    return new Response(ttsRes.body, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'audio/mpeg',
+        'x-used-voice': voiceId,
+        'x-used-model': modelId,
+        'x-used-language': sentLanguageCode ?? '',
+        'x-used-settings': JSON.stringify(voiceSettings),
+        'x-chars': String(clean.length),
       },
     })
   } catch (e) {
