@@ -85,7 +85,8 @@ const officeScene = ArScene(
   lng: 2.6558,
   views: [
     ArView(
-      bearing: 0,
+      // Measured on the spot with the phone's compass, facing the wall square on.
+      bearing: 279,
       now: 'assets/ar/office/wall_now.jpg',
       then: 'assets/ar/office/wall_then.jpg',
     ),
