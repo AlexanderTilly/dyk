@@ -5,6 +5,8 @@ import '../../models/internal_ad.dart';
 import '../../services/auth_service.dart';
 import '../../services/dyk_repository.dart';
 import '../../services/entitlements.dart';
+import '../../services/ar_scene.dart';
+import '../ar_view_screen.dart';
 import '../../theme/dyk_theme.dart';
 import '../../widgets/internal_ad_banner.dart';
 import '../../widgets/pickpocket_banner.dart';
@@ -185,6 +187,38 @@ class _MoreTabState extends State<MoreTab> {
                           style: const TextStyle(fontWeight: FontWeight.w800)),
                       Text(tr('local_tips_sub'),
                           style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+          ),
+        ),
+        // Time travel — the camera demo. Deliberately plain and deliberately
+        // last: it is one scene shot at one address, not a feature yet.
+        _sectionTitle('Time travel'),
+        GestureDetector(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const ArViewScreen(scene: officeScene))),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: dark ? PassimColors.surface : PassimColors.card,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Text('🕰️', style: TextStyle(fontSize: 26)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('See ${officeScene.title} in ${officeScene.era}',
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                      const Text('Hold the phone up and slide back in time.',
+                          style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),

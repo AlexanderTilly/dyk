@@ -38,6 +38,8 @@ dependencies:
   video_player: ^2.9.1
   geocoding: ^3.0.0
   qr_flutter: ^4.1.0
+  camera: ^0.12.1
+  flutter_compass: ^0.8.1
 
 dev_dependencies:
   flutter_test:
@@ -65,3 +67,4 @@ flutter:
     - assets/images/badges/
     - assets/images/headers/
     - assets/models/
+    - assets/ar/office/
