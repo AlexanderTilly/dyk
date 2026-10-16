@@ -10,6 +10,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import '../../models/hot_deal.dart';
 import '../../models/hotspot.dart';
+import '../../models/subcategories.dart';
 import '../../models/pickpocket_report.dart';
 import '../../services/audio_service.dart';
 import '../../services/auth_service.dart';
@@ -116,6 +117,9 @@ class _NearbyTabState extends State<NearbyTab> {
     'headline',
     'hotdeal',
   };
+  /// Chosen subcategory chips. Empty means "all", so the row starts out
+  /// invisible in effect as well as in appearance.
+  final Set<String> _visibleSubcategories = {};
   String _search = '';
   final _searchCtrl = TextEditingController();
   bool _panelOpen = false;
@@ -165,6 +169,8 @@ class _NearbyTabState extends State<NearbyTab> {
   List<Hotspot> get _filtered => widget.hotspots
       .where((h) =>
           _visibleCategories.contains(h.category) &&
+          matchesSubcategories(
+              h.category, h.subcategory, _visibleSubcategories) &&
           (_search.isEmpty ||
               h.name.toLowerCase().contains(_search.toLowerCase())))
       .toList();
@@ -601,8 +607,75 @@ class _NearbyTabState extends State<NearbyTab> {
       _visibleCategories.contains(c)
           ? _visibleCategories.remove(c)
           : _visibleCategories.add(c);
+      // Dropping a category drops its chips with it. Leaving them selected
+      // would keep narrowing a category nobody can see, and the only clue
+      // would be places missing from the map for no visible reason.
+      final offered = subcategoryChipsFor(_visibleCategories).toSet();
+      _visibleSubcategories.removeWhere((s) => !offered.contains(s));
     });
     _updateSource();
+  }
+
+  void _toggleSubcategory(String s) {
+    setState(() {
+      _visibleSubcategories.contains(s)
+          ? _visibleSubcategories.remove(s)
+          : _visibleSubcategories.add(s);
+    });
+    _updateSource();
+  }
+
+  /// Subcategory chips for whichever selected categories have them.
+  ///
+  /// Hidden entirely when nothing selected has subcategories — an empty row
+  /// of nothing is worse than no row, and today only Leisure has any.
+  Widget _subcategoryRow(bool dark) {
+    final chips = subcategoryChipsFor(_visibleCategories);
+    if (chips.isEmpty) return const SizedBox.shrink();
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        children: [
+          for (final key in chips)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: () => _toggleSubcategory(key),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: _visibleSubcategories.contains(key)
+                        ? DykColors.yellow
+                        : (dark ? PassimColors.surface : PassimColors.card),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _visibleSubcategories.contains(key)
+                          ? DykColors.yellow
+                          : Theme.of(context).dividerColor,
+                    ),
+                  ),
+                  child: Text(
+                    tr('sub_$key'),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      // On the amber pill the text is always ink; off it, the
+                      // theme decides.
+                      color: _visibleSubcategories.contains(key)
+                          ? PassimColors.ink
+                          : Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -805,6 +878,7 @@ class _NearbyTabState extends State<NearbyTab> {
                         ],
                       ),
                     ),
+                    _subcategoryRow(dark),
                   ],
                 ),
         ),
