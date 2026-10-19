@@ -86,9 +86,13 @@ Skriv på **engelska**. Besökaren är en turist i Palma, inte en svensk.
 ## 9. Öppna frågor till ägaren
 
 - Heter varumärket **Passim** eller **Passim Experience**? Appen heter Passim
-  överallt i dag — i gränssnittet, i paketnamnet, i loggan.
-- Vilken domän? `passimexplore.com` har diskuterats. Sajten ska **inte**
-  läggas på `diduknow.app`.
+  överallt i dag — i gränssnittet, i paketnamnet, i loggan. Domänen
+  `passimexplore.com` tvingar inget: skriv **Passim** i rubriker och logga,
+  och låt adressen vara en adress. Två namn i omlopp kostar igenkänning
+  och vinner ingenting.
+- ~~Vilken domän?~~ **Avgjort: `passimexplore.com`.** Registrerad och i dag
+  parkerad hos Loopia, alltså ledig att peka om utan att något rivs.
+  Sajten ska **inte** läggas på `diduknow.app`.
 - Finns appen i App Store och Google Play när sidan går live? Utan
   butikslänkar har sidan ingen uppmaning att ge.
 
