@@ -3,258 +3,298 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Passim — Walk. The story starts itself.</title>
-<meta name="description" content="A GPS audio guide for Palma de Mallorca. Put your headphones in and walk: when you reach somewhere with a story, it starts playing. 149 places, four languages, free.">
+<title>Passim — Just walk. The stories find you.</title>
+<meta name="description" content="Discover Palma de Mallorca through audio stories that play automatically as you walk. 149 places, four languages, free to explore.">
 <link rel="canonical" href="https://passimexplore.com/">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://passimexplore.com/">
-<meta property="og:title" content="Passim — Walk. The story starts itself.">
-<meta property="og:description" content="A GPS audio guide for Palma de Mallorca. 149 places, four languages, free.">
-<meta property="og:image" content="https://passimexplore.com/assets/hero.webp">
+<meta property="og:title" content="Passim — Just walk. The stories find you.">
+<meta property="og:description" content="Audio stories that play automatically as you walk Palma. 149 places, four languages, free.">
+<meta property="og:image" content="https://passimexplore.com/assets/palma-hero.webp">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#071A2F">
 
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/assets/pin-history.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="image" href="/assets/hero.webp">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="/assets/palma-hero.webp" fetchpriority="high">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="site-head">
-  <img class="wordmark" src="/assets/passim-logo.webp" alt="Passim" width="140" height="56">
-  <a class="ghost-btn" href="#get">Get the app</a>
+<header class="nav" data-nav>
+  <a class="brand" href="/" aria-label="Passim">
+    <img src="/assets/pin-amber.svg" alt="" width="26" height="34">
+    <span>passim<i>.</i></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#explore">Explore Palma</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="btn btn-amber nav-cta" href="#get">Download the app</a>
 </header>
 
 <main id="main">
 
-  <!-- ───────────────────────── hero ───────────────────────── -->
+  <!-- ═══════════════════ hero ═══════════════════ -->
   <section class="hero">
-    <div class="hero-art" aria-hidden="true"></div>
+    <div class="hero-photo" aria-hidden="true"></div>
 
-    <div class="hero-inner">
-      <p class="eyebrow">Palma de Mallorca</p>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Palma audio guide</p>
+        <h1>Just&nbsp;walk.<br>The <span>stories</span><br>find&nbsp;you.</h1>
+        <p class="lede">
+          Discover Palma through audio stories that play automatically as you
+          explore. No planning. No searching. Just put on your headphones and go.
+        </p>
 
-      <h1>Walk.<br><em>The story starts itself.</em></h1>
+        <ul class="facts">
+          <li>
+            <img src="/assets/pin-amber.svg" alt="" width="20" height="26">
+            <span><strong>149 places</strong>in Palma</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 0 0-7 7v4.5A3.5 3.5 0 0 0 8.5 18H9a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2v-2a5 5 0 0 1 10 0v2h-2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h.5a3.5 3.5 0 0 0 3.5-3.5V10a7 7 0 0 0-7-7z"/></svg>
+            <span><strong>4 languages</strong>EN · ES · CA · DE</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-1.6a3.2 3.2 0 0 0-.5-3.5 3.3 3.3 0 0 0-4.6 0L12 4.7l-1.3-1.2a3.3 3.3 0 0 0-4.6 0A3.2 3.2 0 0 0 5.6 7H4a1 1 0 0 0-1 1v3h8V8h2v3h8V8a1 1 0 0 0-1-1zM4 20a1 1 0 0 0 1 1h6v-8H4zm9 1h6a1 1 0 0 0 1-1v-7h-7z"/></svg>
+            <span><strong>Free</strong>to explore</span>
+          </li>
+        </ul>
 
-      <p class="lede">
-        Headphones in, phone in your pocket. When you reach somewhere with a
-        story, you hear it — no searching, no QR codes, no knowing it was
-        there.
-      </p>
-
-      <!-- The point of the whole page: it plays. -->
-      <div class="player" data-player>
-        <button class="play" type="button"
-                data-play
-                data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/77/narration_en_1789377653993.mp3"
-                aria-label="Play the story of The Walled-In Lady of La Seu">
-          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
-          <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
-        </button>
-
-        <div class="player-text">
-          <span class="player-label">Hear one now</span>
-          <strong>The Walled-In Lady of La Seu</strong>
-          <span class="player-sub">The woman who chose to live behind stone</span>
-        </div>
-
-        <div class="wave" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <div class="cta-row" id="get">
+          <a class="store" href="#" data-store="ios">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .7 1.1 1.6 2.3 2.8 2.3 1.1 0 1.5-.7 2.9-.7s1.7.7 2.9.7 2-1.1 2.7-2.1c.9-1.2 1.2-2.4 1.2-2.4s-2.3-.9-2.3-3.5zM14.2 5.4c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.8-.9 2.8 1 .1 2-.5 2.6-1.3z"/></svg>
+            <span><small>Download on the</small>App Store</span>
+          </a>
+          <a class="store" href="#" data-store="android">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 2.2a1 1 0 0 0-.5.9v17.8a1 1 0 0 0 .5.9l9.3-9.8zm10.7 8.1 2.9-3-9.9-5.6zm0 3.4 2.9 3.1-9.9 5.6zm1.4-1.5 3.6-1.9c.7-.4.7-1.3 0-1.7l-3.5-2-3.5 3.7z"/></svg>
+            <span><small>Get it on</small>Google Play</span>
+          </a>
         </div>
       </div>
 
-      <div class="cta-row" id="get">
-        <a class="store" href="#" data-store="ios">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .7 1.1 1.6 2.3 2.8 2.3 1.1 0 1.5-.7 2.9-.7s1.7.7 2.9.7 2-1.1 2.7-2.1c.9-1.2 1.2-2.4 1.2-2.4s-2.3-.9-2.3-3.5zM14.2 5.4c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.8-.9 2.8 1 .1 2-.5 2.6-1.3z"/></svg>
-          <span><small>Download on the</small>App Store</span>
-        </a>
-        <a class="store" href="#" data-store="android">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 2.2a1 1 0 0 0-.5.9v17.8a1 1 0 0 0 .5.9l9.3-9.8zm10.7 8.1 2.9-3-9.9-5.6zm0 3.4 2.9 3.1-9.9 5.6zm1.4-1.5 3.6-1.9c.7-.4.7-1.3 0-1.7l-3.5-2-3.5 3.7z"/></svg>
-          <span><small>Get it on</small>Google Play</span>
-        </a>
+      <!-- The app, drawn rather than screenshotted: it stays sharp, and it
+           cannot go out of date the way a captured screen does. -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <img class="phone-bg" src="/assets/phone-bg.webp" alt="" width="393" height="831" loading="eager">
+            <div class="phone-top">
+              <img src="/assets/pin-amber.svg" alt="" width="14" height="18">
+              <span>passim<i>.</i></span>
+            </div>
+
+            <div class="phone-card">
+              <p class="np">Now playing nearby</p>
+              <strong>La Seu Cathedral</strong>
+              <span>A symbol through the centuries</span>
+              <div class="phone-bar"><i></i></div>
+              <div class="phone-times"><span>0:00</span><span>-3:24</span></div>
+            </div>
+
+            <div class="phone-tabs">
+              <span class="on">Explore</span><span>Map</span><span>Saved</span><span>Settings</span>
+            </div>
+          </div>
+        </div>
+        <p class="phone-note">Stories play<br>automatically<br>as you walk.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ hear a real one ═══════════════ -->
+  <section class="band cream" id="explore">
+    <div class="wrap listen-grid">
+      <div>
+        <p class="eyebrow dark">A real story from Palma</p>
+        <h2>Hear what you've<br>been walking past.</h2>
+        <p class="body-text">
+          Stand in front of La Seu and listen to the story of the woman who
+          chose to live behind its stone. Our stories are written for the place
+          you're in, and narrated by real voices.
+        </p>
+
+        <div class="story" data-player>
+          <img src="/assets/card-laseu.webp" alt="" width="84" height="84" loading="lazy">
+          <button class="play" type="button" data-play
+                  data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/77/narration_en_1789377653993.mp3"
+                  aria-label="Play the story of The Walled-In Lady of La Seu">
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
+          </button>
+          <div class="story-text">
+            <strong>The Walled-In Lady of La Seu</strong>
+            <span>The woman who chose to live behind stone</span>
+            <div class="wave" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+          </div>
+          <span class="story-time" data-time>0:00</span>
+        </div>
       </div>
 
-      <p class="fineprint">Free. No account. 149 places in Palma, in four languages.</p>
-    </div>
-  </section>
-
-  <!-- ───────────────────── how it works ───────────────────── -->
-  <section class="band">
-    <div class="wrap">
-      <h2>There is nothing to plan</h2>
-      <ol class="steps">
-        <li>
-          <span class="num">01</span>
-          <h3>Put your headphones in</h3>
-          <p>Open Passim once and put the phone away. It keeps listening for
-             where you are, not for what you type.</p>
-        </li>
-        <li>
-          <span class="num">02</span>
-          <h3>Walk wherever you like</h3>
-          <p>No route, no meeting point, no guide holding an umbrella. Turn
-             down the street that looks interesting.</p>
-        </li>
-        <li>
-          <span class="num">03</span>
-          <h3>The story finds you</h3>
-          <p>Reach somewhere with a history and it begins — narrated, in
-             your language, at the spot it happened.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ───────────────────────  listen  ──────────────────────── -->
-  <section class="band alt">
-    <div class="wrap">
-      <h2>What Palma sounds like</h2>
-      <p class="band-lede">Four of the hundred and forty-nine. Press one.</p>
-
-      <ul class="clips">
-        <li class="clip" data-player>
-          <button class="play sm" type="button" data-play
-                  data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/61/narration_en_1790793152426.mp3"
-                  aria-label="Play: Palacio de la Almudaina">
-            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
-          </button>
-          <div>
-            <strong>Palacio de la Almudaina</strong>
-            <span>A thousand years of power at the heart of Palma</span>
+      <ul class="cards">
+        <li data-player>
+          <img src="/assets/card-laseu.webp" alt="La Seu Cathedral" width="280" height="373" loading="lazy">
+          <div class="card-foot">
+            <span>La Seu<br>Cathedral</span>
+            <button class="chip" type="button" data-play
+                    data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/77/narration_en_1789377653993.mp3"
+                    aria-label="Play: La Seu Cathedral">
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
+            </button>
           </div>
         </li>
-        <li class="clip" data-player>
-          <button class="play sm" type="button" data-play
-                  data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/103/narration_en_1790790008245.mp3"
-                  aria-label="Play: Guillem Sagrera">
-            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
-          </button>
-          <div>
-            <strong>Guillem Sagrera</strong>
-            <span>The master who gave Mallorca its greatest Gothic monument</span>
+        <li data-player>
+          <img src="/assets/card-granhotel.webp" alt="Gran Hotel" width="280" height="373" loading="lazy">
+          <div class="card-foot">
+            <span>Palacio de<br>la Almudaina</span>
+            <button class="chip" type="button" data-play
+                    data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/61/narration_en_1790793152426.mp3"
+                    aria-label="Play: Palacio de la Almudaina">
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
+            </button>
           </div>
         </li>
-        <li class="clip" data-player>
-          <button class="play sm" type="button" data-play
-                  data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/65/narration_en_1790789246370.mp3"
-                  aria-label="Play: Faro de Portopi">
-            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
-          </button>
-          <div>
-            <strong>Faro de Portopí</strong>
-            <span>One of the world's oldest working lighthouses</span>
+        <li data-player>
+          <img src="/assets/card-forteza.webp" alt="Can Forteza Rey" width="280" height="373" loading="lazy">
+          <div class="card-foot">
+            <span>Faro de<br>Portopí</span>
+            <button class="chip" type="button" data-play
+                    data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/65/narration_en_1790789246370.mp3"
+                    aria-label="Play: Faro de Portopí">
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
+            </button>
           </div>
         </li>
-        <li class="clip" data-player>
-          <button class="play sm" type="button" data-play
-                  data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/36/narration_en_1785841882849.mp3"
-                  aria-label="Play: Casa Museu Can Marquès">
-            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
-          </button>
-          <div>
-            <strong>Casa Museu Can Marquès</strong>
-            <span>A noble house that kept the life of Palma's aristocracy</span>
+        <li data-player>
+          <img src="/assets/card-corbella.webp" alt="Can Corbella" width="280" height="373" loading="lazy">
+          <div class="card-foot">
+            <span>Casa Museu<br>Can Marquès</span>
+            <button class="chip" type="button" data-play
+                    data-src="https://jqykkyhoxpykhixwgwyw.supabase.co/storage/v1/object/public/hotspot-audio/36/narration_en_1785841882849.mp3"
+                    aria-label="Play: Casa Museu Can Marquès">
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></svg>
+            </button>
           </div>
         </li>
       </ul>
     </div>
   </section>
 
-  <!-- ──────────────────── what you'll find ─────────────────── -->
-  <section class="band">
-    <div class="wrap">
-      <h2>What you'll come across</h2>
-      <ul class="kinds">
-        <li>
-          <img src="/assets/pin-history.webp" alt="" width="64" height="64" loading="lazy">
-          <strong>History</strong>
-          <span>Buildings, works and the people who left a mark.</span>
-        </li>
-        <li>
-          <img src="/assets/pin-headline.webp" alt="" width="64" height="64" loading="lazy">
-          <strong>Stories &amp; Legends</strong>
-          <span>The ones locals tell and no plaque admits to.</span>
-        </li>
-        <li>
-          <img src="/assets/pin-otium.webp" alt="" width="64" height="64" loading="lazy">
-          <strong>Leisure</strong>
-          <span>Restaurants, bars, museums and places to sit down.</span>
-        </li>
-        <li>
-          <img src="/assets/pin-hotdeal.webp" alt="" width="64" height="64" loading="lazy">
-          <strong>Offers</strong>
-          <span>From places nearby, when there is one worth having.</span>
-        </li>
-      </ul>
+  <!-- ═════════════════ the map ═════════════════ -->
+  <section class="band navy">
+    <div class="wrap map-grid">
+      <div class="map-card">
+        <div class="map-pins" id="map-pins" aria-hidden="true"></div>
+        <div class="map-badge"><strong>149 stories</strong><span>in Palma</span></div>
+        <div class="map-chip">
+          <img src="/assets/card-laseu.webp" alt="" width="52" height="52" loading="lazy">
+          <div><strong>La Seu Cathedral</strong><span>A symbol through the centuries</span></div>
+        </div>
+      </div>
+
+      <div>
+        <p class="eyebrow">Explore Palma</p>
+        <h2 class="light">149 places.<br>Countless stories.</h2>
+        <p class="body-text dim">
+          From hidden corners to famous landmarks. History, legends, places to
+          eat and the quiet things in between — spread right across the city.
+        </p>
+        <ul class="kind-row">
+          <li><img src="/assets/pin-history.webp" alt="" width="34" height="34" loading="lazy">History</li>
+          <li><img src="/assets/pin-headline.webp" alt="" width="34" height="34" loading="lazy">Stories &amp; Legends</li>
+          <li><img src="/assets/pin-otium.webp" alt="" width="34" height="34" loading="lazy">Leisure</li>
+          <li><img src="/assets/pin-hotdeal.webp" alt="" width="34" height="34" loading="lazy">Offers</li>
+        </ul>
+      </div>
     </div>
   </section>
 
-  <!-- ───────────────────────  numbers  ─────────────────────── -->
-  <section class="band alt stats-band">
-    <div class="wrap stats">
-      <div><strong>149</strong><span>places in Palma</span></div>
-      <div><strong>4</strong><span>languages: EN · ES · CA · DE</span></div>
-      <div><strong>0</strong><span>minutes of planning</span></div>
+  <!-- ═══════════════ how it works ═══════════════ -->
+  <section class="band cream" id="how">
+    <div class="wrap how-grid">
+      <div>
+        <p class="eyebrow dark">How it works</p>
+        <h2>Simple. Automatic.<br>Nothing to plan.</h2>
+        <ol class="how-steps">
+          <li>
+            <span class="step-n">1</span>
+            <span class="step-ic">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 0 0-7 7v4.5A3.5 3.5 0 0 0 8.5 18H9a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2v-2a5 5 0 0 1 10 0v2h-2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h.5a3.5 3.5 0 0 0 3.5-3.5V10a7 7 0 0 0-7-7z"/></svg>
+            </span>
+            <strong>Put on your headphones.</strong>
+          </li>
+          <li>
+            <span class="step-n">2</span>
+            <span class="step-ic">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 5.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM9.8 8.9 7 10.3 5.5 14 7.4 15l1.2-3 2-1-1.3 5.5L5.6 22h2.3l2.9-4.6.9 4.6h2.2l-1.3-6.6 1.4-5.2 1 2.3 3.7.9.5-2-2.6-.7-1.9-4.4a2 2 0 0 0-2.4-1.1l-3 1z"/></svg>
+            </span>
+            <strong>Start walking.</strong>
+          </li>
+          <li>
+            <span class="step-n">3</span>
+            <span class="step-ic">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.3 7 13 7 13s7-7.7 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+            </span>
+            <strong>Stories find you.</strong>
+          </li>
+        </ol>
+      </div>
+
+      <div class="faq-col" id="faq">
+        <h3>Before you ask</h3>
+        <details>
+          <summary>Is this just an encyclopedia read aloud?</summary>
+          <p>No. Every story is written to be heard standing there, and read by
+             a real narrating voice rather than your phone's.</p>
+        </details>
+        <details>
+          <summary>Do I need a connection?</summary>
+          <p>Yes, for now. Stories stream as you reach them, so you'll want data
+             or a local SIM. Carrying a city offline is on its way.</p>
+        </details>
+        <details>
+          <summary>Will it drain my battery?</summary>
+          <p>It follows your position while you're exploring, which costs
+             something — but you can switch exploring off between walks and the
+             app stops looking entirely.</p>
+        </details>
+        <details>
+          <summary>What does it cost?</summary>
+          <p>Nothing today. Every place in Palma is open, with no account and
+             no card.</p>
+        </details>
+        <details>
+          <summary>Which cities?</summary>
+          <p>Palma de Mallorca is finished and narrated. More are being written
+             — we'd rather have one city done properly than ten of silence.</p>
+        </details>
+      </div>
     </div>
   </section>
 
-  <!-- ─────────────────────────  faq  ───────────────────────── -->
-  <section class="band">
-    <div class="wrap narrow">
-      <h2>Before you ask</h2>
-
-      <details>
-        <summary>Is this just an encyclopedia read aloud?</summary>
-        <p>No. Every story is written to be heard standing there, and read by
-           a real narrating voice rather than your phone's. They are short —
-           the length of the walk to the next corner.</p>
-      </details>
-
-      <details>
-        <summary>Do I need a connection?</summary>
-        <p>Yes, for now. The stories stream as you reach them, so you'll want
-           data or a local SIM. Downloading a city to carry offline is on its
-           way.</p>
-      </details>
-
-      <details>
-        <summary>Will it drain my battery?</summary>
-        <p>It follows your position while you're exploring, which costs
-           something — but you can switch exploring off between walks and the
-           app stops looking entirely.</p>
-      </details>
-
-      <details>
-        <summary>What does it cost?</summary>
-        <p>Nothing today. Every place in Palma is open, with no account and no
-           card.</p>
-      </details>
-
-      <details>
-        <summary>Which cities?</summary>
-        <p>Palma de Mallorca is finished and narrated. More are being written
-           — but we'd rather have one city done properly than ten cities of
-           silence.</p>
-      </details>
-    </div>
-  </section>
-
-  <!-- ─────────────────────── closing cta ───────────────────── -->
+  <!-- ═══════════════ closing cta ═══════════════ -->
   <section class="closer">
-    <div class="wrap">
-      <h2>Palma is waiting, and it talks.</h2>
-      <div class="cta-row center">
+    <div class="closer-photo" aria-hidden="true"></div>
+    <div class="wrap closer-inner">
+      <p class="eyebrow">Palma is waiting</p>
+      <h2 class="light">Download Passim and<br>start exploring for free.</h2>
+      <div class="cta-row">
         <a class="store" href="#" data-store="ios">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .7 1.1 1.6 2.3 2.8 2.3 1.1 0 1.5-.7 2.9-.7s1.7.7 2.9.7 2-1.1 2.7-2.1c.9-1.2 1.2-2.4 1.2-2.4s-2.3-.9-2.3-3.5zM14.2 5.4c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.8-.9 2.8 1 .1 2-.5 2.6-1.3z"/></svg>
           <span><small>Download on the</small>App Store</span>
@@ -264,14 +304,20 @@
           <span><small>Get it on</small>Google Play</span>
         </a>
       </div>
+      <p class="closer-note">Same city. A deeper story.</p>
     </div>
   </section>
 </main>
 
 <footer class="site-foot">
   <div class="wrap foot-inner">
-    <img src="/assets/passim-logo.webp" alt="Passim" width="104" height="42" loading="lazy">
+    <a class="brand small" href="/" aria-label="Passim">
+      <img src="/assets/pin-amber.svg" alt="" width="18" height="24">
+      <span>passim<i>.</i></span>
+    </a>
     <nav>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
       <a href="/privacy/">Privacy</a>
       <a href="mailto:hello@passimexplore.com">Contact</a>
     </nav>
