@@ -1,0 +1,15 @@
+# Netlify / Cloudflare Pages syntax. Loopia ignores this file; if the site
+# lands there instead, the same headers go in .htaccess.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=()
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/styles.css
+  Cache-Control: public, max-age=3600
+/app.js
+  Cache-Control: public, max-age=3600
