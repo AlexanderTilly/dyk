@@ -88,7 +88,9 @@ svg { fill: currentColor; }
 
 .hero-grid {
   width: min(100% - 40px, var(--wrap)); margin-inline: auto;
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  /* The phone column grew; the copy keeps its own measure rather than
+     stretching to fill whatever is left. */
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 470px);
   gap: 40px; align-items: center;
   padding: 136px 0 72px;
 }
@@ -127,23 +129,14 @@ h1 span { color: var(--amber); }
 /* ── the phone ──────────────────────────────────── */
 .phone-wrap { position: relative; justify-self: center; }
 .phone-shot {
-  width: 310px; height: auto;
-  filter: drop-shadow(0 38px 70px rgba(0, 0, 0, .6));
-  transform: rotate(-2.5deg);
+  /* Upright and large. Tilting it read as a stock mockup, and the screen is
+     the one place on this page where the product is actually visible — it
+     earns the room. */
+  width: min(430px, 42vw);
+  height: auto;
+  filter: drop-shadow(0 44px 80px rgba(0, 0, 0, .62));
 }
-
-.phone-note {
-  position: absolute; left: -186px; top: 46px; width: 152px;
-  font-size: 14px; line-height: 1.4; color: var(--on-dark);
-  text-align: right; transform: rotate(-5deg); opacity: .92;
-}
-.phone-note::after {
-  content: ''; position: absolute; right: -46px; bottom: -26px;
-  width: 56px; height: 40px;
-  border-bottom: 2px solid var(--amber); border-right: 2px solid var(--amber);
-  border-radius: 0 0 24px 0; opacity: .75;
-}
-@media (max-width: 1140px) { .phone-note { display: none; } }
+@media (max-width: 1040px) { .phone-shot { width: min(330px, 70vw); } }
 
 /* ── bands ──────────────────────────────────────── */
 .band { padding: 92px 0; }
@@ -347,7 +340,10 @@ h2.light { color: var(--on-dark); }
 /* ── narrow ─────────────────────────────────────── */
 @media (max-width: 1040px) {
   .hero-grid { grid-template-columns: 1fr; padding-top: 118px; }
-  .phone-wrap { display: none; }
+  /* Shown on phones too, below the copy. Most visitors to a travel app's
+     page arrive on a phone, and a picture of the app on a phone is the
+     most persuasive thing here — hiding it exactly there was backwards. */
+  .phone-wrap { margin-top: 34px; }
   .hero-photo::after { background: linear-gradient(180deg, rgba(7,26,47,.82) 0%, rgba(10,35,66,.86) 60%, rgba(7,26,47,.95) 100%); }
   .listen-grid, .map-grid, .how-grid { grid-template-columns: 1fr; gap: 44px; }
   .cards { grid-template-columns: repeat(2, 1fr); }
