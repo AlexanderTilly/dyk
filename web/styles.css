@@ -46,13 +46,12 @@ svg { fill: currentColor; }
 :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 8px; }
 
 /* ── brand lockup ───────────────────────────────── */
-.brand {
-  display: inline-flex; align-items: center; gap: 10px;
-  text-decoration: none; color: inherit;
-}
-.brand span { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
-.brand i { color: var(--amber); font-style: normal; }
-.brand.small span { font-size: 19px; }
+/* The real wordmark, pin above type. It is drawn in white and amber, so it
+   only ever sits on the navy — never on the cream bands. */
+.brand { display: inline-flex; text-decoration: none; }
+.brand img { width: 118px; height: auto; }
+.brand.small img { width: 92px; }
+@media (max-width: 560px) { .brand img { width: 96px; } }
 
 /* ── nav ────────────────────────────────────────── */
 .nav {
@@ -127,49 +126,16 @@ h1 span { color: var(--amber); }
 
 /* ── the phone ──────────────────────────────────── */
 .phone-wrap { position: relative; justify-self: center; }
-.phone {
-  width: 300px; border-radius: 42px; padding: 9px;
-  background: linear-gradient(160deg, #3a3f46, #14171c 55%, #2b3036);
-  box-shadow: 0 40px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07);
-  transform: rotate(-3deg);
+.phone-shot {
+  width: 310px; height: auto;
+  filter: drop-shadow(0 38px 70px rgba(0, 0, 0, .6));
+  transform: rotate(-2.5deg);
 }
-.phone-screen {
-  position: relative; border-radius: 34px; overflow: hidden;
-  aspect-ratio: 9 / 19; background: var(--navy-deep);
-  display: flex; flex-direction: column;
-}
-.phone-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.phone-screen > *:not(.phone-bg) { position: relative; z-index: 1; }
-.phone-screen::after {
-  content: ''; position: absolute; inset: 0; z-index: 0;
-  background: linear-gradient(180deg, rgba(7,26,47,.55), rgba(7,26,47,.25) 40%, rgba(7,26,47,.92));
-}
-
-.phone-top { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 16px 0 0; color: #fff; }
-.phone-top span { font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
-.phone-top i { color: var(--amber); font-style: normal; }
-
-.phone-card {
-  margin: auto 14px 12px; padding: 14px 16px; border-radius: 18px;
-  background: rgba(7,26,47,.82); backdrop-filter: blur(8px);
-  border: 1px solid var(--line-dark); color: #fff; text-align: center;
-}
-.phone-card .np { margin: 0 0 4px; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--on-dark-dim); }
-.phone-card strong { display: block; font-size: 15px; }
-.phone-card span { font-size: 11px; color: var(--on-dark-dim); }
-.phone-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,.2); margin: 12px 0 6px; }
-.phone-bar i { display: block; width: 22%; height: 100%; border-radius: 2px; background: var(--amber); }
-.phone-times { display: flex; justify-content: space-between; font-size: 9px; color: var(--on-dark-dim); }
-
-.phone-tabs { display: flex; justify-content: space-around; padding: 10px 0 16px; font-size: 9px; color: var(--on-dark-dim); }
-.phone-tabs .on { color: var(--amber); font-weight: 700; }
 
 .phone-note {
-  /* Clear of the phone, not on it: measured, because 'looks about right'
-     put it 48px over the screen. */
-  position: absolute; left: -196px; top: 30px; width: 158px; text-align: right;
+  position: absolute; left: -186px; top: 46px; width: 152px;
   font-size: 14px; line-height: 1.4; color: var(--on-dark);
-  transform: rotate(-5deg); opacity: .92;
+  text-align: right; transform: rotate(-5deg); opacity: .92;
 }
 .phone-note::after {
   content: ''; position: absolute; right: -46px; bottom: -26px;
@@ -177,7 +143,7 @@ h1 span { color: var(--amber); }
   border-bottom: 2px solid var(--amber); border-right: 2px solid var(--amber);
   border-radius: 0 0 24px 0; opacity: .75;
 }
-@media (max-width: 1080px) { .phone-note { display: none; } }
+@media (max-width: 1140px) { .phone-note { display: none; } }
 
 /* ── bands ──────────────────────────────────────── */
 .band { padding: 92px 0; }
@@ -254,43 +220,87 @@ h2.light { color: var(--on-dark); }
 .chip:hover { transform: scale(1.12); }
 .chip svg { width: 14px; height: 14px; }
 
-/* ── map block ──────────────────────────────────── */
-.map-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; }
-.map-card {
-  position: relative; border-radius: 22px; overflow: hidden;
-  aspect-ratio: 4 / 3; border: 1px solid var(--line-dark);
-  background:
-    radial-gradient(circle at 30% 70%, rgba(27,70,115,.55), transparent 60%),
-    linear-gradient(150deg, #123152, #0b1f35 100%);
-  background-color: #10273f;
-}
-.map-pins { position: absolute; inset: 0; }
-.map-pins i {
-  position: absolute; width: 16px; height: 21px; transform: translate(-50%, -100%);
-  background: var(--amber);
-  clip-path: path('M8 0C3.6 0 0 3.6 0 8c0 5.8 7 13 8 13s8-7.2 8-13c0-4.4-3.6-8-8-8z');
-  opacity: .92;
-}
-.map-badge {
-  position: absolute; left: 50%; top: 32%; transform: translate(-50%, -50%);
-  background: #fff; color: var(--ink); border-radius: 12px; padding: 9px 16px;
-  text-align: center; box-shadow: 0 10px 26px rgba(0,0,0,.3);
-}
-.map-badge strong { display: block; font-size: 15px; }
-.map-badge span { font-size: 11px; color: var(--ink-soft); }
-.map-chip {
-  position: absolute; right: 16px; bottom: 16px; left: 16px;
-  display: flex; align-items: center; gap: 12px;
-  background: #fff; color: var(--ink); border-radius: 14px; padding: 10px;
-  box-shadow: 0 12px 30px rgba(0,0,0,.35);
-}
-.map-chip img { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; }
-.map-chip strong { display: block; font-size: 14px; }
-.map-chip span { font-size: 11px; color: var(--ink-soft); }
+/* ── explore: the real map ──────────────────────── */
+.explore { background: var(--navy); padding: 92px 0 0; }
+.explore-head { padding-bottom: 36px; max-width: 720px; }
+.explore h2 span { color: var(--amber); }
 
-.kind-row { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px 26px; }
-.kind-row li { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; color: var(--on-dark); }
-.kind-row img { width: 32px; height: 32px; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 999px; cursor: pointer;
+  font-size: 14px; font-weight: 600; font-family: inherit;
+  background: rgba(255, 255, 255, .06); color: var(--on-dark);
+  border: 1px solid var(--line-dark);
+  transition: background .18s, color .18s, border-color .18s;
+}
+.pill img { width: 20px; height: 20px; }
+.pill:hover { border-color: rgba(255, 194, 26, .5); }
+.pill.is-on { background: var(--amber); color: var(--navy-deep); border-color: var(--amber); }
+
+/* The stage holds the artwork, the map and the card, so the card is inside
+   whatever the map is doing rather than floating next to it. */
+.map-stage { position: relative; height: min(76vh, 680px); overflow: hidden; }
+.map-fallback {
+  position: absolute; inset: 0;
+  background: url('/assets/map-fallback.webp') center / cover no-repeat;
+  transition: opacity .6s;
+}
+.map-stage.is-ready .map-fallback { opacity: 0; }
+/* Two classes deep on purpose. Mapbox's own stylesheet sets
+   .mapboxgl-map { position: relative }, it loads after this one, and at
+   equal specificity the later rule wins — which collapsed the map to zero
+   height and left Mapbox drawing into its 300px default, off-stage. */
+.map-stage .map-canvas { position: absolute; inset: 0; opacity: 0; transition: opacity .6s; }
+.map-stage.is-ready .map-canvas { opacity: 1; }
+/* If Mapbox never arrives the artwork simply stays, and the hint goes: there
+   is nothing to tap. */
+.map-stage.map-failed .map-hint { display: none; }
+
+.map-hint {
+  position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+  margin: 0; padding: 9px 18px; border-radius: 999px;
+  background: rgba(7, 26, 47, .82); backdrop-filter: blur(8px);
+  border: 1px solid var(--line-dark);
+  font-size: 13px; color: var(--on-dark-dim); pointer-events: none;
+  transition: opacity .3s;
+}
+.map-stage.has-card .map-hint { opacity: 0; }
+
+.place-card {
+  position: absolute; right: 22px; top: 22px; width: 320px; z-index: 5;
+  background: rgba(7, 26, 47, .93); backdrop-filter: blur(14px);
+  border: 1px solid var(--line-dark); border-radius: 18px; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+}
+.place-card > img { width: 100%; height: 170px; object-fit: cover; }
+.place-close {
+  position: absolute; right: 10px; top: 10px; z-index: 2;
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  border: none; background: rgba(7, 26, 47, .75); color: #fff;
+  font-size: 20px; line-height: 1; display: grid; place-items: center;
+}
+.place-close:hover { background: var(--amber); color: var(--navy-deep); }
+.place-body { padding: 16px 18px 18px; }
+.place-body h3 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 800; letter-spacing: -.01em; }
+.place-cat { display: flex; align-items: center; gap: 7px; margin: 0 0 8px; font-size: 12px; color: var(--amber); font-weight: 600; }
+.place-cat img { width: 20px; height: 20px; }
+.place-sub { margin: 0 0 14px; font-size: 13px; color: var(--on-dark-dim); line-height: 1.45; }
+.place-player { display: flex; align-items: center; gap: 12px; }
+.place-time { font-size: 12px; color: var(--on-dark-dim); font-variant-numeric: tabular-nums; }
+.place-player .wave { flex: 1; margin-top: 0; }
+.place-player .wave i { background: rgba(255, 255, 255, .3); }
+
+/* Mapbox's own chrome, dressed to match. */
+.mapboxgl-ctrl-group { background: rgba(7, 26, 47, .85) !important; border: 1px solid var(--line-dark); }
+.mapboxgl-ctrl-group button + button { border-top: 1px solid var(--line-dark); }
+.mapboxgl-ctrl-icon { filter: invert(1) brightness(1.6); }
+
+@media (max-width: 760px) {
+  .map-stage { height: 72vh; }
+  .place-card { left: 14px; right: 14px; top: auto; bottom: 14px; width: auto; }
+  .place-card > img { height: 120px; }
+}
 
 /* ── how it works + faq ─────────────────────────── */
 .how-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
@@ -351,3 +361,39 @@ h2.light { color: var(--on-dark); }
   .story-time { display: none; }
   .foot-inner { justify-content: center; text-align: center; }
 }
+
+/* ── cities ─────────────────────────────────────── */
+.cities { list-style: none; margin: 34px 0 0; padding: 0; display: grid; gap: 16px; grid-template-columns: 1.6fr repeat(3, 1fr); align-items: stretch; }
+
+.city.live a { display: block; position: relative; border-radius: var(--r); overflow: hidden; height: 100%; text-decoration: none; color: #fff; }
+.city.live img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.city.live:hover img { transform: scale(1.04); }
+.city-foot {
+  position: absolute; inset: auto 0 0 0; padding: 18px;
+  background: linear-gradient(180deg, transparent, rgba(7, 26, 47, .92));
+  display: flex; flex-direction: column; gap: 3px;
+}
+.city-flag {
+  align-self: flex-start; margin-bottom: 4px;
+  background: var(--amber); color: var(--navy-deep);
+  font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 999px;
+}
+.city-foot strong { font-size: 1.2rem; }
+.city-meta { font-size: 12px; color: var(--on-dark-dim); }
+
+/* The unfinished ones are deliberately flat and unclickable. Dressing them up
+   as cards would promise a page that does not exist. */
+.city.soon {
+  display: grid; place-items: center; min-height: 150px;
+  border: 1px dashed var(--line-dark); border-radius: var(--r);
+  background: rgba(255, 255, 255, .02); text-align: center;
+}
+.city.soon strong { display: block; font-size: 1.05rem; color: var(--on-dark); }
+.city.soon span { font-size: 12px; color: var(--on-dark-dim); }
+
+.closer-note a { color: var(--amber); text-decoration: none; font-style: normal; font-weight: 600; }
+.closer-note a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) { .cities { grid-template-columns: repeat(2, 1fr); } .city.live { grid-column: 1 / -1; min-height: 260px; } }
+@media (max-width: 520px) { .cities { grid-template-columns: 1fr; } }

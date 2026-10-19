@@ -72,20 +72,11 @@
     if (!audio.ended && audio.currentTime > 0) stop()
   })
 
-  // ── the map's pins ───────────────────────────────────────
-  // Scattered rather than real coordinates: this is a picture of a city full
-  // of stories, not a map anyone navigates by. Fixed positions, because pins
-  // that land somewhere new on every reload look like a bug.
-  const pins = document.getElementById('map-pins')
-  if (pins) {
-    const spots = [
-      [18, 30], [27, 52], [34, 22], [41, 68], [46, 38], [52, 18],
-      [57, 58], [63, 30], [68, 74], [72, 44], [78, 26], [83, 62],
-      [24, 76], [37, 44], [60, 82], [88, 40], [14, 58], [49, 60],
-    ]
-    pins.innerHTML = spots
-      .map(([x, y]) => `<i style="left:${x}%;top:${y}%"></i>`)
-      .join('')
+  window.passimAudio = {
+    stop() {
+      audio.pause()
+      stop()
+    },
   }
 
   const year = document.querySelector('[data-year]')
