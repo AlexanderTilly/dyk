@@ -23,8 +23,12 @@ Then open <http://localhost:4399>.
 | `app.js` | one shared audio element, plus the map's pins |
 | `privacy/` | **skeleton, not legal text** — see below |
 | `assets/` | Palma photography, the four map pins, the brand pin |
-| `_headers` | Netlify / Cloudflare syntax; Loopia ignores it |
-| `../vercel.json` | serves this folder if the site goes on Vercel |
+| `_headers` | Netlify / Cloudflare syntax; Vercel and Loopia ignore it |
+
+Vercel serves this folder directly: the project's Root Directory is `web`,
+which is also where Vercel looks for `vercel.json` — a copy at the repo root
+would simply never be read.
+| `vercel.json` | headers and clean URLs on Vercel |
 
 ## Before it goes live
 
