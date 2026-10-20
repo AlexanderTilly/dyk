@@ -51,7 +51,7 @@ Deno.test('fewer waypoints than places is an error with no ordering', async () =
   const r = await buildRoute(places, 'loop', 'tok', stub(200, body) as typeof fetch)
   assert('error' in r)
   assert(r.error.includes('2 waypoints for 4 places'))
-  assertEquals(Object.keys(r), ['error'])
+  assertEquals(Object.keys(r).sort(), ['error', 'structural'])
 })
 
 Deno.test('non-200 reply returns an error carrying the status', async () => {
@@ -73,4 +73,27 @@ Deno.test('a failing fetch never leaks the token', async () => {
   const r = await buildRoute(places, 'loop', 'SECRET', boom as unknown as typeof fetch)
   assert('error' in r)
   assert(!r.error.includes('SECRET'))
+})
+
+Deno.test('start is the first coordinate and is dropped from ordered', async () => {
+  const start = { lat: 39.5, lng: 2.5 }
+  const calls: string[] = []
+  const body = {
+    trips: [{ distance: 3049.6, geometry: {} }],
+    // start + 4 places; places visited in order p2, p0, p1, p3
+    waypoints: [0, 3, 2, 1, 4].map((waypoint_index) => ({ waypoint_index })),
+  }
+  const r = await buildRoute(places, 'loop', 'tok', stub(200, body, calls) as typeof fetch, start)
+  assert(!('error' in r))
+  assert(calls[0].includes('/2.5,39.5;2.65,39.57;'))
+  assertEquals(r.ordered.map((p) => p.id), ['p2', 'p1', 'p0', 'p3'])
+  assertEquals(r.meters, 3050)
+})
+
+Deno.test('waypoint ceiling counts the start', async () => {
+  const calls: string[] = []
+  const eleven = Array.from({ length: 12 }, (_, i) => mk(i))
+  const r = await buildRoute(eleven, 'loop', 'tok', stub(200, {}, calls) as typeof fetch, { lat: 1, lng: 1 })
+  assert('error' in r)
+  assertEquals(calls.length, 0)
 })

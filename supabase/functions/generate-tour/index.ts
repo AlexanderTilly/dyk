@@ -29,13 +29,13 @@ function json(body: unknown, status = 200) {
 
 // Same keys as lib/models/themes.dart; English names for the tour title.
 const THEME_LABELS: Record<string, string> = {
-  food_drink: 'Food & Drink',
-  churches: 'Churches',
-  ghosts: 'Ghosts',
-  walls_gates: 'Walls & Gates',
-  palaces: 'Palaces',
-  old_shops: 'Old Shops',
-  the_sea: 'The Sea',
+  food_drink: 'Food & drink',
+  churches: 'Churches & convents',
+  ghosts: 'Ghosts & legends',
+  walls_gates: 'Walls, gates & towers',
+  palaces: 'Palaces & noble houses',
+  old_shops: 'Old shops & crafts',
+  the_sea: 'The sea & the harbour',
   modernisme: 'Modernisme',
 }
 
@@ -49,6 +49,9 @@ const WALK_KMH = 4.8
 //   budget 2.6 km:  7 stops -> 1.62 km (-19%)
 //   budget 3.2 km:  8 stops -> 1.91 km (-4%, in band)
 //   budget 4.0 km: 10 stops -> 2.38 km (+19%)
+// Re-measured after the start point became the first routed coordinate; 1.6
+// survives. At La Seu, 2 km: x1.0 -> -21%, x1.2 -> -12%, x1.6 -> +6%. At Placa
+// d'Espanya, 2 km: x1.0 and x1.2 both return too_few, x1.6 -> -2%.
 // 1.6x lands in band. Applied only to the selection budget, never to the asked
 // km used for the tolerance check or stored. 3 km one-way saturates at 10 stops
 // / 2.38 km whatever the budget (clamp 10, ghost pool 12); the closest-match
@@ -108,7 +111,15 @@ Deno.serve(async (req) => {
     for (let i = 0; i < CANDIDATES; i++) {
       const seed = baseSeed + i
       const budgetKm = shape === 'one_way' ? km * ONE_WAY_BUDGET : km
-      const pick = pickRound(places, { start, km: budgetKm, theme, exclude, seed })
+      let pick = pickRound(places, { start, km: budgetKm, theme, exclude, seed })
+      if (pick.reason === 'too_few') {
+        // Widen once, here and not inside selectPlaces: selectPlaces stays honest
+        // about its radius, but a pull that returns nothing is an anti-goal when
+        // the person merely stands outside the cluster (a 2 km loop from Placa
+        // d'Espanya, 1.5 km away). Selection is local, so the retry costs no
+        // Mapbox call.
+        pick = pickRound(places, { start, km: budgetKm * 2, theme, exclude, seed })
+      }
       if (pick.reason === 'too_few') {
         return json({
           error: 'too_few',
@@ -116,9 +127,11 @@ Deno.serve(async (req) => {
           theme,
         }, 422)
       }
-      const routed = await buildRoute(pick.places, shape as Shape, token, fetch)
+      const routed = await buildRoute(pick.places, shape as Shape, token, fetch, start)
       if ('error' in routed) {
         lastError = routed.error
+        // Structural failures repeat for every seed; do not pay for five more calls.
+        if (routed.structural) break
         continue
       }
       const dist = Math.abs(routed.meters - askedM) / askedM
