@@ -15,6 +15,9 @@ const _wallsGates = 'walls_gates';
 const _wallsGatesMinKm = 5;
 
 const tourDistancesKm = [1, 2, 3, 5];
+/// How long one pull may hold the lever before it is released regardless.
+const pullTimeout = Duration(seconds: 30);
+
 const tourShapes = ['loop', 'one_way'];
 
 /// The slot machine: Distance, Shape and Theme reels and a lever. It makes no
@@ -57,7 +60,13 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
     if (_pulling || widget.busy) return;
     _pulling = true;
     try {
-      await widget.onGenerate(_km, _shape, _theme);
+      // Backstop above the caller's own network limit (25 s), so a Future
+      // that never completes cannot leave the lever dead.
+      await Future<void>.sync(
+              () => widget.onGenerate(_km, _shape, _theme))
+          .timeout(pullTimeout);
+    } on TimeoutException {
+      // Fall through to release the latch.
     } finally {
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -144,6 +153,7 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
                   value: _theme,
                   onChanged: selectTheme,
                   label: themeLabel,
+                  maxLines: 2,
                 ),
               ),
             ],

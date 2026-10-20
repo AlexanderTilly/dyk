@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:palma_app/screens/tour_generator_screen.dart';
@@ -80,7 +82,7 @@ void main() {
 
   group('TourGeneratorScreen', () {
     Future<void> pump(WidgetTester t,
-        {void Function(int, String, String)? onGenerate,
+        {FutureOr<void> Function(int, String, String)? onGenerate,
         String? city = 'palma',
         Set<String> cities = const {'palma'}}) async {
       await t.pumpWidget(_host(TourGeneratorScreen(
@@ -170,6 +172,58 @@ void main() {
       await t.tap(find.byKey(const Key('lever')));
       expect(n, 2);
     });
+
+    testWidgets('a Future that never completes does not latch the lever',
+        (t) async {
+      var n = 0;
+      await pump(t, onGenerate: (_, __, ___) {
+        n++;
+        return Completer<void>().future;
+      });
+      await t.tap(find.byKey(const Key('lever')));
+      await t.tap(find.byKey(const Key('lever')));
+      expect(n, 1);
+      await t.pump(pullTimeout + const Duration(seconds: 1));
+      await t.pump();
+      await t.tap(find.byKey(const Key('lever')));
+      expect(n, 2);
+      await t.pump(pullTimeout + const Duration(seconds: 1));
+    });
+
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('labels stay >= 14 px at 360 px wide, text scale $scale',
+          (t) async {
+        t.view.physicalSize = const Size(360, 800);
+        t.view.devicePixelRatio = 1;
+        addTearDown(t.view.reset);
+        await t.pumpWidget(MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(
+                size: const Size(360, 800),
+                textScaler: TextScaler.linear(scale)),
+            child: Scaffold(
+              body: TourGeneratorScreen(
+                citypackId: 'palma',
+                narratedCities: const {'palma'},
+                onGenerate: (_, __, ___) {},
+              ),
+            ),
+          ),
+        ));
+        final state = t.state<TourGeneratorScreenState>(
+            find.byType(TourGeneratorScreen));
+        // Walk the theme reel and the shape reel through every label.
+        for (var i = 0; i < 8; i++) {
+          await dragTheme(t, -80);
+          final texts = t.widgetList<Text>(find.descendant(
+              of: find.byType(Reel<String>), matching: find.byType(Text)));
+          for (final x in texts) {
+            expect(x.style!.fontSize, greaterThanOrEqualTo(Reel.labelFloor));
+          }
+        }
+        expect(state.theme, 'modernisme');
+      });
+    }
 
     testWidgets('busy disables the lever and shows the busy label',
         (t) async {

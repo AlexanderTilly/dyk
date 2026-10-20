@@ -13,18 +13,27 @@ class Reel<T> extends StatefulWidget {
   final ValueChanged<T> onChanged;
   final String Function(T) label;
 
+  /// Lines the label may wrap to before it is shrunk or ellipsised.
+  final int maxLines;
+
   const Reel({
     super.key,
     required this.values,
     required this.value,
     required this.onChanged,
     required this.label,
+    this.maxLines = 1,
   });
 
   /// Finger travel that steps one notch. Measured on this Flutter version:
   /// the recogniser reports the full travel including the touch slop (a
   /// 40 px move reports 40 px), so this is what the finger actually moves.
   static const dragThreshold = 24.0;
+
+  /// Design size of the label, and the smallest it is ever shrunk to.
+  /// Past the floor the label is ellipsised rather than made unreadable.
+  static const labelSize = 20.0;
+  static const labelFloor = 14.0;
 
   @override
   State<Reel<T>> createState() => _ReelState<T>();
@@ -64,20 +73,7 @@ class _ReelState<T> extends State<Reel<T>> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _chevron(Icons.keyboard_arrow_up, i < widget.values.length - 1, 1),
-            // Shrink rather than overflow: a long word can't be broken.
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                widget.label(widget.value),
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: PassimColors.brand,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
+            _label(context),
             _chevron(Icons.keyboard_arrow_down, i > 0, -1),
           ],
         ),
@@ -90,4 +86,54 @@ class _ReelState<T> extends State<Reel<T>> {
         child: Icon(icon,
             color: PassimColors.brand.withValues(alpha: enabled ? 1 : 0.2)),
       );
+
+  /// 20 px weight 900 whenever it fits in [Reel.maxLines] lines without
+  /// breaking a word; otherwise shrinks one px at a time down to the floor,
+  /// then ellipsises.
+  Widget _label(BuildContext context) {
+    final text = widget.label(widget.value);
+    final scaler = MediaQuery.textScalerOf(context);
+    return LayoutBuilder(builder: (context, c) {
+      TextStyle style(double size) => TextStyle(
+            color: PassimColors.brand,
+            fontSize: size,
+            fontWeight: FontWeight.w900,
+          );
+      bool fits(double size) {
+        double measure(String t, int lines) {
+          final tp = TextPainter(
+            text: TextSpan(text: t, style: style(size)),
+            textDirection: TextDirection.ltr,
+            textScaler: scaler,
+            maxLines: lines,
+          )..layout(maxWidth: c.maxWidth);
+          return tp.didExceedMaxLines ? double.infinity : tp.width;
+        }
+
+        final longestWord = text
+            .split(' ')
+            .map((w) => TextPainter(
+                  text: TextSpan(text: w, style: style(size)),
+                  textDirection: TextDirection.ltr,
+                  textScaler: scaler,
+                )..layout())
+            .map((tp) => tp.width)
+            .fold<double>(0, (a, b) => a > b ? a : b);
+        return longestWord <= c.maxWidth &&
+            measure(text, widget.maxLines) <= c.maxWidth;
+      }
+
+      var size = Reel.labelSize;
+      while (size > Reel.labelFloor && !fits(size)) {
+        size -= 1;
+      }
+      return Text(
+        text,
+        maxLines: widget.maxLines,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: style(size),
+      );
+    });
+  }
 }
