@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
           citypack_id,
           type: 'custom', // generated tours are distinguishable; 'custom' always satisfies the CHECK
           title,
-          price_sek: 0,
+          price_cents: 0,
           is_published: false,
           is_generated: true,
           // Reel settings and seed only: this row is world-readable, so nothing
