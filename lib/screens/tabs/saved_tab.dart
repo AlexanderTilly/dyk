@@ -13,7 +13,7 @@ import '../../theme/dyk_theme.dart';
 import '../../widgets/hotspot_list_tile.dart';
 import '../../i18n/i18n.dart';
 
-class SavedTab extends StatelessWidget {
+class SavedTab extends StatefulWidget {
   final SavedStore savedStore;
   final List<Hotspot> allHotspots;
   final AudioService audioService;
@@ -23,6 +23,11 @@ class SavedTab extends StatelessWidget {
   final String? cityName;
   final int cityPriceCents;
   final AuthService? authService;
+
+  /// Whether this is the selected tab. The shell keeps every tab alive in an
+  /// IndexedStack, so initState runs once; the kept rounds are reloaded when
+  /// this goes false to true.
+  final bool isActive;
 
   const SavedTab({
     super.key,
@@ -35,14 +40,89 @@ class SavedTab extends StatelessWidget {
     this.cityName,
     this.cityPriceCents = 0,
     this.authService,
+    this.isActive = true,
   });
 
   @override
+  State<SavedTab> createState() => _SavedTabState();
+}
+
+class _SavedTabState extends State<SavedTab> {
+  List<Tour> _rounds = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRounds();
+  }
+
+  @override
+  void didUpdateWidget(SavedTab old) {
+    super.didUpdateWidget(old);
+    if (widget.isActive && !old.isActive) _loadRounds();
+  }
+
+  Future<void> _loadRounds() async {
+    final repo = widget.repo;
+    final auth = widget.authService;
+    if (repo == null || auth == null || !auth.isSignedIn) {
+      if (_rounds.isNotEmpty) setState(() => _rounds = []);
+      return;
+    }
+    final rounds = await repo.loadSavedTours();
+    if (mounted) setState(() => _rounds = rounds);
+  }
+
+  Widget _roundsSection(
+      BuildContext context, DykRepositoryBase repo, AuthService auth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(tr('saved_rounds'),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900)),
+        const SizedBox(height: 8),
+        for (final t in _rounds)
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.route, color: DykColors.yellow),
+              title: Text(t.title),
+              subtitle: t.distanceMeters == null
+                  ? null
+                  : Text(
+                      '${(t.distanceMeters! / 1000).toStringAsFixed(1)} km'
+                      '${t.estMinutes == null ? '' : ' · ${t.estMinutes} min'}'),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => TourDetailScreen(
+                  tour: t,
+                  repo: repo,
+                  authService: auth,
+                  audioService: widget.audioService,
+                ),
+              )),
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final savedStore = widget.savedStore;
+    final audioService = widget.audioService;
+    final repo = widget.repo;
+    final authService = widget.authService;
+    final entitlements = widget.entitlements;
+    final citypackId = widget.citypackId;
+    final cityName = widget.cityName;
+    final cityPriceCents = widget.cityPriceCents;
     return AnimatedBuilder(
       animation: savedStore,
       builder: (context, _) {
-        final saved = allHotspots
+        final saved = widget.allHotspots
             .where((h) => savedStore.isSaved(h.id))
             .toList();
         return ListView(
@@ -62,12 +142,12 @@ class SavedTab extends StatelessWidget {
             Text(tr('saved_sub'),
                 style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 16),
-            if (authService != null && repo != null)
-              SavedRounds(
-                  repo: repo!,
-                  authService: authService!,
-                  audioService: audioService),
-            if (saved.isEmpty)
+            if (_rounds.isNotEmpty && repo != null && authService != null)
+              _roundsSection(context, repo, authService),
+            // Rounds only: the rounds above are the content, so no empty note.
+            if (saved.isEmpty && _rounds.isNotEmpty)
+              const SizedBox.shrink()
+            else if (saved.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(32),
                 child: Center(
@@ -130,78 +210,6 @@ class SavedTab extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-/// The person's kept generated rounds. Omitted entirely when signed out: the
-/// places below are local and need no account, so nothing here may nag.
-class SavedRounds extends StatefulWidget {
-  final DykRepositoryBase repo;
-  final AuthService authService;
-  final AudioService audioService;
-  const SavedRounds({
-    super.key,
-    required this.repo,
-    required this.authService,
-    required this.audioService,
-  });
-
-  @override
-  State<SavedRounds> createState() => _SavedRoundsState();
-}
-
-class _SavedRoundsState extends State<SavedRounds> {
-  List<Tour> _rounds = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    if (!widget.authService.isSignedIn) return;
-    final rounds = await widget.repo.loadSavedTours();
-    if (mounted) setState(() => _rounds = rounds);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!widget.authService.isSignedIn || _rounds.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(tr('saved_rounds'),
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w900)),
-        const SizedBox(height: 8),
-        for (final t in _rounds)
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.route, color: DykColors.yellow),
-              title: Text(t.title),
-              subtitle: t.distanceMeters == null
-                  ? null
-                  : Text(
-                      '${(t.distanceMeters! / 1000).toStringAsFixed(1)} km'
-                      '${t.estMinutes == null ? '' : ' · ${t.estMinutes} min'}'),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => TourDetailScreen(
-                  tour: t,
-                  repo: widget.repo,
-                  authService: widget.authService,
-                  audioService: widget.audioService,
-                ),
-              )),
-            ),
-          ),
-        const SizedBox(height: 16),
-      ],
     );
   }
 }

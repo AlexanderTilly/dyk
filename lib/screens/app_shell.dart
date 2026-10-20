@@ -448,6 +448,7 @@ class _AppShellState extends State<AppShell> {
             cityLng: _activePack?.lng,
           )),
           _refreshable(SavedTab(
+            isActive: _index == 3,
             savedStore: widget.savedStore,
             allHotspots: widget.hotspots,
             audioService: widget.audioService,
