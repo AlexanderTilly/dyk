@@ -36,6 +36,10 @@ abstract class DykRepositoryBase {
   /// Citypack ids that have enough English narration for the tour generator.
   /// Empty when unknown (offline, view missing): the generator stays hidden.
   Future<Set<String>> loadGeneratorCities();
+
+  /// The signed-in person's kept generated rounds, newest first. Empty when
+  /// signed out, offline or on any error (same convention as loadTours).
+  Future<List<Tour>> loadSavedTours();
 }
 
 /// Whether to offer the tour generator in [citypackId]. The set comes from the
@@ -411,6 +415,27 @@ class DykRepository implements DykRepositoryBase {
       }).toList();
     } catch (e) {
       debugPrint('DykRepository.loadTourStops failed: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Tour>> loadSavedTours() async {
+    try {
+      if (_client.auth.currentUser == null) return [];
+      // saved_tours is RLS-limited to the caller's rows (052); the embedded
+      // tours row is readable because generated tours are world-readable (050).
+      final rows = await _client
+          .from('saved_tours')
+          .select('saved_at, tours(*)')
+          .order('saved_at', ascending: false);
+      return [
+        for (final r in rows)
+          if (r['tours'] is Map<String, dynamic>)
+            Tour.fromJson(r['tours'] as Map<String, dynamic>)
+      ];
+    } catch (e) {
+      debugPrint('DykRepository.loadSavedTours failed: $e');
       return [];
     }
   }

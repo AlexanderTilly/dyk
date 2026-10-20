@@ -6,7 +6,9 @@ import '../../services/auth_service.dart';
 import '../../services/dyk_repository.dart';
 import '../../services/entitlements.dart';
 import '../../services/saved_store.dart';
+import '../../models/tour.dart';
 import '../hotspot_detail_screen.dart';
+import '../tour_detail_screen.dart';
 import '../../theme/dyk_theme.dart';
 import '../../widgets/hotspot_list_tile.dart';
 import '../../i18n/i18n.dart';
@@ -60,6 +62,11 @@ class SavedTab extends StatelessWidget {
             Text(tr('saved_sub'),
                 style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 16),
+            if (authService != null && repo != null)
+              SavedRounds(
+                  repo: repo!,
+                  authService: authService!,
+                  audioService: audioService),
             if (saved.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(32),
@@ -123,6 +130,78 @@ class SavedTab extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// The person's kept generated rounds. Omitted entirely when signed out: the
+/// places below are local and need no account, so nothing here may nag.
+class SavedRounds extends StatefulWidget {
+  final DykRepositoryBase repo;
+  final AuthService authService;
+  final AudioService audioService;
+  const SavedRounds({
+    super.key,
+    required this.repo,
+    required this.authService,
+    required this.audioService,
+  });
+
+  @override
+  State<SavedRounds> createState() => _SavedRoundsState();
+}
+
+class _SavedRoundsState extends State<SavedRounds> {
+  List<Tour> _rounds = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    if (!widget.authService.isSignedIn) return;
+    final rounds = await widget.repo.loadSavedTours();
+    if (mounted) setState(() => _rounds = rounds);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.authService.isSignedIn || _rounds.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(tr('saved_rounds'),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900)),
+        const SizedBox(height: 8),
+        for (final t in _rounds)
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.route, color: DykColors.yellow),
+              title: Text(t.title),
+              subtitle: t.distanceMeters == null
+                  ? null
+                  : Text(
+                      '${(t.distanceMeters! / 1000).toStringAsFixed(1)} km'
+                      '${t.estMinutes == null ? '' : ' · ${t.estMinutes} min'}'),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => TourDetailScreen(
+                  tour: t,
+                  repo: widget.repo,
+                  authService: widget.authService,
+                  audioService: widget.audioService,
+                ),
+              )),
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }
