@@ -101,13 +101,13 @@ void main() {
 
       await dragDistance(t, 80); // 5 -> 3
       await t.pump();
-      expect(state.theme, isNot('walls_gates'));
+      expect(state.theme, 'palaces');
       expect(state.availableThemes, contains(state.theme));
 
       await t.tap(find.byKey(const Key('lever')));
       expect(pulls, hasLength(1));
       expect(pulls.single[0], 3);
-      expect(pulls.single[2], isNot('walls_gates'));
+      expect(pulls.single[2], 'palaces');
     });
 
     testWidgets('lever reports the three reel values', (t) async {

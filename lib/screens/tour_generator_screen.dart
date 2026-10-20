@@ -57,11 +57,19 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
 
   void _setDistance(int km) {
     setState(() {
+      final previous = tourThemes.indexOf(_theme);
       _km = km;
       // A pull must never ask for an impossible combination. If the current
-      // theme just left the reel, fall back to the first remaining theme.
+      // theme just left the reel, land on its neighbour in the full theme
+      // order: the next available one forward, else the nearest one back.
       if (!availableThemes.contains(_theme)) {
-        _theme = availableThemes.first;
+        final avail = availableThemes;
+        _theme = tourThemes.skip(previous + 1).firstWhere(avail.contains,
+            orElse: () => tourThemes
+                .take(previous)
+                .toList()
+                .reversed
+                .firstWhere(avail.contains, orElse: () => avail.first));
       }
     });
   }
