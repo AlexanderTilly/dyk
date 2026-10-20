@@ -142,6 +142,7 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
                   value: _shape,
                   onChanged: (v) => setState(() => _shape = v),
                   label: (v) => tr('shape_$v'),
+                  maxLines: 2,
                 ),
               ),
               const SizedBox(width: 10),

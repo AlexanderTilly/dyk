@@ -1,11 +1,30 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palma_app/i18n/i18n.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:palma_app/screens/tour_generator_screen.dart';
 import 'package:palma_app/widgets/reel.dart';
 
 Widget _host(Widget child) => MaterialApp(home: Scaffold(body: child));
+
+/// flutter_test renders every glyph as a full-em Ahem box, which is far wider
+/// than any real text. Load the Roboto the SDK ships (the Android default,
+/// and weight 900 is its Black) so legibility is measured on real widths.
+Future<void> _loadRoboto() async {
+  final root = Platform.environment['FLUTTER_ROOT'] ?? 'C:/flutter/flutter';
+  final loader = FontLoader('Roboto');
+  for (final f in ['regular', 'black']) {
+    final bytes = File('$root/bin/cache/artifacts/material_fonts/roboto-$f.ttf')
+        .readAsBytesSync();
+    loader.addFont(Future.value(ByteData.sublistView(bytes)));
+  }
+  await loader.load();
+}
 
 void main() {
   group('Reel', () {
@@ -222,6 +241,49 @@ void main() {
           }
         }
         expect(state.theme, 'modernisme');
+      });
+    }
+
+    for (final lang in ['en', 'es', 'ca', 'de']) {
+      testWidgets('every label is whole and >= 14 px in $lang at 360 px',
+          (t) async {
+        await _loadRoboto();
+        SharedPreferences.setMockInitialValues({});
+        await I18n.instance.setCode(lang);
+        addTearDown(() => I18n.instance.setCode('en'));
+        t.view.physicalSize = const Size(360, 800);
+        t.view.devicePixelRatio = 1;
+        addTearDown(t.view.reset);
+        await pump(t);
+
+        void check() {
+          for (final f in [
+            find.descendant(
+                of: find.byKey(const Key('reel_shape')),
+                matching: find.byType(Text)),
+            find.descendant(
+                of: find.byKey(const Key('reel_theme')),
+                matching: find.byType(Text)),
+          ]) {
+            final x = t.widget<Text>(f);
+            expect(x.style!.fontSize, greaterThanOrEqualTo(Reel.labelFloor));
+            expect(t.renderObject<RenderParagraph>(f).didExceedMaxLines,
+                isFalse,
+                reason: '"${x.data}" ellipsised in $lang');
+          }
+        }
+
+        // 5 km so walls_gates is on the reel too.
+        await dragDistance(t, -80);
+        await dragDistance(t, -80);
+        for (var i = 0; i < 8; i++) {
+          check();
+          await dragTheme(t, -80);
+        }
+        check();
+        await t.drag(find.byKey(const Key('reel_shape')), const Offset(0, -80));
+        await t.pump();
+        check();
       });
     }
 
