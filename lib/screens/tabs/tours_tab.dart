@@ -175,7 +175,15 @@ class _ToursTabState extends State<ToursTab> {
     if (!live() || !mounted) return;
     _history.add(tour.placeIds);
     if (loc.needsNotice) {
+      // Two places on purpose. The snack bar rides over the detail screen
+      // pushed next, so the person reads why stop one is far away at the
+      // moment they wonder; the tab notice stays for when they come back.
       setState(() => _generatorNotice = tr('tour_no_location'));
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
+        content: Text(tr('tour_no_location')),
+        // Long enough to read a full German sentence.
+        duration: const Duration(seconds: 10),
+      ));
     }
     (widget.onGeneratedTour ?? _openTour)(tour.toTour(city));
   }

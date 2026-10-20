@@ -142,7 +142,9 @@ void main() {
     await t.tap(_lever);
     await t.pumpAndSettle();
     expect(opened, 1);
-    expect(find.text(tr('tour_no_location')), findsOneWidget);
+    // The tab notice and the snack bar (which survives the route change).
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.text(tr('tour_no_location')), findsNWidgets(2));
   });
 
   testWidgets('no connectivity says offline, not a generic failure',
