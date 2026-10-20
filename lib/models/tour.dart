@@ -25,6 +25,10 @@ class Tour {
   final List<Map<String, dynamic>> routeSteps; // precomputed turn-by-turn
   final int sortOrder;
 
+  /// Made by the tour generator (tours.is_generated, migration 050) rather
+  /// than curated. Only these can be kept with Save.
+  final bool isGenerated;
+
   const Tour({
     required this.id,
     required this.citypackId,
@@ -52,6 +56,7 @@ class Tour {
     this.isPick = false,
     this.routeSteps = const [],
     this.sortOrder = 0,
+    this.isGenerated = false,
   });
 
   String get modeIcon => switch (transportMode) {
@@ -97,5 +102,6 @@ class Tour {
         sortOrder: (json['sort_order'] as int?) ?? 0,
         isTrending: (json['is_trending'] as bool?) ?? false,
         isPick: (json['is_pick'] as bool?) ?? false,
+        isGenerated: (json['is_generated'] as bool?) ?? false,
       );
 }

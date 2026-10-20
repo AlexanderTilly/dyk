@@ -5,7 +5,10 @@ import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
+
 import '../models/tour.dart';
+import 'auth_service.dart';
 
 /// How long one generate-tour request may run before it is abandoned.
 ///
@@ -91,6 +94,7 @@ class GeneratedTour {
         distanceMeters: meters,
         estMinutes: minutes,
         routeGeojson: geojson,
+        isGenerated: true,
       );
 
   factory GeneratedTour.fromJson(Map<String, dynamic> j) {
@@ -251,4 +255,49 @@ const tourStartMaxKm = 30;
   if (centre == null) return gps;
   final d = distanceMeters(gps.lat, gps.lng, centre.lat, centre.lng);
   return d > tourStartMaxKm * 1000 ? centre : gps;
+}
+
+/// How a try at keeping a round ended.
+enum SaveResult { saved, needsAccount, failed }
+
+/// Keeps a generated round for the signed-in person.
+///
+/// The auth check comes first and a signed-out caller never reaches [_write]:
+/// generate-tour is unauthenticated, so saved_tours (migration 052) is what
+/// makes a round someone's. RLS there is the second line, not the first.
+class TourKeeper {
+  final bool Function() _isSignedIn;
+  final String? Function() _userId;
+  final Future<void> Function(String userId, String tourId) _write;
+
+  TourKeeper({
+    required bool Function() isSignedIn,
+    required String? Function() userId,
+    required Future<void> Function(String userId, String tourId) write,
+  })  : _isSignedIn = isSignedIn,
+        _userId = userId,
+        _write = write;
+
+  /// Production wiring: upsert on (user_id, tour_id) so a repeat is a no-op.
+  factory TourKeeper.supabase(SupabaseClient client, AuthService auth) =>
+      TourKeeper(
+        isSignedIn: () => auth.isSignedIn,
+        userId: () => auth.currentUser?.id,
+        write: (userId, tourId) => client.from('saved_tours').upsert(
+          {'user_id': userId, 'tour_id': tourId},
+          onConflict: 'user_id,tour_id',
+          ignoreDuplicates: true,
+        ),
+      );
+
+  Future<SaveResult> saveTour(String tourId) async {
+    final uid = _isSignedIn() ? _userId() : null;
+    if (uid == null) return SaveResult.needsAccount;
+    try {
+      await _write(uid, tourId);
+      return SaveResult.saved;
+    } catch (_) {
+      return SaveResult.failed;
+    }
+  }
 }
