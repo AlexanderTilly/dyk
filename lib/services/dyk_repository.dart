@@ -42,6 +42,32 @@ abstract class DykRepositoryBase {
 /// `generator_cities` view (migration 051), which holds the narration
 /// threshold in one place, so no number is repeated here. An empty set means
 /// "no city qualifies (or we could not tell)" and hides it everywhere.
+/// Maps view rows to the set of city ids. Rows whose `citypack_id` is missing
+/// or not a string are skipped rather than crashing or inventing an entry.
+Set<String> generatorCitiesFromRows(Iterable<dynamic> rows) {
+  final out = <String>{};
+  for (final r in rows) {
+    final id = r is Map ? r['citypack_id'] : null;
+    if (id is String && id.isNotEmpty) out.add(id);
+  }
+  return out;
+}
+
+/// Runs [fetch] and maps its rows; any error yields an empty set.
+Future<Set<String>> generatorCitiesFrom(
+    Future<Iterable<dynamic>> Function() fetch) async {
+  try {
+    return generatorCitiesFromRows(await fetch());
+  } catch (e) {
+    // Fail closed. If we cannot tell which cities are narrated (no network,
+    // or migration 051 not applied yet) the safe answer is "none": hiding the
+    // generator costs a missing button, whereas offering it in a silent city
+    // hands a tourist a handsome route with nothing to listen to.
+    debugPrint('DykRepository.loadGeneratorCities failed: $e');
+    return {};
+  }
+}
+
 bool generatorAvailable(String? citypackId, Set<String> cities) =>
     citypackId != null && cities.contains(citypackId);
 
@@ -390,19 +416,8 @@ class DykRepository implements DykRepositoryBase {
   }
 
   @override
-  Future<Set<String>> loadGeneratorCities() async {
-    try {
-      final rows = await _client.from('generator_cities').select('citypack_id');
-      return rows.map<String>((r) => r['citypack_id'] as String).toSet();
-    } catch (e) {
-      // Fail closed. If we cannot tell which cities are narrated (no network,
-      // or migration 051 not applied yet) the safe answer is "none": hiding the
-      // generator costs a missing button, whereas offering it in a silent city
-      // hands a tourist a handsome route with nothing to listen to.
-      debugPrint('DykRepository.loadGeneratorCities failed: $e');
-      return {};
-    }
-  }
+  Future<Set<String>> loadGeneratorCities() => generatorCitiesFrom(
+      () => _client.from('generator_cities').select('citypack_id'));
 
   Future<Set<String>> loadTourProgress(String tourId) async {
     try {

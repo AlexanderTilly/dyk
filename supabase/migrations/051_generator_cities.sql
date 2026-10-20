@@ -16,7 +16,7 @@
 --
 -- Privileges. hotspot_media and hotspots are RLS-protected (a row is readable
 -- only if the place is free or purchased), so a caller's own rights would
--- undercount. The view is therefore left at its default (security_invoker off):
+-- undercount. The view is therefore stated explicitly as security_invoker = false:
 -- it runs with its owner's rights, which bypass RLS, and reports the true
 -- count. It exposes only a citypack id and a number, nothing per-place. The
 -- explicit grant is what lets the anonymous app read it at all.
@@ -26,7 +26,11 @@
 
 begin;
 
-create or replace view public.generator_cities as
+-- Dropped first: create or replace cannot change output columns (42P16).
+drop view if exists public.generator_cities;
+
+create view public.generator_cities
+  with (security_invoker = false) as
 with threshold as (select 20 as min_narrated)
 select h.citypack_id,
        count(distinct h.id)::int as narrated_count

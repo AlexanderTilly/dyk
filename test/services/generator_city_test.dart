@@ -39,6 +39,37 @@ void main() {
       final cities = await repo.loadGeneratorCities();
       expect(cities, isEmpty);
       expect(generatorAvailable('palma', cities), isFalse);
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('a PostgrestException (view missing) yields an empty set', () async {
+      final cities = await generatorCitiesFrom(() => throw const PostgrestException(
+          message: 'relation "public.generator_cities" does not exist',
+          code: '42P01'));
+      expect(cities, isEmpty);
+    });
+  });
+
+  group('generatorCitiesFromRows', () {
+    test('maps a normal response to both ids', () {
+      expect(
+          generatorCitiesFromRows([
+            {'citypack_id': 'a', 'narrated_count': 30},
+            {'citypack_id': 'b', 'narrated_count': 21},
+          ]),
+          {'a', 'b'});
+    });
+    test('empty list gives empty set', () {
+      expect(generatorCitiesFromRows([]), isEmpty);
+    });
+    test('null or non-string ids are skipped, not invented', () {
+      expect(
+          generatorCitiesFromRows([
+            {'citypack_id': null},
+            {'citypack_id': 5},
+            {'other': 'x'},
+            {'citypack_id': 'ok'},
+          ]),
+          {'ok'});
     });
   });
 }
