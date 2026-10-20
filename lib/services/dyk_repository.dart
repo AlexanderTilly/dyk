@@ -32,7 +32,18 @@ abstract class DykRepositoryBase {
   Future<(bool, Set<String>)> getEntitlements();
   Future<String?> unlockCity(String citypackId);
   Future<String?> setPremium();
+
+  /// Citypack ids that have enough English narration for the tour generator.
+  /// Empty when unknown (offline, view missing): the generator stays hidden.
+  Future<Set<String>> loadGeneratorCities();
 }
+
+/// Whether to offer the tour generator in [citypackId]. The set comes from the
+/// `generator_cities` view (migration 051), which holds the narration
+/// threshold in one place, so no number is repeated here. An empty set means
+/// "no city qualifies (or we could not tell)" and hides it everywhere.
+bool generatorAvailable(String? citypackId, Set<String> cities) =>
+    citypackId != null && cities.contains(citypackId);
 
 /// Loads DYK content from Supabase. Returns empty lists when offline so the
 /// app can fall back to bundled content instead of crashing.
@@ -375,6 +386,21 @@ class DykRepository implements DykRepositoryBase {
     } catch (e) {
       debugPrint('DykRepository.loadTourStops failed: $e');
       return [];
+    }
+  }
+
+  @override
+  Future<Set<String>> loadGeneratorCities() async {
+    try {
+      final rows = await _client.from('generator_cities').select('citypack_id');
+      return rows.map<String>((r) => r['citypack_id'] as String).toSet();
+    } catch (e) {
+      // Fail closed. If we cannot tell which cities are narrated (no network,
+      // or migration 051 not applied yet) the safe answer is "none": hiding the
+      // generator costs a missing button, whereas offering it in a silent city
+      // hands a tourist a handsome route with nothing to listen to.
+      debugPrint('DykRepository.loadGeneratorCities failed: $e');
+      return {};
     }
   }
 
