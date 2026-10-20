@@ -6,7 +6,10 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:palma_app/models/themes.dart';
 import 'package:palma_app/screens/tour_generator_screen.dart' show pullTimeout;
+import 'package:palma_app/i18n/i18n.dart';
 import 'package:palma_app/services/tour_generator.dart';
 
 const _ok = {
@@ -40,6 +43,8 @@ Future<GeneratedTour> _call(TourGenerator g, {List<String> exclude = const []}) 
     );
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
   test('a normal reply parses, stops in order', () async {
     final g = _gen(MockClient((r) async => http.Response(
         jsonEncode(_ok), 200,
@@ -143,6 +148,33 @@ void main() {
   test('the whole-pull cap sits between the request and the latch', () {
     expect(tourRunTimeout > tourRequestTimeout, isTrue);
     expect(tourRunTimeout < pullTimeout, isTrue);
+  });
+
+  group('displayed title', () {
+    GeneratedTour round() =>
+        GeneratedTour.fromJson({..._ok, 'meters': 1820}, theme: 'ghosts');
+
+    test('shows the measured distance, not the asked one or the server title',
+        () {
+      final t = round().toTour('palma');
+      expect(t.title, contains('1.8 km'));
+      expect(t.title, isNot(contains('2 km')));
+      expect(t.distanceMeters, 1820);
+    });
+
+    test('the theme name is localised (German)', () async {
+      await I18n.instance.setCode('de');
+      addTearDown(() => I18n.instance.setCode('en'));
+      final title = round().toTour('palma').title;
+      expect(title, '${themeLabel('ghosts')}-Tour, 1.8 km');
+      expect(title, contains('Geister'));
+    });
+
+    test('the reply theme wins over the requested one', () {
+      final r = GeneratedTour.fromJson({..._ok, 'theme': 'churches'},
+          theme: 'ghosts');
+      expect(r.theme, 'churches');
+    });
   });
 
   group('ExcludeHistory', () {

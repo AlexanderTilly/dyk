@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 
 import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
 
+import '../i18n/i18n.dart';
+import '../models/themes.dart';
 import '../models/tour.dart';
 import 'auth_service.dart';
 
@@ -65,6 +67,9 @@ class GeneratedTour {
   final String tourId;
   final String title;
 
+  /// Theme key of the round (from the reply, else the one asked for).
+  final String theme;
+
   /// The MEASURED route length. Show this, never the asked-for distance: a
   /// "2 km" pull may come back at 1.76 km.
   final int meters;
@@ -75,6 +80,7 @@ class GeneratedTour {
   const GeneratedTour({
     required this.tourId,
     required this.title,
+    this.theme = '',
     required this.meters,
     required this.minutes,
     required this.stops,
@@ -86,18 +92,23 @@ class GeneratedTour {
   /// The tour as the existing detail screen wants it. Generated tours are
   /// unpublished; the detail screen reads the stops from the database (RLS
   /// from migration 050).
+  ///
+  /// The shown title is built here, localised, from the theme and the MEASURED
+  /// distance. The server's English title states the asked distance and would
+  /// contradict the distance shown beside it; it stays as the server's record.
   Tour toTour(String citypackId) => Tour(
         id: tourId,
         citypackId: citypackId,
         type: 'custom',
-        title: title,
+        title: generatedTourTitle(theme, meters),
         distanceMeters: meters,
         estMinutes: minutes,
         routeGeojson: geojson,
         isGenerated: true,
       );
 
-  factory GeneratedTour.fromJson(Map<String, dynamic> j) {
+  factory GeneratedTour.fromJson(Map<String, dynamic> j,
+      {String theme = ''}) {
     if ((j['stops'] as List).isEmpty) {
       // A tour with no stops is the blank-tour outcome migration 050 exists
       // to prevent; never hand it to the detail screen.
@@ -116,6 +127,7 @@ class GeneratedTour {
     return GeneratedTour(
       tourId: j['tour_id'] as String,
       title: j['title'] as String,
+      theme: (j['theme'] as String?) ?? theme,
       meters: (j['meters'] as num).round(),
       minutes: (j['minutes'] as num).round(),
       stops: stops,
@@ -201,7 +213,8 @@ class TourGenerator {
         throw TourGenerationFailed('HTTP ${res.statusCode}');
       }
       return GeneratedTour.fromJson(
-          jsonDecode(res.body) as Map<String, dynamic>);
+          jsonDecode(res.body) as Map<String, dynamic>,
+          theme: theme);
     } on TourTooFew {
       rethrow;
     } on TimeoutException {
@@ -301,3 +314,11 @@ class TourKeeper {
     }
   }
 }
+
+/// "Ghosts & legends walk, 1.8 km" in the app's language. One translatable
+/// pattern with placeholders, not words glued in code (word order differs).
+/// Distance uses the app's usual one-decimal kilometre format.
+String generatedTourTitle(String theme, int meters) =>
+    tr('generated_tour_title')
+        .replaceAll('{theme}', themeLabel(theme))
+        .replaceAll('{km}', (meters / 1000).toStringAsFixed(1));
