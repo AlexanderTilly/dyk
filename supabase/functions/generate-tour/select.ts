@@ -47,10 +47,19 @@ export function selectPlaces(
   )
   if (inRadius.length < MIN_STOPS) return { places: [], reason: 'too_few' }
 
-  // Prefer fresh places; fall back to excluded ones only to reach the minimum.
+  // Fresh places always stay in the pool. If fewer than 3 remain, top up with
+  // only as many excluded ones as needed (nearest to the start first). Dropping
+  // the exclusion wholesale would give recent places the same standing as fresh
+  // ones and kill variety across pulls exactly when the pool is small.
   const skip = new Set(opts.exclude)
   const fresh = inRadius.filter((p) => !skip.has(p.id))
-  const pool = fresh.length >= MIN_STOPS ? fresh : inRadius
+  const pool = fresh.slice()
+  if (pool.length < MIN_STOPS) {
+    const back = inRadius
+      .filter((p) => skip.has(p.id))
+      .sort((a, b) => metres(opts.start, a) - metres(opts.start, b) || (a.id < b.id ? -1 : 1))
+    pool.push(...back.slice(0, MIN_STOPS - pool.length))
+  }
 
   const target = Math.min(
     MAX_STOPS,

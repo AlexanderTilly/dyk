@@ -19,6 +19,8 @@ Deno.test('returns between 3 and 10 places', () => {
     const r = selectPlaces(grid, { ...base, km })
     assert(r.places.length >= 3 && r.places.length <= 10, `km=${km} got ${r.places.length}`)
   }
+  assertEquals(selectPlaces(grid, { ...base, km: 20 }).places.length, 10)
+  assertEquals(selectPlaces(grid, { ...base, km: 1 }).places.length, 3)
 })
 Deno.test('too few in radius gives too_few and no places', () => {
   const few = [mk(1, 0.001, 0), mk(2, 0, 0.001), mk(3, 0.5, 0.5)] // third is far away
@@ -49,7 +51,10 @@ Deno.test('excluded places are used only when too few others remain', () => {
   const small = grid.slice(0, 4)
   const r = selectPlaces(small, { ...base, exclude: ['p0', 'p1'] })
   assertEquals(r.reason, undefined)
-  assert(r.places.length >= 3)
+  assertEquals(r.places.length, 3)
+  const got = ids(r.places)
+  assert(got.includes('p2') && got.includes('p3'), 'fresh places must survive the top-up')
+  assertEquals(got.filter((x) => x === 'p0' || x === 'p1').length, 1)
 })
 Deno.test('every place carries the theme', () => {
   const mixed = grid.map((p, i) => (i % 2 ? { ...p, themes: ['ghosts'] } : p))
@@ -60,8 +65,9 @@ Deno.test('every place carries the theme', () => {
 Deno.test('radius grows with km: 1 km ask does not reach 2 km away', () => {
   const far = mk(99, 0.018, 0) // ~2 km north
   const near = [mk(1, 0.001, 0), mk(2, 0, 0.001), mk(3, -0.001, 0), far]
-  const r = selectPlaces(near, { ...base, km: 1 })
-  assert(!r.places.some((p) => p.id === 'p99'))
+  const inside = [mk(1, 0.001, 0), mk(2, 0, 0.001), mk(3, 0.0027, 0)] // 300 m, inside 333 m
+  assertEquals(selectPlaces(inside, { ...base, km: 1 }).reason, undefined)
+  assertEquals(selectPlaces(near.slice(0, 2).concat(far), { ...base, km: 1 }).reason, 'too_few')
   // reachable at the larger radius: with only two near places it is needed to reach 3
   const two = [mk(1, 0.001, 0), mk(2, 0, 0.001), far]
   assertEquals(selectPlaces(two, { ...base, km: 1 }).reason, 'too_few')
