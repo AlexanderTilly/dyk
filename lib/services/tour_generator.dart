@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/tour.dart';
@@ -191,4 +192,28 @@ class TourGenerator {
       throw TourGenerationFailed('$e');
     }
   }
+}
+
+/// Beyond this from the city centre, the phone's position is not a usable
+/// start for a round.
+const tourStartMaxKm = 30;
+
+/// Where a round starts. [gps] is the phone's fix (null if it failed) and
+/// [centre] the city pack's centre (null if unknown).
+///
+/// A tourist planning a trip from home, or testing from another country, has a
+/// perfectly good fix that is nowhere near the city. Starting there makes the
+/// server find nothing and answer "too few", which the app would show as "not
+/// enough places for that theme" - false, the places exist, just far away. So
+/// a fix farther than [tourStartMaxKm] from the centre is replaced by it.
+({double lat, double lng})? chooseTourStart(
+  ({double lat, double lng})? gps,
+  ({double lat, double lng})? centre, {
+  double Function(double, double, double, double) distanceMeters =
+      Geolocator.distanceBetween,
+}) {
+  if (gps == null) return centre;
+  if (centre == null) return gps;
+  final d = distanceMeters(gps.lat, gps.lng, centre.lat, centre.lng);
+  return d > tourStartMaxKm * 1000 ? centre : gps;
 }

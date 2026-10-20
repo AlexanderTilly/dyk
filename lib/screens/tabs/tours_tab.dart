@@ -94,15 +94,16 @@ class _ToursTabState extends State<ToursTab> {
   }
 
   Future<({double lat, double lng})?> _start() async {
+    ({double lat, double lng})? gps;
     try {
       final p = await Geolocator.getCurrentPosition(
               desiredAccuracy: LocationAccuracy.high)
           .timeout(const Duration(seconds: 8));
-      return (lat: p.latitude, lng: p.longitude);
-    } catch (_) {
-      final lat = widget.cityLat, lng = widget.cityLng;
-      return lat != null && lng != null ? (lat: lat, lng: lng) : null;
-    }
+      gps = (lat: p.latitude, lng: p.longitude);
+    } catch (_) {}
+    final lat = widget.cityLat, lng = widget.cityLng;
+    return chooseTourStart(
+        gps, lat != null && lng != null ? (lat: lat, lng: lng) : null);
   }
 
   // The lever. Its Future is handed back to the screen (see onGenerate below),

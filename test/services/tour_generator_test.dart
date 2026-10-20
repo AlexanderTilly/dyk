@@ -138,4 +138,23 @@ void main() {
       expect(h.ids.toSet().length, h.ids.length);
     });
   });
+
+  group('chooseTourStart', () {
+    const centre = (lat: 39.5696, lng: 2.6502);
+    test('a position near the centre is used as-is', () {
+      const gps = (lat: 39.58, lng: 2.66);
+      expect(chooseTourStart(gps, centre), gps);
+    });
+    test('a position far away is replaced by the centre', () {
+      const home = (lat: 59.33, lng: 18.07);
+      expect(chooseTourStart(home, centre), centre);
+    });
+    test('a GPS failure falls back to the centre', () {
+      expect(chooseTourStart(null, centre), centre);
+    });
+    test('no centre known keeps the fix', () {
+      const gps = (lat: 59.33, lng: 18.07);
+      expect(chooseTourStart(gps, null), gps);
+    });
+  });
 }
