@@ -31,11 +31,18 @@ alter table public.tours
 alter table public.tours
   add column if not exists generated_params jsonb;
 
--- Backfill ghosts from the headline category. The guard makes a re-run a
--- no-op rather than rewriting rows that already carry the tag.
+-- Backfill ghosts from the headline category, in Palma only. The guard makes
+-- a re-run a no-op rather than rewriting rows that already carry the tag.
+--
+-- The citypack filter is not tidiness. 'headline' means a different thing in
+-- each city's content: in Palma it is the fifteen ghost stories, elsewhere it
+-- is simply a featured place. Without the filter this tagged 49 hotspots
+-- across fourteen other cities, among them Athens' Syntagma Metro Station —
+-- measured against production on 2026-10-20, after the first run.
 update public.hotspots
    set themes = array_append(themes, 'ghosts')
  where category = 'headline'
+   and citypack_id = 'a1b2c3d4-0000-0000-0000-000000000001'
    and not themes @> array['ghosts'];
 
 -- Generated tours are deliberately unpublished so they stay out of the curated
