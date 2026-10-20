@@ -144,13 +144,10 @@ Deno.serve(async (req) => {
           price_sek: 0,
           is_published: false,
           is_generated: true,
-          // install_id makes rows from this unauthenticated endpoint attributable
-          // and lets a later job sweep generated tours nobody saved. Optional.
-          generated_params: {
-            lat, lng, km, shape, theme, exclude, seed,
-            ...(typeof body.install_id === 'string' ? { install_id: body.install_id } : {}),
-          },
-          distance_meters: routed.meters,
+          // Reel settings and seed only: this row is world-readable, so nothing
+        // personal (no start position, no install id) may go in it.
+        generated_params: { km, shape, theme, seed },
+        distance_meters: routed.meters,
           est_minutes: minutes,
           route_geojson: routed.geojson,
         })
@@ -158,6 +155,15 @@ Deno.serve(async (req) => {
         .single()
       if (tourErr || !tour) return json({ error: `Tour insert failed: ${tourErr?.message}` }, 500)
       tourId = tour.id
+      // install_id makes rows from this unauthenticated endpoint attributable and
+      // lets a later job sweep unsaved generated tours. Kept in a non-public
+      // table (see migration 050). Optional: a missing id still yields a tour.
+      if (typeof body.install_id === 'string') {
+        const { error: instErr } = await admin
+          .from('generated_tour_installs')
+          .insert({ tour_id: tourId, install_id: body.install_id })
+        if (instErr) throw new Error('install insert failed')
+      }
 
       // lat/lng/title are written on the stop itself: the app backfills only name,
       // audio and image from the hotspot, so a stop without coordinates would break
@@ -172,7 +178,7 @@ Deno.serve(async (req) => {
       }))
       const { error: stopErr } = await admin.from('tour_stops').insert(stopRows)
       if (stopErr) {
-        await admin.from('tours').delete().eq('id', tourId) // no half-written tour
+        await admin.from('tours').delete().eq('id', tourId).then(() => {}, () => {}) // no half-written tour
         return json({ error: `Stops insert failed: ${stopErr.message}` }, 500)
       }
 

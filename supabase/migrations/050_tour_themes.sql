@@ -53,6 +53,26 @@ create policy tour_stops_read_generated on public.tour_stops
             where t.id = tour_stops.tour_id and t.is_generated = true)
   );
 
+-- Who generated a tour lives in its own table, not on the tours row. Generated
+-- tours are world-readable so an anonymous caller can walk one back, and RLS is
+-- row-level: that makes EVERY column on the row public. Anything identifying
+-- must therefore live elsewhere. (A column-level revoke on tours would not do:
+-- the app reads tours with select(), i.e. *, which PostgREST expands to all
+-- columns, so anon would get "permission denied" on every tour list.)
+-- RLS on, no anon/authenticated policy: only the service role (the edge
+-- function) writes, and admins read via is_admin().
+create table if not exists public.generated_tour_installs (
+  tour_id uuid primary key references public.tours(id) on delete cascade,
+  install_id text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.generated_tour_installs enable row level security;
+
+drop policy if exists generated_tour_installs_admin on public.generated_tour_installs;
+create policy generated_tour_installs_admin on public.generated_tour_installs
+  for select using (public.is_admin());
+
 commit;
 
 -- Check after running:
