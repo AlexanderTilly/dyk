@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,6 +115,34 @@ void main() {
     expect(body['theme'], 'ghosts');
     expect(seen.headers['apikey'], 'anon');
     expect(seen.headers['Authorization'], 'Bearer anon');
+  });
+
+  test('a reply with no stops is a failure, not a blank tour', () async {
+    final body = {..._ok, 'stops': <Object>[]};
+    final g = _gen(MockClient((r) async => http.Response(jsonEncode(body), 200)));
+    await expectLater(_call(g), throwsA(isA<TourGenerationFailed>()));
+  });
+
+  test('no connectivity is flagged offline; a 500 is not', () async {
+    for (final c in [
+      MockClient((r) async => throw const SocketException('no route')),
+      MockClient((r) async =>
+          throw http.ClientException('SocketException: Failed host lookup')),
+    ]) {
+      await expectLater(
+          _call(_gen(c)),
+          throwsA(isA<TourGenerationFailed>()
+              .having((e) => e.offline, 'offline', true)));
+    }
+    await expectLater(
+        _call(_gen(MockClient((r) async => http.Response('{}', 500)))),
+        throwsA(isA<TourGenerationFailed>()
+            .having((e) => e.offline, 'offline', false)));
+  });
+
+  test('the whole-pull cap sits between the request and the latch', () {
+    expect(tourRunTimeout > tourRequestTimeout, isTrue);
+    expect(tourRunTimeout < pullTimeout, isTrue);
   });
 
   group('ExcludeHistory', () {

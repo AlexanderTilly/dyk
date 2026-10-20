@@ -79,8 +79,9 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
       await Future<void>.sync(
               () => widget.onGenerate(_km, _shape, _theme))
           .timeout(pullTimeout);
-    } on TimeoutException {
-      // Fall through to release the latch.
+    } catch (_) {
+      // A timeout, or a callback that threw: neither may escape into the zone,
+      // and both fall through to release the latch.
     } finally {
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

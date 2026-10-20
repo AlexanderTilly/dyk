@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,11 @@ import '../models/tour.dart';
 /// 2026-09-30 when nothing capped them.
 const tourRequestTimeout = Duration(seconds: 25);
 
+/// Cap on a whole pull in the UI: locate, read prefs, request. Above the
+/// request's 25 s, below the screen's 30 s latch, so the parent's busy flag is
+/// always cleared before the screen gives up on it.
+const tourRunTimeout = Duration(seconds: 28);
+
 /// The generator found too few places for this theme near the start.
 /// The remedy is to turn a wheel, so the screen shows this at the theme reel.
 class TourTooFew implements Exception {
@@ -27,7 +33,12 @@ class TourTooFew implements Exception {
 /// Anything else that stops a round: network, timeout, server or bad reply.
 class TourGenerationFailed implements Exception {
   final String reason;
-  const TourGenerationFailed(this.reason);
+
+  /// No connectivity (as opposed to a slow or failing server). The one failure
+  /// worth its own message: it is the most common one for a tourist, and
+  /// "you are offline" is something they can act on.
+  final bool offline;
+  const TourGenerationFailed(this.reason, {this.offline = false});
   @override
   String toString() => 'TourGenerationFailed($reason)';
 }
@@ -83,6 +94,11 @@ class GeneratedTour {
       );
 
   factory GeneratedTour.fromJson(Map<String, dynamic> j) {
+    if ((j['stops'] as List).isEmpty) {
+      // A tour with no stops is the blank-tour outcome migration 050 exists
+      // to prevent; never hand it to the detail screen.
+      throw const FormatException('tour has no stops');
+    }
     final stops = [
       for (final s in (j['stops'] as List))
         GeneratedStop(
@@ -189,9 +205,28 @@ class TourGenerator {
     } on TourGenerationFailed {
       rethrow;
     } catch (e) {
-      throw TourGenerationFailed('$e');
+      // http's IOClient wraps a SocketException in a ClientException.
+      final offline = e is SocketException ||
+          (e is http.ClientException && e.message.contains('SocketException'));
+      throw TourGenerationFailed('$e', offline: offline);
     }
   }
+}
+
+/// Why the phone gave no usable position.
+enum LocationIssue { denied, disabled, timeout }
+
+/// The phone's position, or why there is none.
+class TourLocation {
+  final ({double lat, double lng})? fix;
+  final LocationIssue? issue;
+  const TourLocation(this.fix, [this.issue]);
+
+  /// Permission refused or location switched off: the person should be told
+  /// the round starts from the city centre. A mere timeout is not worth a
+  /// notice (location works, it was just slow).
+  bool get needsNotice =>
+      issue == LocationIssue.denied || issue == LocationIssue.disabled;
 }
 
 /// Beyond this from the city centre, the phone's position is not a usable

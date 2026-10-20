@@ -49,6 +49,10 @@ class ToursTab extends StatefulWidget {
   /// Injectable for tests; defaults to the live edge function.
   final TourGenerator? generator;
 
+  /// Test seams: where the phone is, and what to do with a finished round.
+  final Future<TourLocation> Function()? locate;
+  final void Function(Tour)? onGeneratedTour;
+
   const ToursTab({
     super.key,
     required this.tours,
@@ -61,6 +65,8 @@ class ToursTab extends StatefulWidget {
     this.cityLat,
     this.cityLng,
     this.generator,
+    this.locate,
+    this.onGeneratedTour,
   });
 
   @override
@@ -93,21 +99,31 @@ class _ToursTabState extends State<ToursTab> {
     });
   }
 
-  Future<({double lat, double lng})?> _start() async {
-    ({double lat, double lng})? gps;
+  // Permission and service state are checked up front so a refusal is told
+  // apart from a slow fix; the caller shows a notice for the former.
+  Future<TourLocation> _locate() async {
     try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        return const TourLocation(null, LocationIssue.disabled);
+      }
+      final perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        return const TourLocation(null, LocationIssue.denied);
+      }
       final p = await Geolocator.getCurrentPosition(
               desiredAccuracy: LocationAccuracy.high)
-          .timeout(const Duration(seconds: 8));
-      gps = (lat: p.latitude, lng: p.longitude);
-    } catch (_) {}
-    final lat = widget.cityLat, lng = widget.cityLng;
-    return chooseTourStart(
-        gps, lat != null && lng != null ? (lat: lat, lng: lng) : null);
+          .timeout(const Duration(seconds: 3));
+      return TourLocation((lat: p.latitude, lng: p.longitude));
+    } catch (_) {
+      return const TourLocation(null, LocationIssue.timeout);
+    }
   }
 
   // The lever. Its Future is handed back to the screen (see onGenerate below),
-  // which holds its latch until this completes.
+  // which holds its latch until this completes. The WHOLE pull is capped and
+  // every exit clears _generating: a stalled platform call (prefs, location)
+  // must not leave the lever greyed out for the rest of the session.
   Future<void> _run(int km, String shape, String theme) async {
     final city = widget.citypackId;
     if (_generating || city == null) return;
@@ -115,31 +131,53 @@ class _ToursTabState extends State<ToursTab> {
       _generating = true;
       _generatorNotice = null;
     });
+    var live = true; // false once we gave up, so a late result is dropped
     try {
-      final start = await _start();
-      if (start == null) throw const TourGenerationFailed('no position');
-      final prefs = await SharedPreferences.getInstance();
-      final tour = await _generator.generate(
-        lat: start.lat,
-        lng: start.lng,
-        km: km,
-        shape: shape,
-        theme: theme,
-        citypackId: city,
-        exclude: _history.ids,
-        installId: prefs.getString('anon_install_id'),
-      );
-      _history.add(tour.placeIds);
-      if (!mounted) return;
-      _openTour(tour.toTour(city));
+      await _pull(city, km, shape, theme, () => live).timeout(tourRunTimeout);
     } on TourTooFew {
       if (mounted) setState(() => _generatorNotice = tr('tour_too_few'));
     } catch (e) {
       debugPrint('tour generation failed: $e');
-      if (mounted) setState(() => _generatorNotice = tr('tour_failed'));
+      final offline = e is TourGenerationFailed && e.offline;
+      if (mounted) {
+        setState(() =>
+            _generatorNotice = tr(offline ? 'tour_offline' : 'tour_failed'));
+      }
     } finally {
+      live = false;
       if (mounted) setState(() => _generating = false);
     }
+  }
+
+  Future<void> _pull(String city, int km, String shape, String theme,
+      bool Function() live) async {
+    final loc = await (widget.locate ?? _locate)();
+    final lat = widget.cityLat, lng = widget.cityLng;
+    final start = chooseTourStart(
+        loc.fix, lat != null && lng != null ? (lat: lat, lng: lng) : null);
+    if (start == null) throw const TourGenerationFailed('no position');
+    String? installId;
+    try {
+      final prefs = await SharedPreferences.getInstance()
+          .timeout(const Duration(seconds: 2));
+      installId = prefs.getString('anon_install_id');
+    } catch (_) {} // the id is optional
+    final tour = await _generator.generate(
+      lat: start.lat,
+      lng: start.lng,
+      km: km,
+      shape: shape,
+      theme: theme,
+      citypackId: city,
+      exclude: _history.ids,
+      installId: installId,
+    );
+    if (!live() || !mounted) return;
+    _history.add(tour.placeIds);
+    if (loc.needsNotice) {
+      setState(() => _generatorNotice = tr('tour_no_location'));
+    }
+    (widget.onGeneratedTour ?? _openTour)(tour.toTour(city));
   }
 
   // Clean filter tab: icon over label, yellow underline when active.
