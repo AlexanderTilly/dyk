@@ -5,7 +5,7 @@
 // Secrets required (Edge Functions -> Secrets):
 //   MAPBOX_TOKEN   - Mapbox token for the Optimization API (server-side; not the client token)
 //
-// Input:  { lat, lng, km, shape: 'loop'|'one_way', theme, exclude?: string[], citypack_id, seed? }
+// Input:  { lat, lng, km, shape: 'loop'|'one_way', theme, exclude?: string[], citypack_id, seed?, install_id? }
 // Output: { tour_id, title, meters, minutes, stops: [...], geojson }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -42,6 +42,11 @@ const THEME_LABELS: Record<string, string> = {
 const CANDIDATES = 6
 const TOLERANCE = 0.15
 const WALK_KMH = 4.8
+// est_minutes is walking plus listening. Narrations run minutes each, so a round's
+// real duration scales with its stop count; quoting walking time alone would
+// understate it badly. hotspot_media has no duration column, so this is a flat
+// allowance per stop rather than a measured figure.
+const LISTEN_MIN_PER_STOP = 4
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -110,7 +115,8 @@ Deno.serve(async (req) => {
     if (!best) return json({ error: `Routing failed: ${lastError}` }, 502)
 
     const { routed, seed } = best
-    const minutes = Math.round((routed.meters / 1000 / WALK_KMH) * 60)
+    const minutes = Math.round((routed.meters / 1000 / WALK_KMH) * 60) +
+      routed.ordered.length * LISTEN_MIN_PER_STOP
     const title = `${THEME_LABELS[theme]} walk, ${km} km`
 
     const { data: tour, error: tourErr } = await admin
@@ -122,7 +128,12 @@ Deno.serve(async (req) => {
         price_sek: 0,
         is_published: false,
         is_generated: true,
-        generated_params: { lat, lng, km, shape, theme, exclude, seed },
+        // install_id makes rows from this unauthenticated endpoint attributable
+        // and lets a later job sweep generated tours nobody saved. Optional.
+        generated_params: {
+          lat, lng, km, shape, theme, exclude, seed,
+          ...(typeof body.install_id === 'string' ? { install_id: body.install_id } : {}),
+        },
         distance_meters: routed.meters,
         est_minutes: minutes,
         route_geojson: routed.geojson,
