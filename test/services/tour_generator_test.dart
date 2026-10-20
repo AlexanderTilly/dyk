@@ -166,7 +166,7 @@ void main() {
       await I18n.instance.setCode('de');
       addTearDown(() => I18n.instance.setCode('en'));
       final title = round().toTour('palma').title;
-      expect(title, '${themeLabel('ghosts')}-Tour, 1.8 km');
+      expect(title, 'Tour: ${themeLabel('ghosts')}, 1.8 km');
       expect(title, contains('Geister'));
     });
 
