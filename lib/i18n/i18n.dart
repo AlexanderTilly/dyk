@@ -63,7 +63,7 @@ const _strings = <String, Map<String, String>>{
     'theme_the_sea': "The sea & the harbour",
     'theme_modernisme': "Modernisme",
     'generate_tour': "Generate my tour",
-    'generated_tour_title': "{theme} walk, {km} km",
+    'generated_tour_title': "Walk: {theme}, {km} km",
     'generating_tour': "Cutting your tour...",
     'tour_too_few': "Not enough places match that round. Try a different distance or theme.",
     'tour_failed': "Couldn't build a tour right now. Please try again.",
