@@ -940,7 +940,7 @@ const _strings = <String, Map<String, String>>{
     'tour_too_few': "Zu wenige Orte für diese Runde. Versuche eine andere Distanz oder ein anderes Thema.",
     'tour_failed': "Die Tour konnte gerade nicht erstellt werden. Bitte versuche es erneut.",
     'shape_loop': "Rundweg",
-    'shape_one_way': "Einfache Strecke",
+    'shape_one_way': "Nur Hinweg",
     'nav_explore': 'ENTDECKEN',
     'nav_nearby': 'IN DER NÄHE',
     'nav_tours': 'TOUREN',

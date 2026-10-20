@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../i18n/i18n.dart';
@@ -20,7 +22,7 @@ const tourShapes = ['loop', 'one_way'];
 class TourGeneratorScreen extends StatefulWidget {
   final String? citypackId;
   final Set<String> narratedCities;
-  final void Function(int km, String shape, String theme) onGenerate;
+  final FutureOr<void> Function(int km, String shape, String theme) onGenerate;
   final bool busy;
 
   const TourGeneratorScreen({
@@ -39,6 +41,32 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   int _km = 2;
   String _shape = 'loop';
   String _theme = tourThemes.first;
+
+  // Blocks a second pull until the first callback has returned and a frame
+  // has passed, or until the parent reports busy and then not busy, so the
+  // screen does not rely on the parent rebuilding synchronously.
+  bool _pulling = false;
+
+  @override
+  void didUpdateWidget(TourGeneratorScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.busy && !widget.busy) _pulling = false;
+  }
+
+  Future<void> _pull() async {
+    if (_pulling || widget.busy) return;
+    _pulling = true;
+    try {
+      await widget.onGenerate(_km, _shape, _theme);
+    } finally {
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && !widget.busy) _pulling = false;
+        });
+        WidgetsBinding.instance.scheduleFrame();
+      }
+    }
+  }
 
   int get distanceKm => _km;
   String get shape => _shape;
@@ -130,9 +158,7 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
                 foregroundColor: PassimColors.ink,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: widget.busy
-                  ? null
-                  : () => widget.onGenerate(_km, _shape, _theme),
+              onPressed: widget.busy ? null : _pull,
               child: Text(
                 tr(widget.busy ? 'generating_tour' : 'generate_tour'),
                 style:

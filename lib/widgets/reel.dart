@@ -7,7 +7,7 @@ import '../theme/dyk_theme.dart';
 ///
 /// It does not wrap: the first and last values are hard stops, so a tourist
 /// can't spin from 5 km round to 1 km by overshooting.
-class Reel<T> extends StatelessWidget {
+class Reel<T> extends StatefulWidget {
   final List<T> values;
   final T value;
   final ValueChanged<T> onChanged;
@@ -21,27 +21,37 @@ class Reel<T> extends StatelessWidget {
     required this.label,
   });
 
-  static const _dragThreshold = 24.0;
+  /// Finger travel that steps one notch. Measured on this Flutter version:
+  /// the recogniser reports the full travel including the touch slop (a
+  /// 40 px move reports 40 px), so this is what the finger actually moves.
+  static const dragThreshold = 24.0;
+
+  @override
+  State<Reel<T>> createState() => _ReelState<T>();
+}
+
+class _ReelState<T> extends State<Reel<T>> {
+  // A field, not a build local: a rebuild mid-drag must not lose the delta.
+  double _dragged = 0;
 
   void _step(int delta) {
-    final i = values.indexOf(value) + delta;
-    if (i < 0 || i >= values.length) return;
-    onChanged(values[i]);
+    final i = widget.values.indexOf(widget.value) + delta;
+    if (i < 0 || i >= widget.values.length) return;
+    widget.onChanged(widget.values[i]);
   }
 
   @override
   Widget build(BuildContext context) {
-    var dragged = 0.0;
-    final i = values.indexOf(value);
+    final i = widget.values.indexOf(widget.value);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onVerticalDragStart: (_) => dragged = 0,
-      onVerticalDragUpdate: (d) => dragged += d.delta.dy,
+      onVerticalDragStart: (_) => _dragged = 0,
+      onVerticalDragUpdate: (d) => _dragged += d.delta.dy,
       // One step per gesture, decided on release, so a long fling can't
       // skip several positions or fire onChanged repeatedly.
       onVerticalDragEnd: (_) {
-        if (dragged <= -_dragThreshold) _step(1);
-        if (dragged >= _dragThreshold) _step(-1);
+        if (_dragged <= -Reel.dragThreshold) _step(1);
+        if (_dragged >= Reel.dragThreshold) _step(-1);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -53,14 +63,19 @@ class Reel<T> extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _chevron(Icons.keyboard_arrow_up, i < values.length - 1, 1),
-            Text(
-              label(value),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: PassimColors.brand,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
+            _chevron(Icons.keyboard_arrow_up, i < widget.values.length - 1, 1),
+            // Shrink rather than overflow: a long word can't be broken.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                widget.label(widget.value),
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: PassimColors.brand,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
             _chevron(Icons.keyboard_arrow_down, i > 0, -1),
