@@ -62,12 +62,10 @@ Deno.test('radius grows with km: 1 km ask does not reach 2 km away', () => {
   const near = [mk(1, 0.001, 0), mk(2, 0, 0.001), mk(3, -0.001, 0), far]
   const r = selectPlaces(near, { ...base, km: 1 })
   assert(!r.places.some((p) => p.id === 'p99'))
-  // slack may leave it out for one seed, so check it is reachable at all
-  let reached = false
-  for (let s = 1; s <= 20; s++) {
-    if (selectPlaces(near, { ...base, km: 9, seed: s }).places.some((p) => p.id === 'p99')) reached = true
-  }
-  assert(reached)
+  // reachable at the larger radius: with only two near places it is needed to reach 3
+  const two = [mk(1, 0.001, 0), mk(2, 0, 0.001), far]
+  assertEquals(selectPlaces(two, { ...base, km: 1 }).reason, 'too_few')
+  assert(selectPlaces(two, { ...base, km: 9 }).places.some((p) => p.id === 'p99'))
 })
 Deno.test('result is a compact cluster, not a star around start', () => {
   // two clusters equidistant-ish from start; picks should come from one of them
