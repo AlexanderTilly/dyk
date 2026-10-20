@@ -33,8 +33,10 @@ void main() {
 
   group('themeLabel', () {
     test('keys the label off the theme key', () {
-      expect(themeLabel('ghosts'), 'theme_ghosts');
-      expect(themeLabel('food_drink'), 'theme_food_drink');
+      expect(themeLabel('ghosts'), 'Ghosts & legends');
+      expect(themeLabel('food_drink'), 'Food & drink');
+      expect(themeLabel('modernisme'), 'Modernisme');
+      expect(themeLabel('not_a_theme'), 'theme_not_a_theme');
     });
   });
 }
