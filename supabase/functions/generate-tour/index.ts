@@ -42,6 +42,18 @@ const THEME_LABELS: Record<string, string> = {
 const CANDIDATES = 6
 const TOLERANCE = 0.15
 const WALK_KMH = 4.8
+// A loop walks its return leg; a one-way route through the same stops does not,
+// so the same place budget buys about a third less distance. Measured on the
+// real ghost places (ask 2 km one-way, varying the budget given to selectPlaces):
+//   budget 2.0 km:  5 stops -> 1.36 km (-32%)
+//   budget 2.6 km:  7 stops -> 1.62 km (-19%)
+//   budget 3.2 km:  8 stops -> 1.91 km (-4%, in band)
+//   budget 4.0 km: 10 stops -> 2.38 km (+19%)
+// 1.6x lands in band. Applied only to the selection budget, never to the asked
+// km used for the tolerance check or stored. 3 km one-way saturates at 10 stops
+// / 2.38 km whatever the budget (clamp 10, ghost pool 12); the closest-match
+// path then reports the real distance.
+const ONE_WAY_BUDGET = 1.6
 // est_minutes is walking plus listening. Narrations run minutes each, so a round's
 // real duration scales with its stop count; quoting walking time alone would
 // understate it badly. hotspot_media has no duration column, so this is a flat
@@ -95,7 +107,8 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < CANDIDATES; i++) {
       const seed = baseSeed + i
-      const pick = pickRound(places, { start, km, theme, exclude, seed })
+      const budgetKm = shape === 'one_way' ? km * ONE_WAY_BUDGET : km
+      const pick = pickRound(places, { start, km: budgetKm, theme, exclude, seed })
       if (pick.reason === 'too_few') {
         return json({
           error: 'too_few',
@@ -119,48 +132,60 @@ Deno.serve(async (req) => {
       routed.ordered.length * LISTEN_MIN_PER_STOP
     const title = `${THEME_LABELS[theme]} walk, ${km} km`
 
-    const { data: tour, error: tourErr } = await admin
-      .from('tours')
-      .insert({
-        citypack_id,
-        type: 'custom', // generated tours are distinguishable; 'custom' always satisfies the CHECK
-        title,
-        price_sek: 0,
-        is_published: false,
-        is_generated: true,
-        // install_id makes rows from this unauthenticated endpoint attributable
-        // and lets a later job sweep generated tours nobody saved. Optional.
-        generated_params: {
-          lat, lng, km, shape, theme, exclude, seed,
-          ...(typeof body.install_id === 'string' ? { install_id: body.install_id } : {}),
-        },
-        distance_meters: routed.meters,
-        est_minutes: minutes,
-        route_geojson: routed.geojson,
-      })
-      .select('id')
-      .single()
-    if (tourErr || !tour) return json({ error: `Tour insert failed: ${tourErr?.message}` }, 500)
+    let tourId: string | null = null
+    let stopRows: Record<string, unknown>[] = []
+    try {
+      const { data: tour, error: tourErr } = await admin
+        .from('tours')
+        .insert({
+          citypack_id,
+          type: 'custom', // generated tours are distinguishable; 'custom' always satisfies the CHECK
+          title,
+          price_sek: 0,
+          is_published: false,
+          is_generated: true,
+          // install_id makes rows from this unauthenticated endpoint attributable
+          // and lets a later job sweep generated tours nobody saved. Optional.
+          generated_params: {
+            lat, lng, km, shape, theme, exclude, seed,
+            ...(typeof body.install_id === 'string' ? { install_id: body.install_id } : {}),
+          },
+          distance_meters: routed.meters,
+          est_minutes: minutes,
+          route_geojson: routed.geojson,
+        })
+        .select('id')
+        .single()
+      if (tourErr || !tour) return json({ error: `Tour insert failed: ${tourErr?.message}` }, 500)
+      tourId = tour.id
 
-    // lat/lng/title are written on the stop itself: the app backfills only name,
-    // audio and image from the hotspot, so a stop without coordinates would break
-    // the map and arrival detection.
-    const stopRows = routed.ordered.map((p, i) => ({
-      tour_id: tour.id,
-      order_index: i,
-      hotspot_id: p.id,
-      title: p.name,
-      lat: p.lat,
-      lng: p.lng,
-    }))
-    const { error: stopErr } = await admin.from('tour_stops').insert(stopRows)
-    if (stopErr) {
-      await admin.from('tours').delete().eq('id', tour.id) // no half-written tour
-      return json({ error: `Stops insert failed: ${stopErr.message}` }, 500)
+      // lat/lng/title are written on the stop itself: the app backfills only name,
+      // audio and image from the hotspot, so a stop without coordinates would break
+      // the map and arrival detection.
+      stopRows = routed.ordered.map((p, i) => ({
+        tour_id: tour.id,
+        order_index: i,
+        hotspot_id: p.id,
+        title: p.name,
+        lat: p.lat,
+        lng: p.lng,
+      }))
+      const { error: stopErr } = await admin.from('tour_stops').insert(stopRows)
+      if (stopErr) {
+        await admin.from('tours').delete().eq('id', tourId) // no half-written tour
+        return json({ error: `Stops insert failed: ${stopErr.message}` }, 500)
+      }
+
+    } catch (e) {
+      // Any throw after the tour row exists (network drop, wall-clock limit)
+      // must not leave a tour with no stops behind.
+      console.error('generate-tour write failed', e)
+      if (tourId) await admin.from('tours').delete().eq('id', tourId).then(() => {}, () => {})
+      return json({ error: 'Write failed' }, 500)
     }
 
     return json({
-      tour_id: tour.id,
+      tour_id: tourId,
       title,
       meters: routed.meters,
       minutes,
@@ -168,6 +193,8 @@ Deno.serve(async (req) => {
       geojson: routed.geojson,
     })
   } catch (e) {
-    return json({ error: `Unexpected error: ${e}` }, 500)
+    // Log server-side only: error messages can carry URLs with the Mapbox token.
+    console.error('generate-tour failed', e)
+    return json({ error: 'Unexpected error' }, 500)
   }
 })

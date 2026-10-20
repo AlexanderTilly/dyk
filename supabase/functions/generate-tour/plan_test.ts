@@ -32,7 +32,7 @@ Deno.test('repeated pulls keep returning a full-sized round', () => {
   }
 })
 
-Deno.test('only the last MAX_EXCLUDE ids are honoured', () => {
+Deno.test('ids older than MAX_EXCLUDE are discarded (pick equals the no-exclude pick)', () => {
   const old = pool.slice(0, 5).map((p) => p.id)
   const filler = Array.from({ length: MAX_EXCLUDE }, (_, i) => `none${i}`)
   const r = pickRound(pool, { ...base, exclude: [...old, ...filler], seed: 2 })

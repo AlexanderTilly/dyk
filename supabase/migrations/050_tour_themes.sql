@@ -38,6 +38,21 @@ update public.hotspots
  where category = 'headline'
    and not themes @> array['ghosts'];
 
+-- Generated tours are deliberately unpublished so they stay out of the curated
+-- list, but tours_read / tour_stops_read only expose published rows, so the
+-- anonymous app could not read back a tour it just generated. They need their
+-- own read path.
+drop policy if exists tours_read_generated on public.tours;
+create policy tours_read_generated on public.tours
+  for select using (is_generated = true);
+
+drop policy if exists tour_stops_read_generated on public.tour_stops;
+create policy tour_stops_read_generated on public.tour_stops
+  for select using (
+    exists (select 1 from public.tours t
+            where t.id = tour_stops.tour_id and t.is_generated = true)
+  );
+
 commit;
 
 -- Check after running:

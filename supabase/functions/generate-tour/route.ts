@@ -34,8 +34,9 @@ export async function buildRoute(
   let res: Response
   try {
     res = await fetchImpl(url)
-  } catch (e) {
-    return { error: `Mapbox request failed: ${e}` }
+  } catch (_e) {
+    // Fixed string: a Deno fetch failure carries the full URL, token included.
+    return { error: 'Mapbox request failed' }
   }
   // Never echo the URL: it carries the token.
   if (res.status !== 200) return { error: `Mapbox returned status ${res.status}` }

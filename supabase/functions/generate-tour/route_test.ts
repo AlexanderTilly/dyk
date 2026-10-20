@@ -30,6 +30,7 @@ Deno.test('reorders places by waypoint_index and returns trip distance', async (
   assertEquals((r.geojson as { type: string }).type, 'LineString')
   assert(calls[0].includes('roundtrip=true&source=first'))
   assert(!calls[0].includes('radiuses'))
+  assert(calls[0].includes('/2.65,39.57;')) // lng,lat order
 })
 
 Deno.test('one_way uses destination=last', async () => {
@@ -49,7 +50,8 @@ Deno.test('fewer waypoints than places is an error with no ordering', async () =
   }
   const r = await buildRoute(places, 'loop', 'tok', stub(200, body) as typeof fetch)
   assert('error' in r)
-  assert(!('ordered' in r))
+  assert(r.error.includes('2 waypoints for 4 places'))
+  assertEquals(Object.keys(r), ['error'])
 })
 
 Deno.test('non-200 reply returns an error carrying the status', async () => {
@@ -64,4 +66,11 @@ Deno.test('more than 12 places is rejected before any call', async () => {
   const r = await buildRoute(many, 'loop', 'tok', stub(200, {}, calls) as typeof fetch)
   assert('error' in r)
   assertEquals(calls.length, 0)
+})
+
+Deno.test('a failing fetch never leaks the token', async () => {
+  const boom = (url: string | URL | Request) => Promise.reject(new Error(`failed ${url}`))
+  const r = await buildRoute(places, 'loop', 'SECRET', boom as unknown as typeof fetch)
+  assert('error' in r)
+  assert(!r.error.includes('SECRET'))
 })
