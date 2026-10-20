@@ -7,7 +7,7 @@
 //   ANTHROPIC_API_KEY   — Anthropic API key
 //
 // Input:  { hotspot_ids: string[] }
-// Output: { tagged: { id: string, themes: string[] }[] }
+// Output: { tagged: { id, themes }[], skipped: { id, reason }[] }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Anthropic from 'npm:@anthropic-ai/sdk'
@@ -40,24 +40,45 @@ function json(body: unknown, status = 200) {
   })
 }
 
-// "About" vs "mentions" is spelled out because description text is full of
-// incidental detail (a church near the harbour, a palace with a café) and a
-// loose tagger would bury every theme under every neighbour.
+// `ghosts` is the headline category, not a judgement call: the walkable places
+// measured for the ghost theme are exactly that category, so the model must not
+// widen the set. It is added from `category` below and kept out of the enum.
+const MODEL_THEMES = THEMES.filter((t) => t !== 'ghosts')
+
+// Supabase kills a function that has sent nothing for 150 seconds, and the calls
+// below are sequential, so the batch size has to be capped in code.
+const MAX_IDS = 10
+
+// Keyword matching tagged 126 of 148 places "royal" and 128 "maritime" because
+// these descriptions are long and mention everything in passing. The prompt
+// names that failure and tells the model where the weight lies.
 const PROMPT =
   `You tag places in a walking-tour app with themes. Choose the themes this place is ABOUT, ` +
-  `from this fixed list only:\n` +
-  `- food_drink: eating, drinking, bars, restaurants, bakeries, markets, food traditions\n` +
-  `- churches: churches, chapels, convents, cathedrals, religious life\n` +
-  `- ghosts: ghosts, legends, hauntings, curses, murders, eerie or macabre stories\n` +
-  `- walls_gates: city walls, gates, bastions, fortifications\n` +
-  `- palaces: palaces, noble mansions, patios of the aristocracy, royal or grand residences\n` +
-  `- old_shops: historic shops, workshops, crafts, traditional trades\n` +
-  `- the_sea: harbour, shoreline, seafaring, fishing, maritime history\n` +
-  `- modernisme: Modernista / Art Nouveau architecture and its architects\n\n` +
-  `A theme belongs only when the place itself is about it: it is what the place is, or what its ` +
-  `story is mainly about. A passing mention does not count; a church whose text says it can be ` +
-  `seen from the sea is not a maritime place, and a palace with a café in its courtyard is not ` +
-  `about food. Prefer fewer themes: usually one, rarely three. Return an empty list if none fit.\n\n`
+  `from this fixed list only:
+` +
+  `- food_drink: eating, drinking, bars, restaurants, bakeries, markets, food traditions
+` +
+  `- churches: churches, chapels, convents, cathedrals, religious life
+` +
+  `- walls_gates: city walls, gates, bastions, fortifications
+` +
+  `- palaces: palaces, noble mansions, patios of the aristocracy, royal or grand residences
+` +
+  `- old_shops: historic shops, workshops, crafts, traditional trades
+` +
+  `- the_sea: harbour, shoreline, seafaring, fishing, maritime history
+` +
+  `- modernisme: Modernista / Art Nouveau architecture and its architects
+
+` +
+  `The description is long and will touch several themes in passing: kings, the sea, churches and ` +
+  `food come up almost everywhere in this city. Mentioning a theme does not make the place about it. ` +
+  `A theme belongs only when it is what the place IS, or what its story is mainly about; a church ` +
+  `whose text says it can be seen from the sea is not a maritime place, and a palace with a cafe in ` +
+  `its courtyard is not about food. The name and the opening sentence weigh more than later detail. ` +
+  `Prefer fewer themes: usually one, rarely three. Return an empty list if none fit.
+
+`
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -82,6 +103,10 @@ Deno.serve(async (req) => {
       return json({ error: 'hotspot_ids must be a non-empty array of strings' }, 400)
     }
 
+    if (ids.length > MAX_IDS) {
+      return json({ error: `At most ${MAX_IDS} hotspot_ids per call (150 s idle timeout)` }, 400)
+    }
+
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
     if (!apiKey) return json({ error: 'ANTHROPIC_API_KEY secret not configured' }, 500)
     const client = new Anthropic({ apiKey })
@@ -93,11 +118,12 @@ Deno.serve(async (req) => {
     )
     const { data: rows, error: readErr } = await admin
       .from('hotspots')
-      .select('id, name, subtitle, description')
+      .select('id, name, subtitle, description, category, themes')
       .in('id', ids)
     if (readErr) return json({ error: `Read failed: ${readErr.message}` }, 500)
 
     const tagged: { id: string; themes: string[] }[] = []
+    const skipped: { id: string; reason: string }[] = []
     for (const row of rows ?? []) {
       const response = await client.messages.create({
         model: 'claude-opus-5',
@@ -108,7 +134,7 @@ Deno.serve(async (req) => {
             schema: {
               type: 'object',
               properties: {
-                themes: { type: 'array', items: { type: 'string', enum: THEMES } },
+                themes: { type: 'array', items: { type: 'string', enum: MODEL_THEMES } },
               },
               required: ['themes'],
               additionalProperties: false,
@@ -127,12 +153,36 @@ Deno.serve(async (req) => {
         ],
       })
 
-      // A declined or empty reply skips this place rather than failing the batch.
-      if (response.stop_reason === 'refusal') continue
+      // A bad reply skips this place only; the caller sees why in `skipped`.
+      if (response.stop_reason === 'refusal') {
+        skipped.push({ id: row.id, reason: 'refusal' })
+        continue
+      }
       const textBlock = response.content.find((b) => b.type === 'text')
-      if (!textBlock || textBlock.type !== 'text') continue
+      if (!textBlock || textBlock.type !== 'text') {
+        skipped.push({ id: row.id, reason: 'no text in reply' })
+        continue
+      }
+      let parsed: { themes?: unknown }
+      try {
+        parsed = JSON.parse(textBlock.text)
+      } catch {
+        skipped.push({ id: row.id, reason: 'malformed reply' })
+        continue
+      }
 
-      const themes = cleanThemes(JSON.parse(textBlock.text).themes, THEMES)
+      // An empty or unusable reply must never erase what is stored, and headline
+      // places keep `ghosts` whatever the model says.
+      const existing: string[] = row.themes ?? []
+      const fromModel = cleanThemes(parsed.themes, MODEL_THEMES)
+      const base = fromModel.length > 0 ? fromModel : existing
+      const themes = row.category === 'headline'
+        ? ['ghosts', ...base.filter((t) => t !== 'ghosts')].slice(0, 3)
+        : base
+      if (fromModel.length === 0 && themes.length === existing.length) {
+        skipped.push({ id: row.id, reason: 'no themes returned, kept existing' })
+        continue
+      }
       const { error: writeErr } = await admin
         .from('hotspots')
         .update({ themes })
@@ -141,7 +191,7 @@ Deno.serve(async (req) => {
       tagged.push({ id: row.id, themes })
     }
 
-    return json({ tagged })
+    return json({ tagged, skipped })
   } catch (e) {
     return json({ error: `Unexpected error: ${e}` }, 500)
   }
