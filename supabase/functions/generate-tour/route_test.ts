@@ -29,7 +29,7 @@ Deno.test('reorders places by waypoint_index and returns trip distance', async (
   assertEquals(r.meters, 2100)
   assertEquals((r.geojson as { type: string }).type, 'LineString')
   assert(calls[0].includes('roundtrip=true&source=first'))
-  assert(calls[0].includes('radiuses=40;40;40;40'))
+  assert(!calls[0].includes('radiuses'))
 })
 
 Deno.test('one_way uses destination=last', async () => {

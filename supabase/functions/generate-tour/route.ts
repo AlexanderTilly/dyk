@@ -4,10 +4,14 @@ export type Shape = 'loop' | 'one_way'
 export type Routed = { ordered: Place[]; meters: number; geojson: object }
 
 const MAX_WAYPOINTS = 12 // Mapbox Optimization API ceiling
-// Snap each waypoint to the street within this many metres so stops do not
-// spur into dead ends. Same value and floor as dyk-admin ToursPage.tsx.
-const SNAP_M = 40
-const SNAP_MIN_M = 30
+// Deliberately NO `radiuses` parameter. With a numeric radiuses value Mapbox
+// rejects the whole trip (HTTP 200, code NoSegment, trips: []) when any one stop
+// cannot snap to the walking graph within it. Hotspot coordinates sit inside
+// cathedrals, courtyards and a hilltop castle, so they routinely cannot: measured
+// against live Mapbox on the real ghost places, 6 of 15 failed individually at
+// 40 m, and every numeric value tried (40-500) failed on a full round. This is
+// the admin panel's trick (ToursPage.tsx) and it is wrong for generated tours,
+// whose stops are not hand-placed on streets. Do not reintroduce it.
 
 export async function buildRoute(
   places: Place[],
@@ -20,13 +24,12 @@ export async function buildRoute(
     return { error: `At most ${MAX_WAYPOINTS} places can be routed, got ${places.length}` }
   }
   const coords = places.map((p) => `${p.lng},${p.lat}`).join(';')
-  const radiuses = places.map(() => Math.max(SNAP_M, SNAP_MIN_M)).join(';')
   const mode = shape === 'loop'
     ? 'roundtrip=true&source=first'
     : 'roundtrip=false&source=first&destination=last'
   const url =
     `https://api.mapbox.com/optimized-trips/v1/mapbox/walking/${coords}?${mode}` +
-    `&geometries=geojson&overview=full&radiuses=${radiuses}&access_token=${token}`
+    `&geometries=geojson&overview=full&access_token=${token}`
 
   let res: Response
   try {
