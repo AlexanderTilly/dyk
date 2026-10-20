@@ -14,10 +14,10 @@ for (let i = 0; i < 30; i++) {
 const base = { start, km: 3, theme: 'churches', exclude: [] as string[], seed: 1 }
 const ids = (p: Place[]) => p.map((x) => x.id).sort()
 
-Deno.test('returns between 3 and 12 places', () => {
+Deno.test('returns between 3 and 10 places', () => {
   for (const km of [1, 2, 3, 6, 10, 20]) {
     const r = selectPlaces(grid, { ...base, km })
-    assert(r.places.length >= 3 && r.places.length <= 12, `km=${km} got ${r.places.length}`)
+    assert(r.places.length >= 3 && r.places.length <= 10, `km=${km} got ${r.places.length}`)
   }
 })
 Deno.test('too few in radius gives too_few and no places', () => {
@@ -62,8 +62,12 @@ Deno.test('radius grows with km: 1 km ask does not reach 2 km away', () => {
   const near = [mk(1, 0.001, 0), mk(2, 0, 0.001), mk(3, -0.001, 0), far]
   const r = selectPlaces(near, { ...base, km: 1 })
   assert(!r.places.some((p) => p.id === 'p99'))
-  const r2 = selectPlaces(near, { ...base, km: 9 })
-  assert(r2.places.some((p) => p.id === 'p99'))
+  // slack may leave it out for one seed, so check it is reachable at all
+  let reached = false
+  for (let s = 1; s <= 20; s++) {
+    if (selectPlaces(near, { ...base, km: 9, seed: s }).places.some((p) => p.id === 'p99')) reached = true
+  }
+  assert(reached)
 })
 Deno.test('result is a compact cluster, not a star around start', () => {
   // two clusters equidistant-ish from start; picks should come from one of them
@@ -74,4 +78,16 @@ Deno.test('result is a compact cluster, not a star around start', () => {
     const north = r.places.filter((p) => p.lat > start.lat).length
     assert(north === 0 || north === r.places.length, `seed ${s} mixed clusters`)
   }
+})
+Deno.test('seeds change membership, not just order, over a pool of 12', () => {
+  const pool: Place[] = []
+  for (let i = 0; i < 12; i++) pool.push(mk(i, ((i % 4) - 1.5) * 0.0018, (Math.floor(i / 4) - 1) * 0.0022))
+  const sets: string[][] = []
+  for (let s = 1; s <= 10; s++) {
+    const r = selectPlaces(pool, { ...base, km: 3, seed: s })
+    assertEquals(r.places.length, 8)
+    sets.push(ids(r.places))
+  }
+  assert(new Set(sets.map((x) => x.join())).size > 1, 'all seeds returned the same members')
+  assert(sets.some((x) => x.join() !== sets[0].join()))
 })

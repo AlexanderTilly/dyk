@@ -2,8 +2,8 @@ export type Place = { id: string; lat: number; lng: number; themes: string[]; na
 export type Pick = { places: Place[]; reason?: 'too_few' }
 
 const MIN_STOPS = 3
-const MAX_STOPS = 12 // Mapbox Optimization ceiling
-const METRES_PER_STOP = 250
+const MAX_STOPS = 10 // below the Mapbox Optimization ceiling of 12
+const METRES_PER_STOP = 400 // narrations run minutes; 250 m packed too many stops
 const NEAR_EQUAL = 3 // at most this many near-equal candidates are in the seeded draw
 const NEAR_FACTOR = 1.5 // 'near-equal' = within 1.5x of the best distance (+ slack)
 const NEAR_SLACK_M = 40
@@ -56,7 +56,10 @@ export function selectPlaces(
     MAX_STOPS,
     Math.max(MIN_STOPS, Math.round((opts.km * 1000) / METRES_PER_STOP)),
   )
-  const want = Math.min(target, pool.length)
+  // Always leave at least two places unused (unless the pool is genuinely tiny).
+  // This slack is what makes repeat pulls differ: with none, the set is forced
+  // and no seed can vary it. Do not remove it as redundant.
+  const want = Math.min(target, Math.max(MIN_STOPS, pool.length - 2), pool.length)
   const rand = mulberry32(opts.seed)
   const pickFrom = (ranked: { p: Place; d: number }[]) => {
     ranked.sort((x, y) => x.d - y.d || (x.p.id < y.p.id ? -1 : 1))
