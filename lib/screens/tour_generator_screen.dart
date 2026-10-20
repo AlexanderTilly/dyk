@@ -22,11 +22,23 @@ const tourShapes = ['loop', 'one_way'];
 
 /// The slot machine: Distance, Shape and Theme reels and a lever. It makes no
 /// network calls; [onGenerate] receives the three values on a pull.
+///
+/// [onGenerate] MUST return the Future of the work, not fire and forget: the
+/// lever latch holds until that future completes, and a caller that drops it
+/// reopens a double pull (two edge-function calls, Mapbox requests, two tour
+/// rows).
 class TourGeneratorScreen extends StatefulWidget {
   final String? citypackId;
   final Set<String> narratedCities;
   final FutureOr<void> Function(int km, String shape, String theme) onGenerate;
   final bool busy;
+
+  /// Shown beside the theme reel, e.g. "not enough places": the fix is to turn
+  /// a wheel, so the message lives at the wheel and not in a dialog.
+  final String? notice;
+
+  /// Called when any reel is turned, so the parent can clear [notice].
+  final VoidCallback? onReelChanged;
 
   const TourGeneratorScreen({
     super.key,
@@ -34,6 +46,8 @@ class TourGeneratorScreen extends StatefulWidget {
     required this.narratedCities,
     required this.onGenerate,
     this.busy = false,
+    this.notice,
+    this.onReelChanged,
   });
 
   @override
@@ -90,9 +104,11 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   void selectTheme(String t) {
     if (!availableThemes.contains(t)) return;
     setState(() => _theme = t);
+    widget.onReelChanged?.call();
   }
 
   void _setDistance(int km) {
+    widget.onReelChanged?.call();
     setState(() {
       final previous = tourThemes.indexOf(_theme);
       _km = km;
@@ -140,7 +156,10 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
                   key: const Key('reel_shape'),
                   values: tourShapes,
                   value: _shape,
-                  onChanged: (v) => setState(() => _shape = v),
+                  onChanged: (v) {
+                    setState(() => _shape = v);
+                    widget.onReelChanged?.call();
+                  },
                   label: (v) => tr('shape_$v'),
                   maxLines: 2,
                 ),
@@ -159,6 +178,25 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
               ),
             ],
           ),
+          if (widget.notice != null) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FractionallySizedBox(
+                // Under the theme reel, which is the right-hand half.
+                widthFactor: 0.5,
+                child: Text(
+                  widget.notice!,
+                  key: const Key('generator_notice'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: PassimColors.brand,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,

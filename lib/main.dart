@@ -47,6 +47,7 @@ import 'services/support_reply_checker.dart';
 import 'services/support_seen_store.dart';
 import 'screens/support_screen.dart';
 import 'screens/support_thread_screen.dart';
+import 'services/supabase_config.dart';
 import 'theme/dyk_theme.dart';
 import 'theme/theme_prefs.dart';
 
@@ -80,8 +81,8 @@ Future<void> _boot() async {
   MapboxOptions.setAccessToken(_mapboxToken);
 
   await Supabase.initialize(
-    url: 'https://jqykkyhoxpykhixwgwyw.supabase.co',
-    anonKey: 'sb_publishable_HCRDnKdePmnT0ukTyVlFCg_q0MRPyhK',
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
 
   final prefs = await SharedPreferences.getInstance();

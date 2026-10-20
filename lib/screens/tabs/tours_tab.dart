@@ -1,4 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/supabase_config.dart';
+import '../../services/tour_generator.dart';
+import '../tour_generator_screen.dart';
 import '../../services/step_store.dart';
 import '../../utils/money.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +40,14 @@ class ToursTab extends StatefulWidget {
   final AudioService audioService;
   final String? headerImage; // per-city hero; bundled Palma is the fallback
   final String? cityName;
+  final String? citypackId;
+
+  /// Fallback start for a round when the phone gives no position.
+  final double? cityLat;
+  final double? cityLng;
+
+  /// Injectable for tests; defaults to the live edge function.
+  final TourGenerator? generator;
 
   const ToursTab({
     super.key,
@@ -43,6 +57,10 @@ class ToursTab extends StatefulWidget {
     required this.audioService,
     this.headerImage,
     this.cityName,
+    this.citypackId,
+    this.cityLat,
+    this.cityLng,
+    this.generator,
   });
 
   @override
@@ -53,6 +71,75 @@ class _ToursTabState extends State<ToursTab> {
   String _search = '';
   String _who = 'all'; // all | dyk | creators
   String? _mode; // null = all transport modes
+
+  // Tour generator state.
+  late final TourGenerator _generator = widget.generator ??
+      TourGenerator(
+          client: http.Client(),
+          baseUrl: supabaseUrl,
+          anonKey: supabaseAnonKey);
+  // Only the last ExcludeHistory.maxRounds rounds are sent as exclude, never an
+  // ever-growing list (it starves the pool: 8-stop rounds shrank to 3).
+  final ExcludeHistory _history = ExcludeHistory();
+  Set<String> _narratedCities = {};
+  bool _generating = false;
+  String? _generatorNotice;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.repo.loadGeneratorCities().then((c) {
+      if (mounted) setState(() => _narratedCities = c);
+    });
+  }
+
+  Future<({double lat, double lng})?> _start() async {
+    try {
+      final p = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high)
+          .timeout(const Duration(seconds: 8));
+      return (lat: p.latitude, lng: p.longitude);
+    } catch (_) {
+      final lat = widget.cityLat, lng = widget.cityLng;
+      return lat != null && lng != null ? (lat: lat, lng: lng) : null;
+    }
+  }
+
+  // The lever. Its Future is handed back to the screen (see onGenerate below),
+  // which holds its latch until this completes.
+  Future<void> _run(int km, String shape, String theme) async {
+    final city = widget.citypackId;
+    if (_generating || city == null) return;
+    setState(() {
+      _generating = true;
+      _generatorNotice = null;
+    });
+    try {
+      final start = await _start();
+      if (start == null) throw const TourGenerationFailed('no position');
+      final prefs = await SharedPreferences.getInstance();
+      final tour = await _generator.generate(
+        lat: start.lat,
+        lng: start.lng,
+        km: km,
+        shape: shape,
+        theme: theme,
+        citypackId: city,
+        exclude: _history.ids,
+        installId: prefs.getString('anon_install_id'),
+      );
+      _history.add(tour.placeIds);
+      if (!mounted) return;
+      _openTour(tour.toTour(city));
+    } on TourTooFew {
+      if (mounted) setState(() => _generatorNotice = tr('tour_too_few'));
+    } catch (e) {
+      debugPrint('tour generation failed: $e');
+      if (mounted) setState(() => _generatorNotice = tr('tour_failed'));
+    } finally {
+      if (mounted) setState(() => _generating = false);
+    }
+  }
 
   // Clean filter tab: icon over label, yellow underline when active.
   Widget _chip(String label, bool selected, VoidCallback onTap,
@@ -171,6 +258,29 @@ class _ToursTabState extends State<ToursTab> {
                 ),
               ),
             ],
+          ),
+        ),
+        // The reels swallow vertical drags, so the machine sits right under
+        // the header with padding all round, and the rest of the tab (header,
+        // search, filters, every card below) is still under the finger to
+        // scroll with. Never leave the reels alone in the middle of a list.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: TourGeneratorScreen(
+              citypackId: widget.citypackId,
+              narratedCities: _narratedCities,
+              busy: _generating,
+              notice: _generatorNotice,
+              onReelChanged: () {
+                if (_generatorNotice != null) {
+                  setState(() => _generatorNotice = null);
+                }
+              },
+              // Return the Future: the screen's latch waits on it.
+              onGenerate: (km, shape, theme) => _run(km, shape, theme),
+            ),
           ),
         ),
         Padding(
