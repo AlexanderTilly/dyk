@@ -200,6 +200,11 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
   bool _booting = true;
   late List<Hotspot> _hotspots = widget.hotspots;
   late List<HotDeal> _deals = widget.deals;
+
+  /// Events for the geofence notifications. The Nearby map loads its own copy
+  /// for the pins; this one exists because the background isolate needs the
+  /// geometry written to prefs before the user walks anywhere.
+  List<InternalAd> _events = [];
   late List<Tour> _tours = widget.tours;
   String _activePackId = _palmaCitypackId;
 
@@ -345,6 +350,7 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
       await _fgService.start(
         hotspots: _hotspots,
         deals: _deals,
+        events: _events,
         interests: widget.appState.interests,
       );
     }
@@ -540,9 +546,11 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
     final hotspots = await widget.dykRepo.loadHotspots(pack.id);
     final deals = await widget.dykRepo.loadDeals(pack.id);
     final tours = await widget.dykRepo.loadTours(pack.id);
+    final events = await widget.dykRepo.loadEvents();
     setState(() {
       _hotspots = hotspots;
       _deals = deals;
+      _events = events;
       _tours = tours;
       _activePackId = pack.id;
     });
@@ -550,6 +558,7 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
       await _fgService.update(
         hotspots: hotspots,
         deals: deals,
+        events: events,
         interests: widget.appState.interests,
       );
     }

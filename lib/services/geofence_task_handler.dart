@@ -16,6 +16,7 @@ const _anonKey = 'sb_publishable_HCRDnKdePmnT0ukTyVlFCg_q0MRPyhK';
 // Keys shared between the UI isolate and the background service isolate.
 const kFgHotspots = 'fg_hotspots';
 const kFgDeals = 'fg_deals';
+const kFgEvents = 'fg_events';
 // Published cities (with center coords), written by the UI isolate.
 const kFgCities = 'fg_cities';
 // The city id we last greeted the user in — so we notify once per arrival.
@@ -142,6 +143,7 @@ class GeofenceTaskHandler extends TaskHandler {
 
     final hotspots = _decode(prefs.getString(kFgHotspots));
     final deals = _decode(prefs.getString(kFgDeals));
+    final events = _decode(prefs.getString(kFgEvents));
 
     // Report live presence (best-effort), including today's step count so
     // merchants can size a "they have walked a lot today" audience.
@@ -169,6 +171,29 @@ class GeofenceTaskHandler extends TaskHandler {
         category: category,
         payload: 'hotspot:${h['id']}',
         image: h['image'] as String?,
+      );
+    }
+
+
+    // Events ping regardless of interests: a tourist has not opted out of
+    // "there is a concert fifty metres away" the way they opt out of a
+    // category of story. They are muted on an active tour like everything
+    // else, so a guided walk stays a guided walk.
+    for (final e in events) {
+      if (tourActive) break;
+      _maybeFire(
+        pos,
+        id: 'e_${e['id']}',
+        lat: (e['lat'] as num).toDouble(),
+        lng: (e['lng'] as num).toDouble(),
+        radius: (e['radius'] as num).toDouble(),
+        title: e['title'] as String,
+        body: (e['subtitle'] as String?)?.isNotEmpty == true
+            ? e['subtitle'] as String
+            : _ntr(prefs, 'tap_story'),
+        category: 'event',
+        payload: 'event:${e['id']}',
+        image: e['image'] as String?,
       );
     }
 

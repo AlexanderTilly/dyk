@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/hot_deal.dart';
+import '../models/internal_ad.dart';
 import '../models/hotspot.dart';
 import 'geofence_task_handler.dart';
 
@@ -37,8 +38,8 @@ class GeofenceForegroundService {
 
   // Interests are read by the handler straight from AppState's own pref key,
   // so we only persist the geofence geometry here.
-  Future<void> _writeData(
-      List<Hotspot> hotspots, List<HotDeal> deals) async {
+  Future<void> _writeData(List<Hotspot> hotspots, List<HotDeal> deals,
+      List<InternalAd> events) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       kFgHotspots,
@@ -76,15 +77,36 @@ class GeofenceForegroundService {
               })
           .toList()),
     );
+    final now = DateTime.now();
+    await prefs.setString(
+      kFgEvents,
+      jsonEncode(events.where((e) => e.showsOn(now)).map((e) {
+        // radius_km is KILOMETRES and defaults to 25 — that is an ad's
+        // display radius, and as a notification radius it would ping every
+        // phone on Mallorca. Convert, then cap: a "you are at the event"
+        // ping is only true within a few hundred metres.
+        final metres = (e.radiusKm * 1000).clamp(50.0, 1000.0);
+        return {
+          'id': e.id,
+          'title': e.title,
+          'subtitle': e.subtitle,
+          'lat': e.targetLat,
+          'lng': e.targetLng,
+          'radius': metres,
+          'image': e.imageUrl,
+        };
+      }).toList()),
+    );
   }
 
   Future<void> start({
     required List<Hotspot> hotspots,
     required List<HotDeal> deals,
+    List<InternalAd> events = const [],
     Set<String> interests = const {},
   }) async {
     init();
-    await _writeData(hotspots, deals);
+    await _writeData(hotspots, deals, events);
 
     // A location-typed foreground service requires the "Allow all the time"
     // (background location) grant on Android 10+. Starting it without that
@@ -120,9 +142,10 @@ class GeofenceForegroundService {
   Future<void> update({
     required List<Hotspot> hotspots,
     required List<HotDeal> deals,
+    List<InternalAd> events = const [],
     Set<String> interests = const {},
   }) async {
-    await _writeData(hotspots, deals);
+    await _writeData(hotspots, deals, events);
   }
 
   Future<void> stop() async {

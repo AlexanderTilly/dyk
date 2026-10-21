@@ -49,6 +49,9 @@ class FakeDykRepository implements DykRepositoryBase {
   Future<Map<String, dynamic>?> startRedeem(String dealId, String? userKey) async => null;
   @override
   Future<List<InternalAd>> loadAds() async => [];
+
+  @override
+  Future<List<InternalAd>> loadEvents() async => [];
   @override
   Future<List<PickpocketReport>> loadPickpocketReports() async => [];
   @override

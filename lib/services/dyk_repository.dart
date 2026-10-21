@@ -17,6 +17,9 @@ abstract class DykRepositoryBase {
   Future<List<HotDeal>> loadDeals(String citypackId);
   Future<Map<String, dynamic>?> startRedeem(String dealId, String? userKey);
   Future<List<InternalAd>> loadAds();
+
+  /// Events still running: kind = 'event', active, not yet ended.
+  Future<List<InternalAd>> loadEvents();
   Future<List<PickpocketReport>> loadPickpocketReports();
   Future<String?> reportPickpocket({
     required double lat,
@@ -156,11 +159,35 @@ class DykRepository implements DykRepositoryBase {
       final rows = await _client
           .from('internal_ads')
           .select()
+          // Events live in this table too (migration 053). Without the filter
+          // they would surface as ads the moment the first one is created.
+          .eq('kind', 'ad')
           .eq('is_active', true)
           .order('sort_order', ascending: true);
       return rows.map<InternalAd>((r) => InternalAd.fromJson(r)).toList();
     } catch (e) {
       debugPrint('DykRepository.loadAds failed: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<InternalAd>> loadEvents() async {
+    try {
+      final now = DateTime.now().toUtc().toIso8601String();
+      final rows = await _client
+          .from('internal_ads')
+          .select()
+          .eq('kind', 'event')
+          .eq('is_active', true)
+          // An open-ended event has no end date and must not be filtered out,
+          // so the past is excluded by "ended before now", never by "ends
+          // after now" — the latter silently drops every null.
+          .or('ends_at.is.null,ends_at.gte.$now')
+          .order('starts_at', ascending: true);
+      return rows.map<InternalAd>((r) => InternalAd.fromJson(r)).toList();
+    } catch (e) {
+      debugPrint('DykRepository.loadEvents failed: $e');
       return [];
     }
   }

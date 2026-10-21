@@ -17,6 +17,15 @@ class InternalAd {
   final double? destLng;
   final String? destLabel;
 
+  /// 'ad' or 'event'. Events are the same row shape with a time attached, so
+  /// they share this table; see migration 053.
+  final String kind;
+
+  /// Null on an ad. On an event, null `endsAt` means open-ended rather than
+  /// finished — a permanent installation has a start and no end.
+  final DateTime? startsAt;
+  final DateTime? endsAt;
+
   const InternalAd({
     required this.id,
     required this.title,
@@ -30,10 +39,25 @@ class InternalAd {
     this.destLat,
     this.destLng,
     this.destLabel,
+    this.kind = 'ad',
+    this.startsAt,
+    this.endsAt,
   });
 
   /// Whether this ad can be navigated to.
   bool get hasDestination => destLat != null && destLng != null;
+
+  bool get isEvent => kind == 'event';
+
+  /// An event is over once its end has passed. A null end never expires —
+  /// that is the open-ended case, not a missing value to guess at.
+  bool isOver(DateTime now) => endsAt != null && endsAt!.isBefore(now);
+
+  /// Shown on the map from the moment it is created until it is over. We do
+  /// not hide an event before it starts: a tourist walking past today wants
+  /// to know about Thursday's concert, which is the whole point of putting
+  /// it on a map.
+  bool showsOn(DateTime now) => isEvent && !isOver(now);
 
   factory InternalAd.fromJson(Map<String, dynamic> json) => InternalAd(
         id: json['id'] as String,
@@ -48,5 +72,8 @@ class InternalAd {
         destLat: (json['dest_lat'] as num?)?.toDouble(),
         destLng: (json['dest_lng'] as num?)?.toDouble(),
         destLabel: json['dest_label'] as String?,
+        kind: (json['kind'] as String?) ?? 'ad',
+        startsAt: DateTime.tryParse((json['starts_at'] as String?) ?? ''),
+        endsAt: DateTime.tryParse((json['ends_at'] as String?) ?? ''),
       );
 }

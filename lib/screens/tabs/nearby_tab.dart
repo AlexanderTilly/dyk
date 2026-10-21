@@ -17,12 +17,14 @@ import '../../services/auth_service.dart';
 import '../../services/dyk_repository.dart';
 import '../../services/entitlements.dart';
 import '../../services/saved_store.dart';
+import '../../models/internal_ad.dart';
 import '../../theme/dyk_theme.dart';
 import '../../widgets/category_badge.dart';
 import '../../widgets/photo_pin.dart';
 import '../deal_detail_screen.dart';
 import '../hotspot_detail_screen.dart';
 import '../../i18n/i18n.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/step_store.dart';
 import '../../services/map_style.dart';
 import '../../widgets/passim_puck.dart';
@@ -47,6 +49,7 @@ const _iconIds = [
   'pin_otium',
   'pin_headline',
   'pin_hotdeal',
+  'pin_event',
   'funfact',
   'pickpocket',
 ];
@@ -110,6 +113,10 @@ class _NearbyTabState extends State<NearbyTab> {
   // Hotspots whose first image is registered as a 'photo_<id>' style image.
   final Set<String> _photoPinIds = {};
   List<PickpocketReport> _pickpockets = [];
+
+  /// Events still running. Loaded once with the map, like the pickpocket
+  /// reports, rather than passed in — nothing above this tab needs them.
+  List<InternalAd> _events = [];
 
   final Set<String> _visibleCategories = {
     'history',
@@ -226,6 +233,9 @@ class _NearbyTabState extends State<NearbyTab> {
     if (widget.repo != null) {
       try {
         _pickpockets = await widget.repo!.loadPickpocketReports();
+      } catch (_) {}
+      try {
+        _events = await widget.repo!.loadEvents();
       } catch (_) {}
     }
     await _addSourceAndLayers(map);
@@ -364,6 +374,23 @@ class _NearbyTabState extends State<NearbyTab> {
           'id': d.id,
           'kind': 'deal',
           'name': d.businessName,
+        },
+      });
+    }
+    final now = DateTime.now();
+    for (final e in _events) {
+      if (!e.showsOn(now)) continue; // an event that has ended is just litter
+      features.add({
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [e.targetLng, e.targetLat],
+        },
+        'properties': {
+          'icon': 'pin_event',
+          'id': e.id,
+          'kind': 'event',
+          'name': e.title,
         },
       });
     }
@@ -512,6 +539,9 @@ class _NearbyTabState extends State<NearbyTab> {
       } else if (kind == 'deal') {
         final d = widget.deals.where((x) => x.id == id).firstOrNull;
         if (d != null) _openDeal(d);
+      } else if (kind == 'event') {
+        final e = _events.where((x) => x.id == id).firstOrNull;
+        if (e != null) _showEvent(e);
       } else if (kind == 'pickpocket') {
         final r = _pickpockets.where((x) => x.id == id).firstOrNull;
         if (r != null) _showPickpocket(r);
@@ -528,6 +558,108 @@ class _NearbyTabState extends State<NearbyTab> {
         MapAnimationOptions(duration: 500),
       );
     }
+  }
+
+  /// Formats an event's dates for the sheet. Shows a single day when it
+  /// starts and ends the same day, which is the common case, and leaves the
+  /// end off entirely when there is none — "from 4 Nov" is honest about an
+  /// open-ended run where "4 Nov – null" would not be.
+  String _eventWhen(InternalAd e) {
+    String d(DateTime t) {
+      final l = t.toLocal();
+      const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      final hh = l.hour.toString().padLeft(2, '0');
+      final mm = l.minute.toString().padLeft(2, '0');
+      return '${l.day} ${m[l.month - 1]}, $hh:$mm';
+    }
+    final s = e.startsAt, en = e.endsAt;
+    if (s == null && en == null) return '';
+    if (s == null) return 'until ${d(en!)}';
+    if (en == null) return 'from ${d(s)}';
+    final sameDay = s.toLocal().day == en.toLocal().day &&
+        s.toLocal().month == en.toLocal().month &&
+        s.toLocal().year == en.toLocal().year;
+    if (sameDay) {
+      final l = en.toLocal();
+      final hh = l.hour.toString().padLeft(2, '0');
+      final mm = l.minute.toString().padLeft(2, '0');
+      return '${d(s)} – $hh:$mm';
+    }
+    return '${d(s)} – ${d(en)}';
+  }
+
+  void _showEvent(InternalAd e) {
+    final when = _eventWhen(e);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (e.imageUrl != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.network(e.imageUrl!,
+                        height: 170,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        // A dead image URL must not blank the sheet: the date
+                        // and the link are the useful part.
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                  ),
+                if (e.imageUrl != null) const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Image.asset('assets/images/badges/pin_event.png',
+                        height: 36, width: 36),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(e.title,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w800)),
+                    ),
+                  ],
+                ),
+                if (when.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(when,
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: PassimColors.brand)),
+                ],
+                if (e.subtitle?.isNotEmpty == true) ...[
+                  const SizedBox(height: 12),
+                  Text(e.subtitle!,
+                      style: const TextStyle(fontSize: 15, height: 1.4)),
+                ],
+                if (e.linkUrl?.isNotEmpty == true) ...[
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => launchUrl(Uri.parse(e.linkUrl!),
+                          mode: LaunchMode.externalApplication),
+                      child: Text(e.destLabel?.isNotEmpty == true
+                          ? e.destLabel!
+                          : tr('event_more')),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showPickpocket(PickpocketReport r) {
