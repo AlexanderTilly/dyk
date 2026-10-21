@@ -195,7 +195,7 @@ class _NearbyTabState extends State<NearbyTab> {
     // One look for every map in the app; see lib/services/map_style.dart.
     await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
-    await map.location.updateSettings(passimPuckSettings());
+    await map.location.updateSettings(await passimPuckSettings());
   }
 
   // Runs once the style is ready: register icons, load data, add the

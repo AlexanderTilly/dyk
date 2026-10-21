@@ -416,7 +416,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     // One look for every map in the app; see lib/services/map_style.dart.
     await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
-    await map.location.updateSettings(passimPuckSettings());
+    await map.location.updateSettings(await passimPuckSettings());
     await _addRouteLayers(map);
     // Fixed tours keep the loop hidden until the user reaches the start;
     // flip visibility off here, on again in _setRevealed.

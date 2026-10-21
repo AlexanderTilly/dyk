@@ -109,7 +109,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
     // One look for every map in the app; see lib/services/map_style.dart.
     await applyPassimMapStyle(map, dark: _dark);
     await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
-    await map.location.updateSettings(passimPuckSettings());
+    await map.location.updateSettings(await passimPuckSettings());
     // Destination pin: the hotspot's own photo (badge-less fallback dot).
     try {
       final mgr = await map.annotations.createPointAnnotationManager();

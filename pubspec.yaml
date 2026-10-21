@@ -66,5 +66,7 @@ flutter:
     - assets/icon/
     - assets/images/badges/
     - assets/images/headers/
-    - assets/models/
+    # assets/models/ holds passim_puck.glb only, the 3D location puck that was
+    # tried and put back on 2026-10-21. Left in the repo, out of the bundle:
+    # restoring it is this one line, and until then it is 860 kB nobody sees.
     - assets/ar/office/
