@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:palma_app/models/subcategories.dart';
 
@@ -20,6 +22,45 @@ void main() {
           expect(s, matches(RegExp(r'^[a-z][a-z_]*$')), reason: s);
         }
       }
+    });
+  });
+
+
+  group('the database agrees', () {
+    // The third copy of this taxonomy lives in a CHECK constraint, and it is
+    // the only one that can REJECT a write. On 2026-10-21 the admin offered
+    // "Shop" while the constraint still listed the pre-2026-10-16 keys, so
+    // every save failed with hotspots_subcategory_check. The two code lists
+    // had tests pinning each other; the database had nobody watching it.
+    test('migration 054 permits exactly the keys the app offers', () {
+      final sql =
+          File('supabase/migrations/054_subcategory_constraint.sql')
+              .readAsStringSync();
+      // Only the constraint body. Bounded at both ends on purpose: the file's
+      // closing notes quote 'leisure' and 'art' as values to check are gone,
+      // and an unbounded read swallows them and reports a drift that is only
+      // prose.
+      final body = sql
+          .split('add constraint hotspots_subcategory_check')
+          .last
+          .split('commit;')
+          .first;
+      final permitted = RegExp(r"'([a-z_]+)'")
+          .allMatches(body)
+          .map((m) => m.group(1)!)
+          .toSet();
+
+      final offered = {
+        for (final subs in subcategoriesByCategory.values) ...subs,
+        // History's keys are not in subcategoriesByCategory — only Leisure
+        // has chips in the app — but the admin still writes them, so the
+        // constraint must allow them.
+        'building', 'work_of_art', 'historical_figure',
+      };
+
+      expect(permitted, offered,
+          reason: 'the CHECK constraint and the app have drifted apart; '
+              'change both, and dyk-admin/src/subcategories.ts too');
     });
   });
 
