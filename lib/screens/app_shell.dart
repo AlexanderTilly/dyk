@@ -443,8 +443,12 @@ class _AppShellState extends State<AppShell> {
             audioService: widget.audioService,
             headerImage: _activePack?.headerImage,
             cityName: _activePack?.city,
+            citypackId: widget.activePackId,
+            cityLat: _activePack?.lat,
+            cityLng: _activePack?.lng,
           )),
           _refreshable(SavedTab(
+            isActive: _index == 3,
             savedStore: widget.savedStore,
             allHotspots: widget.hotspots,
             audioService: widget.audioService,

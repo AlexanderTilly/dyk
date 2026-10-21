@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/step_store.dart';
@@ -14,7 +15,9 @@ import '../services/audio_service.dart';
 import '../services/auth_service.dart';
 import '../services/dyk_repository.dart';
 import '../theme/dyk_theme.dart';
+import '../services/tour_generator.dart';
 import 'active_tour_screen.dart';
+import 'auth_screen.dart';
 import '../i18n/i18n.dart';
 
 class TourDetailScreen extends StatefulWidget {
@@ -84,6 +87,33 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
       'pk.eyJ1IjoibGl0dGxld2h5IiwiYSI6ImNtZHJnMjc2bzBoM2EybHNmMWtpNW4xd24ifQ.NMHAZQhN_eP_3wxFUfNhdw';
 
   bool _starting = false;
+  bool _saved = false;
+  bool _saving = false;
+
+  /// Keep a generated round. Signed out, the account prompt opens now - after
+  /// the person has decided the round is worth keeping - and the save runs on
+  /// return if they signed in.
+  Future<void> _save() async {
+    if (_saving || _saved) return;
+    setState(() => _saving = true);
+    final keeper =
+        TourKeeper.supabase(Supabase.instance.client, widget.authService);
+    var result = await keeper.saveTour(widget.tour.id);
+    if (result == SaveResult.needsAccount && mounted) {
+      await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => AuthScreen(authService: widget.authService)));
+      result = await keeper.saveTour(widget.tour.id);
+    }
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      _saved = result == SaveResult.saved;
+    });
+    if (result == SaveResult.failed) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(tr('save_round_failed'))));
+    }
+  }
 
   Future<void> _start() async {
     final included =
@@ -529,7 +559,21 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
+              Row(children: [
+                if (t.isGenerated) ...[
+                  SizedBox(
+                    height: 56,
+                    child: OutlinedButton.icon(
+                      onPressed: _saving || _saved ? null : _save,
+                      icon: Icon(
+                          _saved ? Icons.bookmark : Icons.bookmark_border),
+                      label:
+                          Text(_saved ? tr('round_saved') : tr('save_round')),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(child: SizedBox(
             height: 56,
             width: double.infinity,
             child: ElevatedButton(
@@ -554,7 +598,8 @@ class _TourDetailScreenState extends State<TourDetailScreen> {
                     fontWeight: FontWeight.w900, fontSize: 16),
               ),
             ),
-          ),
+          )),
+              ]),
             ],
           ),
         ),

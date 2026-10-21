@@ -32,7 +32,48 @@ abstract class DykRepositoryBase {
   Future<(bool, Set<String>)> getEntitlements();
   Future<String?> unlockCity(String citypackId);
   Future<String?> setPremium();
+
+  /// Citypack ids that have enough English narration for the tour generator.
+  /// Empty when unknown (offline, view missing): the generator stays hidden.
+  Future<Set<String>> loadGeneratorCities();
+
+  /// The signed-in person's kept generated rounds, newest first. Empty when
+  /// signed out, offline or on any error (same convention as loadTours).
+  Future<List<Tour>> loadSavedTours();
 }
+
+/// Whether to offer the tour generator in [citypackId]. The set comes from the
+/// `generator_cities` view (migration 051), which holds the narration
+/// threshold in one place, so no number is repeated here. An empty set means
+/// "no city qualifies (or we could not tell)" and hides it everywhere.
+/// Maps view rows to the set of city ids. Rows whose `citypack_id` is missing
+/// or not a string are skipped rather than crashing or inventing an entry.
+Set<String> generatorCitiesFromRows(Iterable<dynamic> rows) {
+  final out = <String>{};
+  for (final r in rows) {
+    final id = r is Map ? r['citypack_id'] : null;
+    if (id is String && id.isNotEmpty) out.add(id);
+  }
+  return out;
+}
+
+/// Runs [fetch] and maps its rows; any error yields an empty set.
+Future<Set<String>> generatorCitiesFrom(
+    Future<Iterable<dynamic>> Function() fetch) async {
+  try {
+    return generatorCitiesFromRows(await fetch());
+  } catch (e) {
+    // Fail closed. If we cannot tell which cities are narrated (no network,
+    // or migration 051 not applied yet) the safe answer is "none": hiding the
+    // generator costs a missing button, whereas offering it in a silent city
+    // hands a tourist a handsome route with nothing to listen to.
+    debugPrint('DykRepository.loadGeneratorCities failed: $e');
+    return {};
+  }
+}
+
+bool generatorAvailable(String? citypackId, Set<String> cities) =>
+    citypackId != null && cities.contains(citypackId);
 
 /// Loads DYK content from Supabase. Returns empty lists when offline so the
 /// app can fall back to bundled content instead of crashing.
@@ -377,6 +418,31 @@ class DykRepository implements DykRepositoryBase {
       return [];
     }
   }
+
+  @override
+  Future<List<Tour>> loadSavedTours() async {
+    try {
+      if (_client.auth.currentUser == null) return [];
+      // saved_tours is RLS-limited to the caller's rows (052); the embedded
+      // tours row is readable because generated tours are world-readable (050).
+      final rows = await _client
+          .from('saved_tours')
+          .select('saved_at, tours(*)')
+          .order('saved_at', ascending: false);
+      return [
+        for (final r in rows)
+          if (r['tours'] is Map<String, dynamic>)
+            Tour.fromJson(r['tours'] as Map<String, dynamic>)
+      ];
+    } catch (e) {
+      debugPrint('DykRepository.loadSavedTours failed: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<Set<String>> loadGeneratorCities() => generatorCitiesFrom(
+      () => _client.from('generator_cities').select('citypack_id'));
 
   Future<Set<String>> loadTourProgress(String tourId) async {
     try {
