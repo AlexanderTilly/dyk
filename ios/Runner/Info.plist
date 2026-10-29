@@ -50,13 +50,15 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Did You Know? uses your location to tell you the stories of the places you walk past.</string>
+	<string>Passim uses your location to tell you the stories of the places you walk past.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Did You Know? uses your location in the background so you get a notification the moment you reach a historic site, a hidden gem or a local offer — even with the app closed.</string>
+	<string>Passim uses your location in the background so you get a notification the moment you reach a historic site, a hidden gem or a local offer — even with the app closed.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Did You Know? uses your location in the background so you get a notification the moment you reach a historic site, a hidden gem or a local offer — even with the app closed.</string>
+	<string>Passim uses your location in the background so you get a notification the moment you reach a historic site, a hidden gem or a local offer — even with the app closed.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Passim uses the camera to show you what a place looked like a century ago, held up against the street in front of you.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Did You Know? never records audio. This entry is required because the audio playback library links Apple's audio APIs.</string>
+	<string>Passim never records audio. This entry is required because the audio playback library links Apple's audio APIs.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Used to count the steps you walk while exploring a city.</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:palma_app/i18n/i18n.dart';
 
@@ -62,5 +64,42 @@ void main() {
       });
     });
     expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  // The same check, one file further out. The rebrand test above watches the
+  // translations map; Info.plist is the copy nobody was watching, and it still
+  // read "Did You Know?" on 2026-10-29 — in the iOS permission dialogs, which
+  // is the most sensitive text the app ever shows.
+  test('iOS permission strings are branded Passim too', () {
+    final plist = File('ios/Runner/Info.plist').readAsStringSync();
+    expect(plist.contains('DYK'), isFalse,
+        reason: 'stale branding in ios/Runner/Info.plist');
+    expect(plist.contains('Did You Know'), isFalse,
+        reason: 'stale branding in ios/Runner/Info.plist');
+  });
+
+  // Apple rejects the upload when the binary links an API with no purpose
+  // string (error 90683). Build 1.4.1 (9) was turned away for exactly this:
+  // the camera package arrived with the AR screen and nobody added the key.
+  // Apple scans the binary, not the code path, so a demo screen still counts.
+  test('every sensitive API the app links has a purpose string', () {
+    final plist = File('ios/Runner/Info.plist').readAsStringSync();
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+
+    const needs = {
+      'camera': 'NSCameraUsageDescription',
+      'geolocator': 'NSLocationWhenInUseUsageDescription',
+      'image_picker': 'NSPhotoLibraryUsageDescription',
+      'record': 'NSMicrophoneUsageDescription',
+      'mobile_scanner': 'NSCameraUsageDescription',
+    };
+
+    final missing = <String>[];
+    needs.forEach((package, key) {
+      final declared = RegExp('^  $package:', multiLine: true).hasMatch(pubspec);
+      if (declared && !plist.contains(key)) missing.add('$package needs $key');
+    });
+
+    expect(missing, isEmpty, reason: missing.join(', '));
   });
 }
