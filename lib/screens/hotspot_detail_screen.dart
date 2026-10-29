@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 
 import '../models/hotspot.dart';
+import '../services/arrival_cue.dart';
 import '../services/audio_service.dart';
 import '../services/auth_service.dart';
 import '../services/dyk_repository.dart';
@@ -76,6 +77,9 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
     return widget.hotspot.isFree || e.isCityUnlocked(widget.citypackId);
   }
 
+  /// Its own player; see [ArrivalCue] for why it is not the narration's.
+  final _cue = ArrivalCue();
+
   @override
   void initState() {
     super.initState();
@@ -83,18 +87,26 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
     if (_unlocked &&
         widget.autoPlay &&
         widget.hotspot.audioFile.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) =>
-          widget.audioService.play(widget.hotspot.audioFile,
-              title: widget.hotspot.name,
-              hotspotId: widget.hotspot.id,
-              artUrl: widget.hotspot.images.isNotEmpty
-                  ? widget.hotspot.images.first
-                  : null));
+      // Arriving plays a four-second chime, and the story waits for it.
+      // Starting both together means the opening sentence — the one that has
+      // to earn the listener — competes with a fanfare and loses.
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _cue.play();
+        await Future.delayed(_cue.length);
+        if (!mounted) return;
+        await widget.audioService.play(widget.hotspot.audioFile,
+            title: widget.hotspot.name,
+            hotspotId: widget.hotspot.id,
+            artUrl: widget.hotspot.images.isNotEmpty
+                ? widget.hotspot.images.first
+                : null);
+      });
     }
   }
 
   @override
   void dispose() {
+    _cue.dispose();
     _imagePage.dispose();
     super.dispose();
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -15,6 +16,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../i18n/i18n.dart';
 import '../models/tour.dart';
 import '../models/tour_stop.dart';
+import '../services/arrival_cue.dart';
 import '../services/audio_service.dart';
 import '../services/dyk_repository.dart';
 import '../services/step_store.dart';
@@ -123,6 +125,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
   final DateTime _startedAt = DateTime.now();
   // Gold-pulse arrival effect: bump the seq to replay the animation.
   int _pulseSeq = 0;
+  final _cue = ArrivalCue();
   // Road-following dashed guide (replaces the old as-the-crow-flies line).
   List<List<double>> _guideRouteCoords = [];
   geo.Position? _guideFetchedAt;
@@ -950,6 +953,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     // Gold pulse + haptics that follow it: hard hit as the glow blooms,
     // two softer ones as the ring expands and fades.
     setState(() => _pulseSeq++);
+    _cue.play();
     HapticFeedback.heavyImpact();
     Future.delayed(const Duration(milliseconds: 300),
         () => HapticFeedback.mediumImpact());
@@ -985,8 +989,11 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     });
     await widget.repo.recordTourVisit(widget.tour.id, s.id);
     _drawStops(); // dim the visited pin
-    // Let the pulse land before the sheet covers the map.
-    await Future.delayed(const Duration(milliseconds: 900));
+    // The sheet rises partway through the cue rather than after it: the map
+    // moment lands first, then the card arrives while the rings are still
+    // going, and the two read as one arrival instead of two events. The
+    // narration behind its Play button waits for the person either way.
+    await Future.delayed(const Duration(milliseconds: 2600));
     if (!mounted) return;
     _showStopSheet(s);
   }
@@ -1214,6 +1221,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
     WidgetsBinding.instance.removeObserver(this);
     _posSub?.cancel();
     _paceTimer?.cancel();
+    _cue.dispose();
     SharedPreferences.getInstance()
         .then((p) => p.setBool('tour_active', false));
     super.dispose();
@@ -1444,7 +1452,7 @@ class _ActiveTourScreenState extends State<ActiveTourScreen>
                 child: TweenAnimationBuilder<double>(
                   key: ValueKey(_pulseSeq),
                   tween: Tween(begin: 0, end: 1),
-                  duration: const Duration(milliseconds: 1800),
+                  duration: const Duration(milliseconds: 4500),
                   curve: Curves.easeOut,
                   builder: (context, t, _) => CustomPaint(
                     painter: _GoldPulsePainter(t),
@@ -1779,37 +1787,70 @@ class _StopSheet extends StatelessWidget {
 
 /// Radial gold glow + expanding ring, faded in/out over one sweep.
 class _GoldPulsePainter extends CustomPainter {
-  final double t; // 0..1
+  final double t; // 0..1 over the whole arrival, ~4.5 s
   _GoldPulsePainter(this.t);
+
+  /// Rings keep leaving the centre for most of the cue rather than one wave
+  /// going out and the screen going still. Four, staggered, is enough to read
+  /// as continuous without becoming a target pattern.
+  static const _ringCount = 4;
+  static const _ringStagger = 0.17;
 
   @override
   void paint(Canvas canvas, ui.Size size) {
     if (t >= 1) return;
-    final fade = (t < 0.25 ? t / 0.25 : (1 - t) / 0.75).clamp(0.0, 1.0);
     final center = Offset(size.width / 2, size.height * 0.55);
-    // Soft glow.
+    final maxR = size.width * 0.85;
+
+    // Overall envelope: quick in, long hold, slow out. The hold is what makes
+    // four seconds feel deliberate instead of merely slow.
+    final env = t < 0.08
+        ? t / 0.08
+        : t < 0.62
+            ? 1.0
+            : (1 - t) / 0.38;
+    final fade = env.clamp(0.0, 1.0);
+
+    // The glow breathes twice across the cue, so the light is never static.
+    final breath = 0.78 + 0.22 * math.sin(t * math.pi * 4);
     final glow = Paint()
       ..shader = RadialGradient(colors: [
-        PassimColors.brand.withValues(alpha: 0.45 * fade),
-        PassimColors.brand.withValues(alpha: 0.12 * fade),
+        PassimColors.brand.withValues(alpha: 0.42 * fade * breath),
+        PassimColors.brand.withValues(alpha: 0.10 * fade),
         Colors.transparent,
       ], stops: const [0, 0.45, 1])
-          .createShader(
-              Rect.fromCircle(center: center, radius: size.width * 0.9));
+          .createShader(Rect.fromCircle(center: center, radius: maxR * 1.05));
     canvas.drawRect(Offset.zero & size, glow);
-    // Two expanding rings, the second trailing the first.
-    final ring = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5 * (1 - t) + 1
-      ..color = PassimColors.brand.withValues(alpha: (1 - t) * 0.9);
-    canvas.drawCircle(center, 20 + t * size.width * 0.8, ring);
-    final t2 = ((t - 0.25) / 0.75).clamp(0.0, 1.0);
-    if (t2 > 0) {
-      final ring2 = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5 * (1 - t2) + 1
-        ..color = PassimColors.brand.withValues(alpha: (1 - t2) * 0.6);
-      canvas.drawCircle(center, 20 + t2 * size.width * 0.8, ring2);
+
+    for (var i = 0; i < _ringCount; i++) {
+      final rt = ((t - i * _ringStagger) / (1 - (_ringCount - 1) * _ringStagger))
+          .clamp(0.0, 1.0);
+      if (rt <= 0 || rt >= 1) continue;
+      // Ease out: fast away from the centre, slowing as it goes, the way a
+      // ripple actually behaves.
+      final eased = 1 - math.pow(1 - rt, 2.2).toDouble();
+      final alpha = (1 - rt) * 0.85 * fade;
+      canvas.drawCircle(
+        center,
+        20 + eased * maxR,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4.0 * (1 - rt) + 1
+          ..color = PassimColors.brand.withValues(alpha: alpha),
+      );
+    }
+
+    // A bright core that blooms and settles, so the first instant has a hit
+    // to match the heavy haptic.
+    final bloom = t < 0.3 ? (1 - t / 0.3) : 0.0;
+    if (bloom > 0) {
+      canvas.drawCircle(
+        center,
+        14 + bloom * 26,
+        Paint()
+          ..color = PassimColors.brand.withValues(alpha: 0.55 * bloom)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+      );
     }
   }
 
