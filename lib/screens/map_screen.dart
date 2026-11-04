@@ -93,7 +93,7 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7ED),
       appBar: AppBar(
-        title: const Text('Palma Explorer'),
+        title: const Text('Passim'),
         backgroundColor: const Color(0xFFF97316),
         // AppBar bg is a fixed orange, not theme-derived.
         foregroundColor: PassimColors.onPhoto,

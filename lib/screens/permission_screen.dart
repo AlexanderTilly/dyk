@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../i18n/i18n.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../models/hotspot.dart';
 import '../services/audio_service.dart';
@@ -36,9 +37,9 @@ class _PermissionScreenState extends State<PermissionScreen> {
       widget.onPermissionsGranted?.call(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'The app needs location and notification permissions to work.',
+            tr('perm_need'),
           ),
         ),
       );
@@ -62,7 +63,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Welcome to\nPalma Explorer',
+                tr('welcome_title'),
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       color: const Color(0xFF431407),
                       fontWeight: FontWeight.bold,
@@ -70,7 +71,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Walk around Palma de Mallorca and discover the city\'s history as you pass historic sites.',
+                tr('welcome_body'),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: const Color(0xFF9A3412),
                     ),
@@ -104,8 +105,8 @@ class _PermissionScreenState extends State<PermissionScreen> {
                   ),
                   child: _loading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Grant permissions & start',
+                      : Text(
+                          tr('perm_grant'),
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600),
                         ),

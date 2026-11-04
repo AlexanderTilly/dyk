@@ -146,7 +146,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                         fontWeight: FontWeight.w800)),
                 const SizedBox(height: 6),
                 Text(
-                  'Full narration, the story and every fact.',
+                  tr('premium_blurb'),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: PassimColors.onPhoto.withValues(alpha: 0.6), fontSize: 13),
                 ),
@@ -409,7 +409,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('THE STORY',
+                      Text(tr('the_story'),
                           style: GoogleFonts.bebasNeue(
                             color: onBg,
                             fontSize: 22,
@@ -435,7 +435,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                           child: Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(
-                              _storyExpanded ? 'Read less' : 'Read more',
+                              _storyExpanded ? tr('read_less') : tr('read_more'),
                               style: const TextStyle(
                                 color: DykColors.yellow,
                                 fontWeight: FontWeight.w700,
@@ -454,7 +454,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                 const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('DID YOU KNOW?',
+                  child: Text(tr('did_you_know'),
                       style: GoogleFonts.bebasNeue(
                         color: DykColors.yellow,
                         fontSize: 22,
@@ -479,7 +479,7 @@ class _HotspotDetailScreenState extends State<HotspotDetailScreen> {
                 const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('WATCH',
+                  child: Text(tr('watch'),
                       style: GoogleFonts.bebasNeue(
                         color: onBg,
                         fontSize: 22,
@@ -543,7 +543,7 @@ class _FactCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text('💡 FACT $index',
+              Text('💡 ${tr('fact')} $index',
                   style: const TextStyle(
                     color: DykColors.yellow,
                     fontSize: 13,
@@ -585,7 +585,7 @@ class _FactCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text('💡 FACT',
+                Text('💡 ${tr('fact')}',
                     style: TextStyle(
                       color: DykColors.yellow,
                       fontSize: 11,
@@ -657,7 +657,7 @@ class _ARButton extends StatelessWidget {
               color: DykColors.yellow,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Text('SOON',
+            child: Text(tr('soon'),
                 style: TextStyle(
                     color: DykColors.black,
                     fontWeight: FontWeight.w800,
@@ -912,13 +912,23 @@ class _BrandedAudioPlayerState extends State<_BrandedAudioPlayer> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('LISTEN TO THE STORY',
-                        style: TextStyle(
-                          color: PassimColors.onPhoto,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                          letterSpacing: 0.5,
-                        )),
+                    // Flexible, not bare: the German label is 25 characters
+                    // and on a 320 dp phone an unbounded Text pushed the
+                    // speed chip clean off the right edge. Two lines keep
+                    // every language whole; the ellipsis is a last resort
+                    // that no current translation reaches.
+                    Flexible(
+                      child: Text(tr('listen_story'),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: PassimColors.onPhoto,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                            letterSpacing: 0.5,
+                          )),
+                    ),
+                    const SizedBox(width: 8),
                     // Playback speed — tap to cycle 1x → 1.25x → 1.5x → 0.75x.
                     GestureDetector(
                       onTap: _cycleSpeed,

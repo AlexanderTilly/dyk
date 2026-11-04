@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -64,6 +65,202 @@ String _ntr(SharedPreferences prefs, String key) {
   return _notifStrings[lang]?[key] ?? _notifStrings['en']![key]!;
 }
 
+// ---------------------------------------------------------------------------
+// Adaptive location cadence — pure logic, unit-tested in
+// test/services/geofence_cadence_test.dart.
+//
+// RULE: accuracy and frequency may relax only where relaxing them cannot cost
+// an arrival. Everything below is derived from that, not tuned by feel.
+//
+// DERIVATION
+//  * The foreground-task heartbeat stays at 12 s (see the service). It is only
+//    a timer. What costs power is the GPS fix, so the handler decides per
+//    heartbeat whether to take one.
+//  * Speed bound  v = 3.0 m/s. A brisk walk is ~1.4 m/s; 3 m/s is a jog and
+//    already 2x any tourist on foot. If the last two fixes show the phone
+//    moving faster (bike, scooter, car) the bound becomes 1.5x the observed
+//    speed (cap 40 m/s), so a vehicle shortens the interval instead of
+//    outrunning it.
+//  * Position error  e = max(1.5 x reported accuracy, 100 m). 100 m is the
+//    floor of geolocator's documented 'medium' class (100-500 m); a fix that
+//    reports itself worse than that is believed.
+//  * Edge distance  d = distance to the circle's rim; a user is "in" at
+//    d <= 0. The worst-case true distance to the rim is d - e.
+//  * Guard  g = 150 m. Whenever we are about to switch to a coarse fix we make
+//    sure the user cannot be closer than g to any rim at the next fix. g is
+//    four near-ticks of walking at v (4 x 12 s x 3 m/s = 144 m), so the near
+//    regime always has several high-accuracy ticks before a rim can be reached,
+//    and a coarse fix that misreads the position by up to its own error can
+//    still not hide an arrival.
+//  * Far interval  T = (d - e - g) / v, so at the next fix the user is at best
+//    g from the rim. If T would be under one heartbeat (d - e < g + 12 v) the
+//    user is NEAR: 12 s, high accuracy, exactly the old behaviour.
+//  * Stillness and the clock only ever raise the *cap* on T, never T itself.
+//    So no stillness heuristic, however wrong, can let a walker reach a rim
+//    unobserved. This also means that near a zone a resting phone keeps the
+//    12 s cadence: without a motion sensor (none is a dependency) a position
+//    fix is the only way to notice the owner standing up, and waiting for one
+//    would cost the first arrival after the café.
+// ---------------------------------------------------------------------------
+
+/// Heartbeat of the foreground task and the near-regime fix cadence.
+const kHeartbeat = Duration(seconds: 12);
+
+/// Planning speed for a person on foot (m/s). See derivation above.
+const kWalkBoundMps = 3.0;
+
+/// Never plan on a vehicle faster than this (m/s).
+const kMaxBoundMps = 40.0;
+
+/// Floor for position error when planning (m).
+const kErrorFloorM = 100.0;
+
+/// Distance from a rim we always want to be able to re-arm high accuracy in (m).
+const kGuardM = 150.0;
+
+/// Longest gap between fixes for a moving phone that is far from everything.
+const kFarCap = Duration(minutes: 3);
+
+/// Longest gap once the phone has not left a ~60 m circle for [kStillAfter].
+const kStillCap = Duration(minutes: 10);
+
+/// ... and also between 01:00 and 06:00 local time.
+const kNightCap = Duration(minutes: 20);
+
+/// How long a phone must stay inside [kStillRadiusM] to count as resting.
+/// A café table is longer than this; a plaque read in a pocket is not.
+const kStillAfter = Duration(minutes: 20);
+
+/// Jitter allowance for the stillness circle (m).
+const kStillRadiusM = 60.0;
+
+/// A circle the user can arrive in. [fine] false = a city welcome radius,
+/// where a coarse fix is plenty.
+class FenceCircle {
+  final double lat;
+  final double lng;
+  final double radiusM;
+  final bool fine;
+  const FenceCircle(this.lat, this.lng, this.radiusM, {this.fine = true});
+}
+
+enum PollRegime { near, far, rest }
+
+class PollPlan {
+  /// Minimum time before the next fix. For [PollRegime.near] this is one
+  /// heartbeat, i.e. take a fix on every heartbeat as before.
+  final Duration interval;
+  final LocationAccuracy accuracy;
+  final PollRegime regime;
+  const PollPlan(this.interval, this.accuracy, this.regime);
+
+  @override
+  String toString() => 'PollPlan($regime, ${interval.inSeconds}s, $accuracy)';
+}
+
+const _nearPlan = PollPlan(kHeartbeat, LocationAccuracy.high, PollRegime.near);
+
+double _haversineM(double lat1, double lng1, double lat2, double lng2) {
+  const r = 6371000.0;
+  double rad(double d) => d * math.pi / 180;
+  final dLat = rad(lat2 - lat1);
+  final dLng = rad(lng2 - lng1);
+  final a = math.pow(math.sin(dLat / 2), 2) +
+      math.cos(rad(lat1)) * math.cos(rad(lat2)) * math.pow(math.sin(dLng / 2), 2);
+  return 2 * r * math.asin(math.min(1.0, math.sqrt(a)));
+}
+
+/// Decides when and how precisely to take the next fix. Pure: depends only on
+/// its arguments.
+///
+/// [stillFor] is how long the phone has stayed within [kStillRadiusM] of one
+/// spot; [observedSpeedMps] is the speed seen between the last two fixes.
+PollPlan planNextFix({
+  required double lat,
+  required double lng,
+  required double accuracyM,
+  required List<FenceCircle> fences,
+  required DateTime now,
+  Duration stillFor = Duration.zero,
+  double observedSpeedMps = 0,
+}) {
+  // Nothing to measure against (prefs not written yet, or no content): we
+  // cannot prove it is safe to relax, so don't.
+  if (fences.isEmpty) return _nearPlan;
+
+  final v = math.min(
+      kMaxBoundMps, math.max(kWalkBoundMps, observedSpeedMps * 1.5));
+  final e = math.max(accuracyM * 1.5, kErrorFloorM);
+
+  double fineEdge = double.infinity;
+  double cityEdge = double.infinity;
+  for (final f in fences) {
+    final edge = _haversineM(lat, lng, f.lat, f.lng) - f.radiusM;
+    if (f.fine) {
+      fineEdge = math.min(fineEdge, edge);
+    } else {
+      cityEdge = math.min(cityEdge, edge);
+    }
+  }
+
+  final nearBeyond = kGuardM + v * kHeartbeat.inSeconds;
+  if (fineEdge - e < nearBeyond) return _nearPlan;
+
+  var seconds = (fineEdge - e - kGuardM) / v;
+  // A city welcome fires from any fix inside its radius, so it needs no guard.
+  if (cityEdge.isFinite) seconds = math.min(seconds, (cityEdge - e) / v);
+
+  final rested = stillFor >= kStillAfter;
+  final night = now.hour >= 1 && now.hour < 6;
+  final cap = rested ? (night ? kNightCap : kStillCap) : kFarCap;
+
+  final secs = seconds
+      .clamp(kHeartbeat.inSeconds.toDouble(), cap.inSeconds.toDouble())
+      .floor();
+  return PollPlan(Duration(seconds: secs), LocationAccuracy.medium,
+      rested ? PollRegime.rest : PollRegime.far);
+}
+
+/// Where the phone has been sitting, and since when.
+class StillAnchor {
+  final double lat;
+  final double lng;
+  final DateTime since;
+  const StillAnchor(this.lat, this.lng, this.since);
+}
+
+/// Folds a fix into the stillness anchor. The anchor stays on the first fix
+/// (it does not drift with the phone), so a slow walk eventually leaves the
+/// circle. The circle widens with a poor fix so jitter doesn't read as motion.
+StillAnchor trackStillness(StillAnchor? prev, double lat, double lng,
+    double accuracyM, DateTime now) {
+  if (prev == null) return StillAnchor(lat, lng, now);
+  final radius = math.max(kStillRadiusM, accuracyM);
+  return _haversineM(prev.lat, prev.lng, lat, lng) > radius
+      ? StillAnchor(lat, lng, now)
+      : prev;
+}
+
+/// Metres of walking to credit for a step sample, or 0 to reject it.
+///
+/// Within a normal tick the rule is the original one (3-300 m). Across a long
+/// gap the ceiling grows with time at walking speed — a longer interval must
+/// not make a bus ride look like a stroll — and between coarse fixes the
+/// floor rises to the combined fix error so a stationary phone's wander is not
+/// counted as steps.
+double stepMetresToCount({
+  required double distanceM,
+  required double elapsedSeconds,
+  required double accuracyM,
+  required double lastAccuracyM,
+}) {
+  final ceiling = math.max(300.0, kWalkBoundMps * elapsedSeconds);
+  final floor = elapsedSeconds <= 30
+      ? 3.0
+      : math.max(3.0, accuracyM + lastAccuracyM);
+  return (distanceM >= floor && distanceM <= ceiling) ? distanceM : 0;
+}
+
 @pragma('vm:entry-point')
 void startGeofenceCallback() {
   FlutterForegroundTask.setTaskHandler(GeofenceTaskHandler());
@@ -75,8 +272,17 @@ void startGeofenceCallback() {
 class GeofenceTaskHandler extends TaskHandler {
   final _notifications = FlutterLocalNotificationsPlugin();
   final Set<String> _triggered = {};
-  int _tick = 0;
-  static const _supportEveryTicks = 25; // 25 × 12 s ≈ 5 min
+  // Support polling runs on the wall clock, independent of how often the
+  // location loop decides to take a fix.
+  DateTime? _lastSupportAt;
+  static const _supportEvery = Duration(minutes: 5);
+
+  // Adaptive cadence state (in memory: a restart simply starts conservative).
+  DateTime? _nextFixAt; // null = take a fix on every heartbeat
+  LocationAccuracy _accuracy = LocationAccuracy.high;
+  StillAnchor? _still;
+  double? _prevLat, _prevLng, _prevAcc;
+  DateTime? _prevAt;
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
@@ -100,13 +306,22 @@ class GeofenceTaskHandler extends TaskHandler {
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload();
 
-    _tick++;
-    if (_tick % _supportEveryTicks == 0) await _checkSupportReplies(prefs);
+    final now = DateTime.now();
+    _lastSupportAt ??= now;
+    if (now.difference(_lastSupportAt!) >= _supportEvery) {
+      _lastSupportAt = now;
+      await _checkSupportReplies(prefs);
+    }
+
+    // An active tour keeps today's cadence and accuracy untouched.
+    final tourActive = prefs.getBool('tour_active') ?? false;
+    final gate = _nextFixAt;
+    if (!tourActive && gate != null && now.isBefore(gate)) return;
 
     Position pos;
     try {
       pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        desiredAccuracy: tourActive ? LocationAccuracy.high : _accuracy,
       );
     } catch (_) {
       return;
@@ -114,28 +329,37 @@ class GeofenceTaskHandler extends TaskHandler {
 
     // Steps explored: accumulate GPS movement (the active-tour screen counts
     // its own while 'tour_active' is set, so we skip to avoid double counts).
-    if (!(prefs.getBool('tour_active') ?? false)) {
+    if (!tourActive) {
       final lastLat = prefs.getDouble('step_last_lat');
       final lastLng = prefs.getDouble('step_last_lng');
       if (lastLat != null && lastLng != null) {
         final d = Geolocator.distanceBetween(
             lastLat, lastLng, pos.latitude, pos.longitude);
-        // 3–300 m per 12 s tick = plausible on foot; larger = vehicle/jump.
-        if (d >= 3 && d <= 300) {
-          const mPerStep = 0.75;
+        // Samples are no longer a fixed 12 s apart, so judge each against the
+        // time it actually spans (see stepMetresToCount).
+        final lastTs = prefs.getInt('step_last_ts');
+        final elapsed = lastTs == null
+            ? kHeartbeat.inSeconds.toDouble()
+            : (now.millisecondsSinceEpoch - lastTs) / 1000;
+        final counted = stepMetresToCount(
+          distanceM: d,
+          elapsedSeconds: elapsed,
+          accuracyM: pos.accuracy,
+          lastAccuracyM: prefs.getDouble('step_last_acc') ?? 0,
+        );
+        if (counted > 0) {
           const totalKey = 'steps_total_m';
-          final n = DateTime.now();
-          final dayKey = 'steps_day_m_${n.year}-${n.month}-${n.day}';
+          final dayKey = 'steps_day_m_${now.year}-${now.month}-${now.day}';
           await prefs.setDouble(
-              totalKey, (prefs.getDouble(totalKey) ?? 0) + d);
+              totalKey, (prefs.getDouble(totalKey) ?? 0) + counted);
           await prefs.setDouble(
-              dayKey, (prefs.getDouble(dayKey) ?? 0) + d);
-          // ignore: unused_local_variable
-          const _ = mPerStep;
+              dayKey, (prefs.getDouble(dayKey) ?? 0) + counted);
         }
       }
       await prefs.setDouble('step_last_lat', pos.latitude);
       await prefs.setDouble('step_last_lng', pos.longitude);
+      await prefs.setInt('step_last_ts', now.millisecondsSinceEpoch);
+      await prefs.setDouble('step_last_acc', pos.accuracy);
     }
 
     final interests =
@@ -154,7 +378,7 @@ class GeofenceTaskHandler extends TaskHandler {
 
     // On an active tour the tour screen owns arrivals — muting the regular
     // hotspot/deal pings keeps the experience focused (city welcome stays).
-    final tourActive = prefs.getBool('tour_active') ?? false;
+    // (tourActive was read above.)
 
     for (final h in hotspots) {
       if (tourActive) break;
@@ -228,6 +452,85 @@ class GeofenceTaskHandler extends TaskHandler {
         }
       }
     }
+
+    _planNext(prefs, pos, now, tourActive, hotspots, deals, events);
+  }
+
+  /// Decide when, and how precisely, the next fix is taken (planNextFix).
+  /// Every hotspot, deal and event counts as a place the user could arrive —
+  /// interests and deal targeting are deliberately not applied, because they
+  /// can change between fixes and a superset is the safe side.
+  void _planNext(
+    SharedPreferences prefs,
+    Position pos,
+    DateTime now,
+    bool tourActive,
+    List<Map<String, dynamic>> hotspots,
+    List<Map<String, dynamic>> deals,
+    List<Map<String, dynamic>> events,
+  ) {
+    // Speed between the last two fixes, discounting both fixes' error.
+    var speed = 0.0;
+    if (_prevLat != null && _prevAt != null) {
+      final dt = now.difference(_prevAt!).inMilliseconds / 1000;
+      if (dt >= 5) {
+        final d = Geolocator.distanceBetween(
+            _prevLat!, _prevLng!, pos.latitude, pos.longitude);
+        speed = math.max(0.0, d - pos.accuracy - (_prevAcc ?? 0)) / dt;
+      }
+    }
+    _prevLat = pos.latitude;
+    _prevLng = pos.longitude;
+    _prevAcc = pos.accuracy;
+    _prevAt = now;
+    _still = trackStillness(_still, pos.latitude, pos.longitude, pos.accuracy, now);
+
+    if (tourActive) {
+      _nextFixAt = null;
+      _accuracy = LocationAccuracy.high;
+      return;
+    }
+
+    final fences = <FenceCircle>[];
+    void add(List<Map<String, dynamic>> src) {
+      for (final m in src) {
+        final lat = (m['lat'] as num?)?.toDouble();
+        final lng = (m['lng'] as num?)?.toDouble();
+        final r = (m['radius'] as num?)?.toDouble();
+        if (lat == null || lng == null || r == null) continue;
+        fences.add(FenceCircle(lat, lng, r));
+      }
+    }
+
+    add(hotspots);
+    add(deals);
+    add(events);
+    // Cities not yet greeted (the one we are in has just been recorded).
+    final lastCity = prefs.getString(kFgLastCity);
+    for (final c in _decode(prefs.getString(kFgCities))) {
+      if (c['id'] == lastCity) continue;
+      final lat = (c['lat'] as num?)?.toDouble();
+      final lng = (c['lng'] as num?)?.toDouble();
+      if (lat == null || lng == null) continue;
+      final rKm = (c['radius_km'] as num?)?.toDouble() ?? 30;
+      fences.add(FenceCircle(lat, lng, rKm * 1000, fine: false));
+    }
+
+    final plan = planNextFix(
+      lat: pos.latitude,
+      lng: pos.longitude,
+      accuracyM: pos.accuracy,
+      fences: fences,
+      now: now,
+      stillFor: now.difference(_still!.since),
+      observedSpeedMps: speed,
+    );
+    _accuracy = plan.accuracy;
+    // Near = a fix on every heartbeat, exactly as before. Otherwise leave a
+    // little slack so heartbeat jitter cannot stretch a gap by a whole beat.
+    _nextFixAt = plan.regime == PollRegime.near
+        ? null
+        : now.add(plan.interval - const Duration(seconds: 2));
   }
 
   /// Does this deal's targeting match me right now? Everything is decided on

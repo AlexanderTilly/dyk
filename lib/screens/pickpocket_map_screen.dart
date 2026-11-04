@@ -232,8 +232,8 @@ class _PickpocketMapScreenState extends State<PickpocketMapScreen> {
                         blurRadius: 10),
                   ],
                 ),
-                child: const Text(
-                  'No active pickpocket reports right now. Stay alert and report anything you see.',
+                child: Text(
+                  tr('pickpocket_none'),
                   style: TextStyle(color: PassimColors.surface),
                 ),
               ),

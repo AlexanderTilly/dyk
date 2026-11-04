@@ -35,6 +35,84 @@ class Reel<T> extends StatefulWidget {
   static const labelSize = 20.0;
   static const labelFloor = 14.0;
 
+  /// Horizontal space the reel box takes besides the label: padding 8 + 8
+  /// and the 1.5 + 1.5 border.
+  static const chromeWidth = 19.0;
+
+  /// [base] is the ambient style (`DefaultTextStyle.of(context).style`), so
+  /// measuring uses the same font the rendered Text will.
+  static TextStyle labelStyle(double size, [TextStyle? base]) =>
+      (base ?? const TextStyle()).merge(TextStyle(
+        color: PassimColors.brand,
+        fontSize: size,
+        fontWeight: FontWeight.w900,
+      ));
+
+  static double _width(
+          String t, double size, TextScaler scaler, TextStyle? base) =>
+      (TextPainter(
+        text: TextSpan(text: t, style: labelStyle(size, base)),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+      )..layout())
+          .width;
+
+  /// Width of the widest single word among [labels] at [size], so a column
+  /// can be sized to keep its longest word whole.
+  static double longestWord(
+      Iterable<String> labels, double size, TextScaler scaler,
+      [TextStyle? base]) {
+    var widest = 0.0;
+    for (final l in labels) {
+      for (final w in l.split(' ')) {
+        final x = _width(w, size, scaler, base);
+        if (x > widest) widest = x;
+      }
+    }
+    return widest;
+  }
+
+  /// Narrowest column width in which every one of [labels] fits in
+  /// [maxLines] lines at [size] without breaking a word.
+  static double fitWidth(
+      Iterable<String> labels, double size, int maxLines, TextScaler scaler,
+      [TextStyle? base]) {
+    var need = longestWord(labels, size, scaler, base);
+    for (final l in labels) {
+      bool fits(double w) => !(TextPainter(
+            text: TextSpan(text: l, style: labelStyle(size, base)),
+            textDirection: TextDirection.ltr,
+            textScaler: scaler,
+            maxLines: maxLines,
+          )..layout(maxWidth: w))
+              .didExceedMaxLines;
+      var lo = need, hi = widestLine([l], size, scaler, base) + 1;
+      if (fits(lo)) continue;
+      while (hi - lo > 0.5) {
+        final mid = (lo + hi) / 2;
+        if (fits(mid)) {
+          hi = mid;
+        } else {
+          lo = mid;
+        }
+      }
+      need = hi;
+    }
+    return need;
+  }
+
+  /// Width of the widest label on one line at [size].
+  static double widestLine(
+      Iterable<String> labels, double size, TextScaler scaler,
+      [TextStyle? base]) {
+    var widest = 0.0;
+    for (final l in labels) {
+      final x = _width(l, size, scaler, base);
+      if (x > widest) widest = x;
+    }
+    return widest;
+  }
+
   @override
   State<Reel<T>> createState() => _ReelState<T>();
 }
@@ -94,11 +172,8 @@ class _ReelState<T> extends State<Reel<T>> {
     final text = widget.label(widget.value);
     final scaler = MediaQuery.textScalerOf(context);
     return LayoutBuilder(builder: (context, c) {
-      TextStyle style(double size) => TextStyle(
-            color: PassimColors.brand,
-            fontSize: size,
-            fontWeight: FontWeight.w900,
-          );
+      final base = DefaultTextStyle.of(context).style;
+      TextStyle style(double size) => Reel.labelStyle(size, base);
       bool fits(double size) {
         double measure(String t, int lines) {
           final tp = TextPainter(
@@ -110,15 +185,7 @@ class _ReelState<T> extends State<Reel<T>> {
           return tp.didExceedMaxLines ? double.infinity : tp.width;
         }
 
-        final longestWord = text
-            .split(' ')
-            .map((w) => TextPainter(
-                  text: TextSpan(text: w, style: style(size)),
-                  textDirection: TextDirection.ltr,
-                  textScaler: scaler,
-                )..layout())
-            .map((tp) => tp.width)
-            .fold<double>(0, (a, b) => a > b ? a : b);
+        final longestWord = Reel.longestWord([text], size, scaler, base);
         return longestWord <= c.maxWidth &&
             measure(text, widget.maxLines) <= c.maxWidth;
       }
@@ -127,9 +194,14 @@ class _ReelState<T> extends State<Reel<T>> {
       while (size > Reel.labelFloor && !fits(size)) {
         size -= 1;
       }
+      // A word wider than the column even at the floor is never split
+      // across lines: it stays on one line and is ellipsised.
+      final wordFits =
+          Reel.longestWord([text], size, scaler, base) <= c.maxWidth;
       return Text(
         text,
-        maxLines: widget.maxLines,
+        maxLines: wordFits ? widget.maxLines : 1,
+        softWrap: wordFits,
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,
         style: style(size),

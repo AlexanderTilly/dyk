@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../i18n/i18n.dart';
 import '../theme/dyk_theme.dart';
 
 /// "See and report Pickpocket activity" call-to-action banner shown on the
@@ -48,13 +49,13 @@ class PickpocketBanner extends StatelessWidget {
             const SizedBox(width: 12),
             Container(width: 1, height: 52, color: const Color(0xFFE3E8F0)),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'See and report',
+                    tr('see_and_report'),
                     style: TextStyle(
                       color: PassimColors.ink,
                       fontWeight: FontWeight.w800,
@@ -62,7 +63,7 @@ class PickpocketBanner extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Pickpocket activity',
+                    tr('pickpocket_activity'),
                     style: TextStyle(
                       color: _blue,
                       fontWeight: FontWeight.w800,
@@ -103,8 +104,8 @@ class PickpocketBanner extends StatelessWidget {
               fit: BoxFit.contain,
             ),
             const SizedBox(width: 10),
-            const Text(
-              'Pickpocket activity',
+            Text(
+              tr('pickpocket_activity'),
               style: TextStyle(
                 color: _blue,
                 fontWeight: FontWeight.w800,
@@ -112,8 +113,8 @@ class PickpocketBanner extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Text(
-              'See or Report',
+            Text(
+              tr('see_and_report'),
               style: TextStyle(
                 color: Color(0xFF5B6573),
                 fontWeight: FontWeight.w600,

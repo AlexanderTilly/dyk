@@ -128,6 +128,59 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
     });
   }
 
+  static const _reelGap = 10.0;
+
+  /// Flex of the distance, shape and theme columns, sized to the longest
+  /// labels of the current language instead of a fixed ratio. Every column
+  /// first gets what its longest label needs to fit its line limit at full
+  /// size; what is left over goes to the columns that would like to show
+  /// their label on fewer lines. If that does not fit, columns shrink towards
+  /// the width they need at the font floor, and only below that does a label
+  /// get ellipsised (never split inside a word).
+  List<int> _columnFlex(BuildContext context, double maxWidth) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final base = DefaultTextStyle.of(context).style;
+    final sets = <List<String>>[
+      [for (final v in tourDistancesKm) '$v km'],
+      [for (final v in tourShapes) tr('shape_$v')],
+      // All themes, so the columns do not shift when walls_gates appears.
+      [for (final t in tourThemes) themeLabel(t)],
+    ];
+    final avail = maxWidth - 2 * _reelGap;
+    const lines = [1, 2, 2];
+    double need(int i, double size) =>
+        Reel.fitWidth(sets[i], size, lines[i], scaler, base) + Reel.chromeWidth;
+    final full = [for (var i = 0; i < 3; i++) need(i, Reel.labelSize)];
+    final floor = [for (var i = 0; i < 3; i++) need(i, Reel.labelFloor)];
+    final want = [
+      for (final l in sets)
+        Reel.widestLine(l, Reel.labelSize, scaler, base) + Reel.chromeWidth
+    ];
+    final fullSum = full.fold(0.0, (a, b) => a + b);
+    final floorSum = floor.fold(0.0, (a, b) => a + b);
+    final w = List<double>.filled(3, 0);
+    if (fullSum <= avail) {
+      final extra = [for (var i = 0; i < 3; i++) want[i] - full[i]];
+      final extraSum = extra.fold(0.0, (a, b) => a + b);
+      for (var i = 0; i < 3; i++) {
+        w[i] = full[i] +
+            (extraSum > 0
+                ? (avail - fullSum) * extra[i] / extraSum
+                : (avail - fullSum) / 3);
+      }
+    } else if (floorSum <= avail) {
+      final t = (avail - floorSum) / (fullSum - floorSum);
+      for (var i = 0; i < 3; i++) {
+        w[i] = floor[i] + (full[i] - floor[i]) * t;
+      }
+    } else {
+      for (var i = 0; i < 3; i++) {
+        w[i] = floor[i] * avail / floorSum;
+      }
+    }
+    return [for (final x in w) (x * 100).round().clamp(1, 1 << 30)];
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!generatorAvailable(widget.citypackId, widget.narratedCities)) {
@@ -139,65 +192,77 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Reel<int>(
-                  key: const Key('reel_distance'),
-                  values: tourDistancesKm,
-                  value: _km,
-                  onChanged: _setDistance,
-                  label: (v) => '$v km',
+          LayoutBuilder(builder: (context, c) {
+            final flex = _columnFlex(context, c.maxWidth);
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: flex[0],
+                      child: Reel<int>(
+                        key: const Key('reel_distance'),
+                        values: tourDistancesKm,
+                        value: _km,
+                        onChanged: _setDistance,
+                        label: (v) => '$v km',
+                      ),
+                    ),
+                    const SizedBox(width: _reelGap),
+                    Expanded(
+                      flex: flex[1],
+                      child: Reel<String>(
+                        key: const Key('reel_shape'),
+                        values: tourShapes,
+                        value: _shape,
+                        onChanged: (v) {
+                          setState(() => _shape = v);
+                          widget.onReelChanged?.call();
+                        },
+                        label: (v) => tr('shape_$v'),
+                        maxLines: 2,
+                      ),
+                    ),
+                    const SizedBox(width: _reelGap),
+                    Expanded(
+                      flex: flex[2],
+                      child: Reel<String>(
+                        key: const Key('reel_theme'),
+                        values: availableThemes,
+                        value: _theme,
+                        onChanged: selectTheme,
+                        label: themeLabel,
+                        maxLines: 2,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Reel<String>(
-                  key: const Key('reel_shape'),
-                  values: tourShapes,
-                  value: _shape,
-                  onChanged: (v) {
-                    setState(() => _shape = v);
-                    widget.onReelChanged?.call();
-                  },
-                  label: (v) => tr('shape_$v'),
-                  maxLines: 2,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 2,
-                child: Reel<String>(
-                  key: const Key('reel_theme'),
-                  values: availableThemes,
-                  value: _theme,
-                  onChanged: selectTheme,
-                  label: themeLabel,
-                  maxLines: 2,
-                ),
-              ),
-            ],
-          ),
-          if (widget.notice != null) ...[
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FractionallySizedBox(
-                // Under the theme reel, which is the right-hand half.
-                widthFactor: 0.5,
-                child: Text(
-                  widget.notice!,
-                  key: const Key('generator_notice'),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: PassimColors.brand,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-          ],
+                if (widget.notice != null) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    // Under the theme reel, whatever width it has taken.
+                    child: SizedBox(
+                      width: (c.maxWidth - 2 * _reelGap) *
+                          flex[2] /
+                          (flex[0] + flex[1] + flex[2]),
+                      child: Text(
+                        widget.notice!,
+                        key: const Key('generator_notice'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            color: PassimColors.brand,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            );
+          }),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,

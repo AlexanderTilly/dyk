@@ -173,11 +173,11 @@ class _SavedTabState extends State<SavedTab> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       // Fixed red swipe-to-delete bg, not theme-derived.
-                      children: const [
-                        Icon(Icons.delete_outline,
+                      children: [
+                        const Icon(Icons.delete_outline,
                             color: PassimColors.onPhoto),
-                        SizedBox(width: 8),
-                        Text('REMOVE',
+                        const SizedBox(width: 8),
+                        Text(tr('remove'),
                             style: TextStyle(
                                 color: PassimColors.onPhoto,
                                 fontWeight: FontWeight.w900,

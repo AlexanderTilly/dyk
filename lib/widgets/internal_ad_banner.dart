@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../i18n/i18n.dart';
 
 import '../models/internal_ad.dart';
 import '../screens/navigate_screen.dart';
@@ -55,7 +56,7 @@ class InternalAdBanner extends StatelessWidget {
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(99),
                 ),
-                child: Text('FEATURED',
+                child: Text(tr('featured'),
                     style: TextStyle(
                         // Tag sits on the photo scrim, stays white in both themes.
                         color: PassimColors.onPhoto.withValues(alpha: 0.7),

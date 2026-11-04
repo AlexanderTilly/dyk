@@ -29,12 +29,18 @@ import '../../services/step_store.dart';
 import '../../services/map_style.dart';
 import '../../widgets/passim_puck.dart';
 
-const _categoryMeta = {
-  'history': ('🏛️', 'History'),
-  'otium': ('🌿', 'Leisure'),
-  'headline': ('📖', 'Stories & Legends'),
-  'hotdeal': ('🔥', 'Hot Deals'),
+/// Emoji only. The names come from `cat_<key>` in i18n — they used to live
+/// here as English literals, which is why a Spanish phone said "Leisure".
+const _categoryEmoji = {
+  'history': '🏛️',
+  'otium': '🌿',
+  'headline': '📖',
+  'hotdeal': '🔥',
 };
+
+/// (emoji, translated name) for a category key.
+(String, String) _categoryMetaFor(String key) =>
+    (_categoryEmoji[key] ?? '📍', tr('cat_$key'));
 
 // Icon ids registered as Mapbox style images (each maps to a PNG in
 // assets/images/badges/). Missing files are skipped and fall back gracefully.
@@ -830,7 +836,7 @@ class _NearbyTabState extends State<NearbyTab> {
                   child: Text(
                     _search.isNotEmpty
                         ? '"$_search"'
-                        : _visibleCategories.length < _categoryMeta.length
+                        : _visibleCategories.length < _categoryEmoji.length
                             ? tr('filters_active')
                             : tr('search_and_filters'),
                     style: const TextStyle(
@@ -935,7 +941,7 @@ class _NearbyTabState extends State<NearbyTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
                         children: [
-                          for (final entry in _categoryMeta.entries)
+                          for (final entry in _categoryEmoji.entries)
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8),
@@ -997,7 +1003,7 @@ class _NearbyTabState extends State<NearbyTab> {
                                         ],
                                       ),
                                       const SizedBox(height: 2),
-                                      Text(entry.value.$2,
+                                      Text(_categoryMetaFor(entry.key).$2,
                                           style: const TextStyle(
                                               fontSize: 10,
                                               fontWeight:

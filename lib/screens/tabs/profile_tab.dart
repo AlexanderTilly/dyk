@@ -294,8 +294,8 @@ class ProfileTab extends StatelessWidget {
             showAboutDialog(
               context: context,
               applicationName: 'Passim',
-              children: const [
-                Text('Explore cities. Discover stories. Unlock hidden gems.'),
+              children: [
+                Text(tr('profile_tagline')),
               ],
             );
           }),

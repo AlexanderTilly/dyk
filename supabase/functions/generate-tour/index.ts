@@ -32,7 +32,7 @@ const THEME_LABELS: Record<string, string> = {
   food_drink: 'Food & drink',
   churches: 'Churches & convents',
   ghosts: 'Ghosts & legends',
-  walls_gates: 'Walls, gates & towers',
+  walls_gates: 'Castles, gates & towers',
   palaces: 'Palaces & noble houses',
   old_shops: 'Old shops & crafts',
   the_sea: 'The sea & the harbour',

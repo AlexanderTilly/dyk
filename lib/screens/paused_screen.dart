@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../i18n/i18n.dart';
 
 import '../services/auth_service.dart';
 import '../theme/dyk_theme.dart';
@@ -31,8 +32,8 @@ class PausedScreen extends StatelessWidget {
               const Icon(Icons.pause_circle_outline,
                   size: 64, color: DykColors.yellow),
               const SizedBox(height: 20),
-              const Text(
-                'Your account is paused',
+              Text(
+                tr('account_paused_title'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   // Screen bg is fixed DykColors.black regardless of theme.
@@ -43,8 +44,7 @@ class PausedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Access to Passim is temporarily on hold. '
-                'If you think this is a mistake, please contact our support team.',
+                tr('account_paused_body'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: PassimColors.onPhoto.withValues(alpha: 0.7),
@@ -53,7 +53,7 @@ class PausedScreen extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 icon: const Icon(Icons.mail_outline),
-                label: const Text('CONTACT SUPPORT'),
+                label: Text(tr('contact_support')),
                 onPressed: () {},
               ),
               const SizedBox(height: 8),
@@ -69,7 +69,7 @@ class PausedScreen extends StatelessWidget {
                   await authService.signOut();
                   onSignedOut();
                 },
-                child: Text('Sign out',
+                child: Text(tr('sign_out'),
                     style: TextStyle(
                         color: PassimColors.onPhoto.withValues(alpha: 0.54))),
               ),

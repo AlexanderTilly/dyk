@@ -128,10 +128,10 @@ void main() {
         await dragTheme(t, -80);
       }
       expect(find.text('Modernisme'), findsOneWidget);
-      expect(find.text('Walls, gates & towers'), findsNothing);
+      expect(find.text('Castles, gates & towers'), findsNothing);
       for (var i = 0; i < 10; i++) {
         await dragTheme(t, 80);
-        expect(find.text('Walls, gates & towers'), findsNothing);
+        expect(find.text('Castles, gates & towers'), findsNothing);
       }
       final state = t.state<TourGeneratorScreenState>(
           find.byType(TourGeneratorScreen));
@@ -165,13 +165,13 @@ void main() {
           await dragTheme(t, -80);
         }
         expect(state.theme, 'walls_gates');
-        expect(find.text('Walls, gates & towers'), findsOneWidget);
+        expect(find.text('Castles, gates & towers'), findsOneWidget);
 
         while (state.distanceKm > target) {
           await dragDistance(t, 80);
         }
         expect(state.theme, 'palaces');
-        expect(find.text('Walls, gates & towers'), findsNothing);
+        expect(find.text('Castles, gates & towers'), findsNothing);
 
         await t.tap(find.byKey(const Key('lever')));
         expect(pulls, hasLength(1));
@@ -244,14 +244,16 @@ void main() {
       });
     }
 
-    for (final lang in ['en', 'es', 'ca', 'de']) {
-      testWidgets('every label is whole and >= 14 px in $lang at 360 px',
+    for (final lang in ['en', 'es', 'ca', 'de'])
+    for (final width in [360.0, 320.0]) {
+      testWidgets(
+          'every label is whole, unbroken and >= 14 px in $lang at $width px',
           (t) async {
         await _loadRoboto();
         SharedPreferences.setMockInitialValues({});
         await I18n.instance.setCode(lang);
         addTearDown(() => I18n.instance.setCode('en'));
-        t.view.physicalSize = const Size(360, 800);
+        t.view.physicalSize = Size(width, 800);
         t.view.devicePixelRatio = 1;
         addTearDown(t.view.reset);
         await pump(t);
@@ -270,6 +272,21 @@ void main() {
             expect(t.renderObject<RenderParagraph>(f).didExceedMaxLines,
                 isFalse,
                 reason: '"${x.data}" ellipsised in $lang');
+            // No word may be broken across lines: every word sits whole
+            // inside one line of the paragraph.
+            final para = t.renderObject<RenderParagraph>(f);
+            final data = x.data!;
+            var at = 0;
+            for (final w in data.split(' ')) {
+              final tops = para
+                  .getBoxesForSelection(
+                      TextSelection(baseOffset: at, extentOffset: at + w.length))
+                  .map((b) => b.top.round())
+                  .toSet();
+              expect(tops, hasLength(1),
+                  reason: '"$w" of "$data" broken in $lang at $width px');
+              at += w.length + 1;
+            }
           }
         }
 

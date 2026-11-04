@@ -62,7 +62,7 @@ class TourCompleteScreen extends StatelessWidget {
             children: [
               const Text('🎉', style: TextStyle(fontSize: 64)),
               const SizedBox(height: 14),
-              const Text('TOUR COMPLETE',
+              Text(tr('tour_complete'),
                   style: TextStyle(
                       color: DykColors.yellow,
                       fontSize: 26,
@@ -111,7 +111,7 @@ class TourCompleteScreen extends StatelessWidget {
                       backgroundColor: DykColors.yellow,
                       foregroundColor: DykColors.black),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('DONE',
+                  child: Text(tr('done'),
                       style: TextStyle(
                           fontWeight: FontWeight.w900, fontSize: 16)),
                 ),

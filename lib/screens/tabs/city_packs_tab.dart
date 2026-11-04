@@ -22,7 +22,7 @@ class CityPacksTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('CITY PACKS',
+        Text(tr('city_packs'),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900, letterSpacing: 0.5)),
         const SizedBox(height: 4),
@@ -62,7 +62,7 @@ class CityPacksTab extends StatelessWidget {
                             borderRadius: BorderRadius.circular(99),
                           ),
                           // Fixed green "downloaded" badge, not theme-derived.
-                          child: const Text('DOWNLOADED',
+                          child: Text(tr('downloaded'),
                               style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,

@@ -28,6 +28,9 @@ class GeofenceForegroundService {
       ),
       iosNotificationOptions: const IOSNotificationOptions(),
       foregroundTaskOptions: ForegroundTaskOptions(
+        // Heartbeat only. The handler decides on each beat whether to take a
+        // GPS fix (planNextFix): every beat when near anything, far less when
+        // nothing can be reached. Keep this equal to kHeartbeat.
         eventAction: ForegroundTaskEventAction.repeat(12000),
         autoRunOnBoot: false,
         allowWakeLock: true,

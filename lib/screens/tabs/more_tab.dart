@@ -217,7 +217,7 @@ class _MoreTabState extends State<MoreTab> {
                     children: [
                       Text('See ${officeScene.title} in ${officeScene.era}',
                           style: const TextStyle(fontWeight: FontWeight.w800)),
-                      const Text('Hold the phone up and slide back in time.',
+                      Text(tr('ar_subtitle'),
                           style: TextStyle(fontSize: 12)),
                     ],
                   ),
@@ -317,8 +317,7 @@ class _MoreTabState extends State<MoreTab> {
       builder: (ctx) => AlertDialog(
         title: Text(tr('report_pickpocket_q')),
         content: Text(
-            'Do you want to report pickpocket activity at your current location? '
-            'We\'ll show a temporary pin on the map for 3 hours.'),
+            tr('pickpocket_confirm')),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),

@@ -60,7 +60,7 @@ const PROMPT =
 ` +
   `- churches: churches, chapels, convents, cathedrals, religious life
 ` +
-  `- walls_gates: city walls, gates, bastions, fortifications
+  `- walls_gates: castles, city walls, gates, towers, bastions, fortifications
 ` +
   `- palaces: palaces, noble mansions, patios of the aristocracy, royal or grand residences
 ` +
