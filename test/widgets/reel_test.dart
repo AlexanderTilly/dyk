@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:palma_app/i18n/i18n.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:palma_app/models/themes.dart';
 import 'package:palma_app/screens/tour_generator_screen.dart';
 import 'package:palma_app/widgets/reel.dart';
 
@@ -127,7 +128,10 @@ void main() {
       for (var i = 0; i < 10; i++) {
         await dragTheme(t, -80);
       }
-      expect(find.text('Modernisme'), findsOneWidget);
+      // Whatever sits last once walls_gates is filtered out. Naming it would
+      // make this test fail every time a theme is added, though it is really
+      // about walls_gates being unreachable below 5 km.
+      expect(find.text(themeLabel(tourThemes.last)), findsOneWidget);
       expect(find.text('Castles, gates & towers'), findsNothing);
       for (var i = 0; i < 10; i++) {
         await dragTheme(t, 80);
@@ -240,7 +244,9 @@ void main() {
             expect(x.style!.fontSize, greaterThanOrEqualTo(Reel.labelFloor));
           }
         }
-        expect(state.theme, 'modernisme');
+        // The last theme, whatever it is — this test is about the size
+        // floor, not about which key happens to sit at the end.
+        expect(state.theme, tourThemes.last);
       });
     }
 

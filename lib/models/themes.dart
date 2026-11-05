@@ -21,6 +21,7 @@ const List<String> tourThemes = [
   'old_shops',
   'the_sea',
   'modernisme',
+  'museums',
 ];
 
 /// The translated name of a theme, for showing in a list or chip.

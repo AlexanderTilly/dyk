@@ -24,6 +24,7 @@ const THEMES = [
   'old_shops',
   'the_sea',
   'modernisme',
+  'museums',
 ]
 
 const corsHeaders = {
@@ -69,6 +70,8 @@ const PROMPT =
   `- the_sea: harbour, shoreline, seafaring, fishing, maritime history
 ` +
   `- modernisme: Modernista / Art Nouveau architecture and its architects
+` +
+  `- museums: museums, galleries, exhibition houses, collections open to visit
 
 ` +
   `The description is long and will touch several themes in passing: kings, the sea, churches and ` +

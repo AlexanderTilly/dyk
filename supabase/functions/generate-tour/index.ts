@@ -37,6 +37,7 @@ const THEME_LABELS: Record<string, string> = {
   old_shops: 'Old shops & crafts',
   the_sea: 'The sea & the harbour',
   modernisme: 'Modernisme',
+  museums: 'Museums',
 }
 
 const CANDIDATES = 6

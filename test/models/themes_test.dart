@@ -7,7 +7,7 @@ void main() {
     // dyk-admin/src/themes.ts, and nothing at runtime compares the two repos.
     // Changing the list here fails this test, which is the moment to change
     // the admin as well.
-    test('is exactly the eight keys, in order', () {
+    test('is exactly the nine keys, in order', () {
       expect(tourThemes, [
         'food_drink',
         'churches',
@@ -17,6 +17,7 @@ void main() {
         'old_shops',
         'the_sea',
         'modernisme',
+        'museums',
       ]);
     });
 
