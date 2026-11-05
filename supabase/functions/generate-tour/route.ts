@@ -1,4 +1,12 @@
-import type { Place } from './select.ts'
+import { metres, type Place } from './select.ts'
+
+// Reverses a GeoJSON LineString; anything else is returned untouched.
+function reverseGeometry(g: any): any {
+  if (g && g.type === 'LineString' && Array.isArray(g.coordinates)) {
+    return { ...g, coordinates: g.coordinates.slice().reverse() }
+  }
+  return g
+}
 
 export type Shape = 'loop' | 'one_way'
 export type Routed = { ordered: Place[]; meters: number; geojson: object }
@@ -75,6 +83,22 @@ export async function buildRoute(
   }
   const all = slots as Place[]
   // source=first keeps the start at index 0; drop it from the stop list.
-  const ordered = start ? all.slice(1) : all
-  return { ordered, meters: Math.round(trip.distance), geojson: trip.geometry }
+  let ordered = start ? all.slice(1) : all
+  let geometry = trip.geometry
+  // Mapbox pins only the first coordinate (the person), not the second, so a loop
+  // may start at any stop. A loop is a circuit: walking it the other way round is
+  // the same distance, so if the stop nearest the person sits nearer the end of
+  // the order than the start, reverse stops and geometry. One-way rounds keep the
+  // shortest path (reversing is not free there).
+  if (shape === 'loop' && start && ordered.length > 1) {
+    let near = 0
+    for (let i = 1; i < ordered.length; i++) {
+      if (metres(start, ordered[i]) < metres(start, ordered[near])) near = i
+    }
+    if (near > ordered.length - 1 - near) {
+      ordered = ordered.slice().reverse()
+      geometry = reverseGeometry(geometry)
+    }
+  }
+  return { ordered, meters: Math.round(trip.distance), geojson: geometry }
 }

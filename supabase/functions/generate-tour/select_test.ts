@@ -95,3 +95,16 @@ Deno.test('seeds change membership, not just order, over a pool of 12', () => {
   assert(new Set(sets.map((x) => x.join())).size > 1, 'all seeds returned the same members')
   assert(sets.some((x) => x.join() !== sets[0].join()))
 })
+
+Deno.test('the nearest themed, non-excluded place is always in the round, whatever the seed', () => {
+  const nearestOf = (ex: string[]) =>
+    grid.filter((p) => !ex.includes(p.id))
+      .map((p) => ({ id: p.id, d: Math.hypot(p.lat - start.lat, (p.lng - start.lng) * 0.77) }))
+      .sort((a, b) => a.d - b.d)[0].id
+  for (const ex of [[], ['p14']]) {
+    for (let s = 1; s <= 20; s++) {
+      const r = selectPlaces(grid, { ...base, seed: s, exclude: ex })
+      assertEquals(r.places[0].id, nearestOf(ex), `seed ${s} ex ${ex}`)
+    }
+  }
+})

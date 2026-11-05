@@ -106,3 +106,62 @@ is — turn the wheel.
 cannot pay out from anywhere at any distance. `museums` has eight and works
 from the centre outward. Both argue the same thing: the generator is limited
 by tagging, not by code, which is what part A exists to unblock.
+
+---
+
+## C · Two language bugs in the tour stop list
+
+**Stop names were English.** The hotspot list overlays `hotspot_translations`;
+the tour stop list never did. Fixed, best-effort — a failed translation query
+costs the translation, never the stops.
+
+**The data settled a question the brief left open.** Of 67 stops with their own
+`title`, **48 are byte-identical to the English hotspot name** and **none** is
+a custom text. The remaining 19 have no hotspot at all — they are waypoints
+like *Plaça del Mercat*, already in Catalan, and their title is the only name
+they have. So a stop's title now yields to the translation **when it matches
+the English name**, rather than always: today that is all 48, and a genuinely
+custom title written tomorrow still survives.
+
+**Narration ignored the app's language.** The `hotspot_media` query selected
+`hotspot_id, media_type, storage_path` while the code beneath it read
+`a['lang']`. Every row therefore ranked as English and the first audio file
+won, whatever language it was in. One line; the guard that catches the class
+is `test/services/media_lang_query_test.dart`, and it fails against the old
+query. Checked the rest of the app: the only other `hotspot_media` read uses a
+bare `.select()`, so it was never affected, and the generator writes no audio
+at all — generated rounds fall back through this same path and are fixed with it.
+
+## D · Nearest stop, verified live
+
+106 real loops against the Optimization API, five Palma starts, every
+qualifying theme, two distances, two seeds. **Zero Mapbox errors.** The
+globally nearest themed place was the first pick every time it fell within
+the radius.
+
+**The honest number is 81%, not 100%.** The nearest chosen place came first in
+67% of loops as Mapbox returned them, and 81% after reversal. The remaining 20
+have it in the middle of the circuit — 17 of them at index 1 — and reversing a
+circuit cannot move a middle element to the front. The rule was implemented as
+decided and not widened. Whether 81% is enough is Alexander's call.
+
+Variety survived: every existing variety and exclude test passes unmodified.
+What changed is that the first stop is now the same on every pull from the
+same spot and theme; variation comes from the later picks and the exclude list,
+which still rotates the anchor when the nearest place is excluded.
+
+## E · A theme must earn its place on the wheel
+
+Migration 056 adds `generator_themes`, counting tagged places per city and
+publishing only those at five or more. Five rather than three because three is
+the minimum a round can be built from, and a theme sitting exactly on it can
+only ever produce the same three places in the same order.
+
+**Five is written in three places** — the view, `dyk-admin/src/themes.ts` and
+the app — and nothing compares them at runtime. Change one, change all three.
+
+The gate **fails open**, which is the opposite of the city gate a few lines
+above it in the same file, and the difference is deliberate: the city gate
+protects against a round through silent places, so not knowing must mean "do
+not offer". This one only tidies the wheel, and an unreadable view costs at
+worst a `too_few` notice that names the theme.

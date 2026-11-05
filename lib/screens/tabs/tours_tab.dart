@@ -88,6 +88,10 @@ class _ToursTabState extends State<ToursTab> {
   // ever-growing list (it starves the pool: 8-stop rounds shrank to 3).
   final ExcludeHistory _history = ExcludeHistory();
   Set<String> _narratedCities = {};
+
+  /// Themes this city has enough tagged places for. Stays null until the view
+  /// answers, and null means "show every theme" — the wheel fails open.
+  Set<String>? _cityThemes;
   bool _generating = false;
   String? _generatorNotice;
 
@@ -97,6 +101,12 @@ class _ToursTabState extends State<ToursTab> {
     widget.repo.loadGeneratorCities().then((c) {
       if (mounted) setState(() => _narratedCities = c);
     });
+    final pack = widget.citypackId;
+    if (pack != null) {
+      widget.repo.loadGeneratorThemes(pack).then((t) {
+        if (mounted) setState(() => _cityThemes = t);
+      });
+    }
   }
 
   // Permission and service state are checked up front so a refusal is told
@@ -318,6 +328,7 @@ class _ToursTabState extends State<ToursTab> {
             child: TourGeneratorScreen(
               citypackId: widget.citypackId,
               narratedCities: _narratedCities,
+              cityThemes: _cityThemes,
               busy: _generating,
               notice: _generatorNotice,
               onReelChanged: () {

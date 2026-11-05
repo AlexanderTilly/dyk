@@ -86,8 +86,42 @@ Deno.test('start is the first coordinate and is dropped from ordered', async () 
   const r = await buildRoute(places, 'loop', 'tok', stub(200, body, calls) as typeof fetch, start)
   assert(!('error' in r))
   assert(calls[0].includes('/2.5,39.5;2.65,39.57;'))
-  assertEquals(r.ordered.map((p) => p.id), ['p2', 'p1', 'p0', 'p3'])
+  // Mapbox order p2, p1, p0, p3; nearest to start is p0 (index 2 of 4, nearer the
+  // end), so the loop is reversed to begin there.
+  assertEquals(r.ordered.map((p) => p.id), ['p3', 'p0', 'p1', 'p2'])
   assertEquals(r.meters, 3050)
+})
+
+const line = { type: 'LineString', coordinates: [[1, 1], [2, 2], [3, 3]] }
+const startAt = { lat: 39.5, lng: 2.5 } // nearest place is p0
+function body4(order: number[]) {
+  return {
+    trips: [{ distance: 100, geometry: line }],
+    waypoints: [0, ...order.map((o) => o + 1)].map((waypoint_index) => ({ waypoint_index })),
+  }
+}
+
+Deno.test('loop already starting at the nearest stop is not reversed', async () => {
+  // waypoint_index per place p0..p3: p0 first
+  const r = await buildRoute(places, 'loop', 't', stub(200, body4([0, 1, 2, 3])) as typeof fetch, startAt)
+  assert(!('error' in r))
+  assertEquals(r.ordered.map((p) => p.id), ['p0', 'p1', 'p2', 'p3'])
+  assertEquals((r.geojson as typeof line).coordinates, line.coordinates)
+})
+
+Deno.test('loop with the nearest stop nearer the end is reversed with its geometry', async () => {
+  // visit order p1, p2, p3, p0
+  const r = await buildRoute(places, 'loop', 't', stub(200, body4([3, 0, 1, 2])) as typeof fetch, startAt)
+  assert(!('error' in r))
+  assertEquals(r.ordered.map((p) => p.id), ['p0', 'p3', 'p2', 'p1'])
+  assertEquals((r.geojson as typeof line).coordinates, [[3, 3], [2, 2], [1, 1]])
+})
+
+Deno.test('one_way is never reversed', async () => {
+  const r = await buildRoute(places, 'one_way', 't', stub(200, body4([3, 0, 1, 2])) as typeof fetch, startAt)
+  assert(!('error' in r))
+  assertEquals(r.ordered.map((p) => p.id), ['p1', 'p2', 'p3', 'p0'])
+  assertEquals((r.geojson as typeof line).coordinates, line.coordinates)
 })
 
 Deno.test('waypoint ceiling counts the start', async () => {

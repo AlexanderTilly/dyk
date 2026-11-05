@@ -30,6 +30,15 @@ const tourShapes = ['loop', 'one_way'];
 class TourGeneratorScreen extends StatefulWidget {
   final String? citypackId;
   final Set<String> narratedCities;
+
+  /// Theme keys this city has enough tagged places for, from the
+  /// `generator_themes` view. **Null means "could not tell", and then every
+  /// theme is shown** — failing open on purpose. A theme with too few places
+  /// answers `too_few`, which names it and tells the person to turn the
+  /// wheel; hiding the whole machine because a view was slow is worse. An
+  /// empty set is different from null: it means the city has no theme worth
+  /// offering, and then there is nothing to pull.
+  final Set<String>? cityThemes;
   final FutureOr<void> Function(int km, String shape, String theme) onGenerate;
   final bool busy;
 
@@ -44,6 +53,7 @@ class TourGeneratorScreen extends StatefulWidget {
     super.key,
     required this.citypackId,
     required this.narratedCities,
+    this.cityThemes,
     required this.onGenerate,
     this.busy = false,
     this.notice,
@@ -68,6 +78,15 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   void didUpdateWidget(TourGeneratorScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.busy && !widget.busy) _pulling = false;
+    // The city's theme list arrives after the first build, so the theme the
+    // reel opened on may not survive it. Land on the first one that does,
+    // rather than leaving a selection that can only answer too_few.
+    if (oldWidget.cityThemes != widget.cityThemes) {
+      final avail = availableThemes;
+      if (avail.isNotEmpty && !avail.contains(_theme)) {
+        _theme = avail.first;
+      }
+    }
   }
 
   Future<void> _pull() async {
@@ -96,10 +115,14 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   String get shape => _shape;
   String get theme => _theme;
 
-  /// Themes the reel may show right now. walls_gates only at 5 km.
+  /// Themes the reel may show right now: walls_gates only at 5 km, and only
+  /// themes this city has enough tagged places for. A null [cityThemes] means
+  /// we could not tell, and then nothing is filtered out.
   List<String> get availableThemes => [
         for (final t in tourThemes)
-          if (t != _wallsGates || _km >= _wallsGatesMinKm) t
+          if ((t != _wallsGates || _km >= _wallsGatesMinKm) &&
+              (widget.cityThemes == null || widget.cityThemes!.contains(t)))
+            t
       ];
 
   void selectTheme(String t) {
@@ -184,6 +207,12 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     if (!generatorAvailable(widget.citypackId, widget.narratedCities)) {
+      return const SizedBox.shrink();
+    }
+    // A city whose themes are all below the threshold gets no machine at all,
+    // rather than a wheel with nothing on it. Same outcome as a city without
+    // narration: absent, not broken.
+    if (widget.cityThemes != null && widget.cityThemes!.isEmpty) {
       return const SizedBox.shrink();
     }
     return Container(

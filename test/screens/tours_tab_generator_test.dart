@@ -20,6 +20,10 @@ class _Repo implements DykRepositoryBase {
   _Repo(this.cities);
   @override
   Future<Set<String>> loadGeneratorCities() async => cities;
+  // Null = "could not tell", so the wheel shows every theme. These tests are
+  // about the pull, not about which themes a city qualifies for.
+  @override
+  Future<Set<String>?> loadGeneratorThemes(String citypackId) async => null;
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

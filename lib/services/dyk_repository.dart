@@ -40,6 +40,10 @@ abstract class DykRepositoryBase {
   /// Empty when unknown (offline, view missing): the generator stays hidden.
   Future<Set<String>> loadGeneratorCities();
 
+  /// Theme keys with enough tagged places in [citypackId] to be worth
+  /// offering. Null means "could not tell" — see [generatorThemesFrom].
+  Future<Set<String>?> loadGeneratorThemes(String citypackId);
+
   /// The signed-in person's kept generated rounds, newest first. Empty when
   /// signed out, offline or on any error (same convention as loadTours).
   Future<List<Tour>> loadSavedTours();
@@ -58,6 +62,36 @@ Set<String> generatorCitiesFromRows(Iterable<dynamic> rows) {
     if (id is String && id.isNotEmpty) out.add(id);
   }
   return out;
+}
+
+/// Maps `generator_themes` rows to the set of theme keys. Rows with a missing
+/// or non-string theme are skipped rather than inventing an entry.
+Set<String> generatorThemesFromRows(Iterable<dynamic> rows) {
+  final out = <String>{};
+  for (final r in rows) {
+    final t = r is Map ? r['theme'] : null;
+    if (t is String && t.isNotEmpty) out.add(t);
+  }
+  return out;
+}
+
+/// Runs [fetch] and maps its rows; any error yields null.
+///
+/// Fails OPEN, which is the opposite of [generatorCitiesFrom] a few lines up,
+/// and the difference is deliberate. The city gate protects against a round
+/// through places that say nothing — silence a tourist cannot diagnose — so
+/// not knowing must mean "do not offer". This gate only tidies the wheel: if
+/// we cannot read the list, showing every theme costs at worst a `too_few`
+/// notice, which names the theme and tells the person to turn the wheel.
+/// Hiding the generator because a view was slow would be the worse trade.
+Future<Set<String>?> generatorThemesFrom(
+    Future<Iterable<dynamic>> Function() fetch) async {
+  try {
+    return generatorThemesFromRows(await fetch());
+  } catch (e) {
+    debugPrint('loadGeneratorThemes failed, showing every theme: $e');
+    return null;
+  }
 }
 
 /// Runs [fetch] and maps its rows; any error yields an empty set.
@@ -365,6 +399,8 @@ class DykRepository implements DykRepositoryBase {
           .toSet()
           .toList();
       final names = <String, String>{};
+      // The English names, kept so a stop title can be recognised as a copy.
+      final namesEn = <String, String>{};
       final hotspotAudio = <String, String>{}; // hotspotId → public audio URL
       final hotspotImage = <String, String>{}; // hotspotId → first image URL
       if (hotspotIds.isNotEmpty) {
@@ -375,11 +411,36 @@ class DykRepository implements DykRepositoryBase {
         for (final h in hs) {
           names[h['id'] as String] = h['name'] as String;
         }
+        namesEn.addAll(names);
+        // Same overlay the hotspot list does. Tour stops never had it, so a
+        // Spanish phone read the stop list in English while the place itself
+        // was translated. Best-effort: a failure here must not cost the stops.
+        final stopLang = I18n.instance.code;
+        if (stopLang != 'en') {
+          try {
+            final trs = await _client
+                .from('hotspot_translations')
+                .select('hotspot_id, name')
+                .eq('lang', stopLang)
+                .inFilter('hotspot_id', hotspotIds);
+            for (final t in trs) {
+              final v = t['name'] as String?;
+              if (v != null && v.isNotEmpty) {
+                names[t['hotspot_id'] as String] = v;
+              }
+            }
+          } catch (e) {
+            debugPrint('loadTourStops: translations failed, using English: $e');
+          }
+        }
         // The hotspot's own narration + header image — used when a stop has
         // no tour-specific override.
         final mediaRows = await _client
             .from('hotspot_media')
-            .select('hotspot_id, media_type, storage_path')
+            // lang is read below to rank narration by the app's language.
+            // It was missing, so every row ranked as English and the first
+            // audio file won whatever language it was in.
+            .select('hotspot_id, media_type, storage_path, lang')
             .inFilter('media_type', ['audio', 'image'])
             .inFilter('hotspot_id', hotspotIds)
             .order('sort_order', ascending: true);
@@ -418,9 +479,18 @@ class DykRepository implements DykRepositoryBase {
                 .getPublicUrl(path.substring(slash + 1));
           }
         }
-        // Fill the title from the linked hotspot's name when the stop has none.
+        // Fill the title from the linked hotspot's name when the stop has
+        // none — and also when the stop's title is merely a copy of the
+        // English name. 48 of the 67 titled stops are exactly that, and the
+        // copy was beating the translation, so Spanish readers saw English
+        // stop names beside a translated place. Comparing against the English
+        // name rather than assuming keeps a genuinely custom title safe: on
+        // 2026-11-05 there were none, but there may be one tomorrow.
         final hid = r['hotspot_id'] as String?;
-        if ((r['title'] == null || (r['title'] as String).isEmpty) &&
+        final title = r['title'] as String?;
+        final isCopy = hid != null && title != null &&
+            title == namesEn[hid];
+        if ((title == null || title.isEmpty || isCopy) &&
             hid != null &&
             names.containsKey(hid)) {
           r['title'] = names[hid];
@@ -470,6 +540,13 @@ class DykRepository implements DykRepositoryBase {
   @override
   Future<Set<String>> loadGeneratorCities() => generatorCitiesFrom(
       () => _client.from('generator_cities').select('citypack_id'));
+
+  @override
+  Future<Set<String>?> loadGeneratorThemes(String citypackId) =>
+      generatorThemesFrom(() => _client
+          .from('generator_themes')
+          .select('theme')
+          .eq('citypack_id', citypackId));
 
   Future<Set<String>> loadTourProgress(String tourId) async {
     try {

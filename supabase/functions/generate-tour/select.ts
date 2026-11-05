@@ -20,7 +20,7 @@ function mulberry32(seed: number): () => number {
   }
 }
 
-function metres(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+export function metres(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
   const R = 6371000
   const rad = Math.PI / 180
   const dLat = (b.lat - a.lat) * rad
@@ -83,7 +83,14 @@ export function selectPlaces(
   // to the start yields a star of places that are each near the start but far
   // from one another, i.e. a long, dull walk. Adding whichever place is closest
   // to what we already hold yields a compact cluster that is quick to walk.
-  const chosen: Place[] = [pickFrom(pool.map((p) => ({ p, d: metres(opts.start, p) })))]
+  //
+  // The first place is not drawn: it is the nearest to the person (ties by id),
+  // so the round always includes the closest themed, non-excluded place. Only the
+  // places after it are seeded, which is where pull-to-pull variety comes from.
+  const nearest = pool
+    .map((p) => ({ p, d: metres(opts.start, p) }))
+    .sort((x, y) => x.d - y.d || (x.p.id < y.p.id ? -1 : 1))[0].p
+  const chosen: Place[] = [nearest]
   while (chosen.length < want) {
     const rest = pool.filter((p) => !chosen.includes(p))
     chosen.push(

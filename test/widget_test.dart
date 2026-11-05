@@ -69,6 +69,9 @@ class FakeDykRepository implements DykRepositoryBase {
   Future<List<TourStop>> loadTourStops(String tourId) async => [];
   @override
   Future<Set<String>> loadGeneratorCities() async => {};
+
+  @override
+  Future<Set<String>?> loadGeneratorThemes(String citypackId) async => null;
   @override
   Future<Set<String>> loadTourProgress(String tourId) async => {};
   @override
