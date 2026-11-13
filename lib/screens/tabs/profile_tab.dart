@@ -5,9 +5,11 @@ import '../../services/auth_service.dart';
 import '../../services/dyk_repository.dart';
 import '../../services/entitlements.dart';
 import '../../services/notification_log.dart';
+import '../../services/profile_store.dart';
 import '../../services/saved_store.dart';
 import '../../theme/dyk_theme.dart';
 import '../auth_screen.dart';
+import '../profile_answers_screen.dart';
 import '../premium_screen.dart';
 import '../settings_screen.dart';
 import '../support_screen.dart';
@@ -27,8 +29,12 @@ class ProfileTab extends StatelessWidget {
   final String? cityName;
   final int cityPriceCents;
 
+  /// Null hides the interests entry (no personalisation in this build).
+  final ProfileStore? profileStore;
+
   const ProfileTab({
     super.key,
+    this.profileStore,
     required this.savedStore,
     required this.notificationLog,
     required this.authService,
@@ -284,6 +290,12 @@ class ProfileTab extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           menuRow(Icons.person_outline, tr('edit_profile'), () => _openSettings(context)),
+          if (profileStore != null)
+            menuRow(Icons.interests_outlined, tr('pq_profile_entry'), () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ProfileAnswersScreen(store: profileStore!),
+              ));
+            }),
           menuRow(Icons.settings_outlined, tr('settings'), () => _openSettings(context)),
           menuRow(Icons.help_outline, tr('help_support'), () {
             Navigator.of(context).push(MaterialPageRoute(

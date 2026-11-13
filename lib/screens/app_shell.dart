@@ -13,6 +13,8 @@ import '../services/audio_service.dart';
 import '../services/dyk_repository.dart';
 import '../services/entitlements.dart';
 import '../services/notification_log.dart';
+import '../services/personalisation.dart';
+import '../services/profile_store.dart';
 import '../services/saved_store.dart';
 import '../widgets/mini_player.dart';
 import 'hotspot_detail_screen.dart';
@@ -47,6 +49,9 @@ class AppShell extends StatefulWidget {
   final VoidCallback onAuthChanged;
   final Future<void> Function()? onRefresh;
 
+  /// Where the interest answers live. Null means no personalisation at all.
+  final ProfileStore? profileStore;
+
   const AppShell({
     super.key,
     required this.appState,
@@ -66,6 +71,7 @@ class AppShell extends StatefulWidget {
     required this.onDownloadPack,
     required this.onAuthChanged,
     this.onRefresh,
+    this.profileStore,
   });
 
   @override
@@ -79,7 +85,24 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    widget.profileStore?.addListener(_onProfileChanged);
     _detectCity();
+  }
+
+  void _onProfileChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Personalisation get _personalisation {
+    final s = widget.profileStore;
+    if (s == null) return Personalisation.none;
+    return Personalisation(s.answers, offersConsent: s.personalisedOffers);
+  }
+
+  @override
+  void dispose() {
+    widget.profileStore?.removeListener(_onProfileChanged);
+    super.dispose();
   }
 
   // When the city changes (GPS or manual) to one the user hasn't unlocked,
@@ -87,6 +110,10 @@ class _AppShellState extends State<AppShell> {
   @override
   void didUpdateWidget(covariant AppShell oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.profileStore != widget.profileStore) {
+      oldWidget.profileStore?.removeListener(_onProfileChanged);
+      widget.profileStore?.addListener(_onProfileChanged);
+    }
     if (oldWidget.activePackId != widget.activePackId &&
         !widget.entitlements.isCityUnlocked(widget.activePackId)) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _showWelcome());
@@ -296,6 +323,7 @@ class _AppShellState extends State<AppShell> {
             child: Container(
               decoration: passimScrim(context),
               child: ProfileTab(
+                profileStore: widget.profileStore,
                 savedStore: widget.savedStore,
                 notificationLog: widget.notificationLog,
                 authService: widget.authService,
@@ -426,6 +454,7 @@ class _AppShellState extends State<AppShell> {
           )),
           NearbyTab(
             hotspots: widget.hotspots,
+            personalisation: _personalisation,
             deals: widget.deals,
             audioService: widget.audioService,
             savedStore: widget.savedStore,
@@ -438,6 +467,7 @@ class _AppShellState extends State<AppShell> {
           ),
           _refreshable(ToursTab(
             tours: widget.tours,
+            personalisation: _personalisation,
             repo: widget.repo,
             authService: widget.authService,
             audioService: widget.audioService,

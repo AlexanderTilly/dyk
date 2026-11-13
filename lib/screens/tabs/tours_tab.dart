@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../services/personalisation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,6 +54,9 @@ class ToursTab extends StatefulWidget {
   final Future<TourLocation> Function()? locate;
   final void Function(Tour)? onGeneratedTour;
 
+  /// Reorders sections and tours; never removes any.
+  final Personalisation personalisation;
+
   const ToursTab({
     super.key,
     required this.tours,
@@ -67,6 +71,7 @@ class ToursTab extends StatefulWidget {
     this.generator,
     this.locate,
     this.onGeneratedTour,
+    this.personalisation = Personalisation.none,
   });
 
   @override
@@ -330,6 +335,7 @@ class _ToursTabState extends State<ToursTab> {
               narratedCities: _narratedCities,
               cityThemes: _cityThemes,
               busy: _generating,
+              personalisation: widget.personalisation,
               notice: _generatorNotice,
               onReelChanged: () {
                 if (_generatorNotice != null) {
@@ -404,7 +410,8 @@ class _ToursTabState extends State<ToursTab> {
             child: Center(child: Text(tr('tours_empty'))),
           )
         else
-          for (final type in _typeLabels.keys)
+          for (final type in orderTourTypes(
+              _typeLabels.keys.toList(), widget.personalisation))
             if (byType[type]?.isNotEmpty ?? false) ...[
               Padding(
                 padding:
@@ -413,7 +420,8 @@ class _ToursTabState extends State<ToursTab> {
                     style: const TextStyle(
                         fontWeight: FontWeight.w800, fontSize: 16)),
               ),
-              for (final t in byType[type]!)
+              for (final t in orderToursByLength(
+                  byType[type]!, widget.personalisation))
                 _TourCard(
                   tour: t,
                   onTap: () => Navigator.of(context).push(MaterialPageRoute(

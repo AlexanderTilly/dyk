@@ -20,9 +20,11 @@ import 'models/hotspot.dart';
 import 'models/internal_ad.dart';
 import 'models/tour.dart';
 import 'screens/app_shell.dart';
+import 'screens/profile_questions_screen.dart';
 import 'screens/onboarding/welcome_screen.dart';
 import 'services/app_state.dart';
 import 'services/audio_service.dart';
+import 'services/profile_store.dart';
 import 'services/content_repository.dart';
 import 'services/auth_service.dart';
 import 'services/device_profile_service.dart';
@@ -185,6 +187,11 @@ class DykApp extends StatefulWidget {
 class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
   final _navKey = GlobalKey<NavigatorState>();
   final _fgService = GeofenceForegroundService();
+
+  /// Interest answers. Lives here because both the Profile tab and the
+  /// personalisation of Nearby and Tours read it, and because it has to be
+  /// loaded before the first screen asks what someone likes.
+  final _profileStore = ProfileStore();
   // iOS cannot run the Android-style foreground service; this replaces it.
   late final IosGeoService _iosGeo =
       IosGeoService(onPosition: _onPreciseFix);
@@ -216,6 +223,12 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     // Handle a payload that arrived during cold start.
     WidgetsBinding.instance.addPostFrameCallback((_) => _handleNotificationTap());
+    _profileStore.load();
+    // Answering before making an account must not be wasted: a sign-in
+    // carries whatever is on the phone up to the account.
+    Supabase.instance.client.auth.onAuthStateChange.listen((e) {
+      if (e.event == AuthChangeEvent.signedIn) _profileStore.onSignedIn();
+    });
     _initTelemetry();
     _startForegroundPresence();
     // Language switch → re-fetch content so translations apply immediately.
@@ -289,18 +302,23 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
     if (type == 'hotspot') {
       final h = _hotspots.where((x) => x.id == id).firstOrNull;
       if (h != null) {
-        nav.push(MaterialPageRoute(
-          builder: (_) => HotspotDetailScreen(
-            hotspot: h,
-            audioService: widget.audioService,
-            savedStore: widget.savedStore,
-            autoPlay: true,
-            entitlements: _entitlements,
-            citypackId: _activePackId,
-            repo: widget.dykRepo,
-            authService: _authService,
-          ),
-        ));
+        // An arrival with the story playing is the thing we count towards
+        // offering the questions: one story is curiosity, three is a decision.
+        _profileStore.noteStoryHeard();
+        nav
+            .push(MaterialPageRoute(
+              builder: (_) => HotspotDetailScreen(
+                hotspot: h,
+                audioService: widget.audioService,
+                savedStore: widget.savedStore,
+                autoPlay: true,
+                entitlements: _entitlements,
+                citypackId: _activePackId,
+                repo: widget.dykRepo,
+                authService: _authService,
+              ),
+            ))
+            .then((_) => _maybeAskInterests());
       }
     } else if (type == 'deal') {
       final d = _deals.where((x) => x.id == id).firstOrNull;
@@ -586,8 +604,26 @@ class _DykAppState extends State<DykApp> with WidgetsBindingObserver {
     );
   }
 
+
+  /// Offers the interest questions once, after the person has actually used
+  /// the app — never at first launch, where download already asks enough of
+  /// them. [ProfileStore.shouldPrompt] holds the rule; this only picks the
+  /// moment, which is on returning from a story or a finished walk rather
+  /// than interrupting one.
+  Future<void> _maybeAskInterests() async {
+    if (!mounted) return;
+    if (!await _profileStore.shouldPrompt()) return;
+    final nav = _navKey.currentState;
+    if (nav == null || !mounted) return;
+    await _profileStore.markPrompted();
+    nav.push(MaterialPageRoute(
+      builder: (_) => ProfileQuestionsScreen(store: _profileStore),
+    ));
+  }
+
   Widget _buildShell() => AppShell(
         appState: widget.appState,
+        profileStore: _profileStore,
         notificationLog: widget.notificationLog,
         savedStore: widget.savedStore,
         hotspots: _hotspots,

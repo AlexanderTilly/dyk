@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../i18n/i18n.dart';
 import '../models/themes.dart';
+import '../services/personalisation.dart';
 import '../services/dyk_repository.dart';
 import '../theme/dyk_theme.dart';
 import '../widgets/reel.dart';
@@ -49,6 +50,9 @@ class TourGeneratorScreen extends StatefulWidget {
   /// Called when any reel is turned, so the parent can clear [notice].
   final VoidCallback? onReelChanged;
 
+  /// Reorders the theme reel only; every theme stays on it.
+  final Personalisation personalisation;
+
   const TourGeneratorScreen({
     super.key,
     required this.citypackId,
@@ -58,6 +62,7 @@ class TourGeneratorScreen extends StatefulWidget {
     this.busy = false,
     this.notice,
     this.onReelChanged,
+    this.personalisation = Personalisation.none,
   });
 
   @override
@@ -67,7 +72,12 @@ class TourGeneratorScreen extends StatefulWidget {
 class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   int _km = 2;
   String _shape = 'loop';
-  String _theme = tourThemes.first;
+  late String _theme = _order.first;
+
+  /// The reel order: the canonical list, with the person's story interests
+  /// lifted. Nothing is removed.
+  List<String> get _order =>
+      orderThemes(tourThemes, widget.personalisation);
 
   // Blocks a second pull until the first callback has returned and a frame
   // has passed, or until the parent reports busy and then not busy, so the
@@ -119,7 +129,7 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   /// themes this city has enough tagged places for. A null [cityThemes] means
   /// we could not tell, and then nothing is filtered out.
   List<String> get availableThemes => [
-        for (final t in tourThemes)
+        for (final t in _order)
           if ((t != _wallsGates || _km >= _wallsGatesMinKm) &&
               (widget.cityThemes == null || widget.cityThemes!.contains(t)))
             t
@@ -134,15 +144,15 @@ class TourGeneratorScreenState extends State<TourGeneratorScreen> {
   void _setDistance(int km) {
     widget.onReelChanged?.call();
     setState(() {
-      final previous = tourThemes.indexOf(_theme);
+      final previous = _order.indexOf(_theme);
       _km = km;
       // A pull must never ask for an impossible combination. If the current
       // theme just left the reel, land on its neighbour in the full theme
       // order: the next available one forward, else the nearest one back.
       if (!availableThemes.contains(_theme)) {
         final avail = availableThemes;
-        _theme = tourThemes.skip(previous + 1).firstWhere(avail.contains,
-            orElse: () => tourThemes
+        _theme = _order.skip(previous + 1).firstWhere(avail.contains,
+            orElse: () => _order
                 .take(previous)
                 .toList()
                 .reversed

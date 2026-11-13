@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../services/personalisation.dart';
 import 'package:flutter/material.dart' hide Visibility;
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -74,6 +75,9 @@ class NearbyTab extends StatefulWidget {
   final int cityPriceCents;
   final AuthService? authService;
 
+  /// Reorders chips and deals; never removes any.
+  final Personalisation personalisation;
+
   const NearbyTab({
     super.key,
     required this.hotspots,
@@ -86,6 +90,7 @@ class NearbyTab extends StatefulWidget {
     this.cityName,
     this.cityPriceCents = 0,
     this.authService,
+    this.personalisation = Personalisation.none,
   });
 
   @override
@@ -190,11 +195,15 @@ class _NearbyTabState extends State<NearbyTab> {
 
   List<HotDeal> get _filteredDeals => !_visibleCategories.contains('hotdeal')
       ? const []
-      : widget.deals
-          .where((d) =>
-              _search.isEmpty ||
-              d.businessName.toLowerCase().contains(_search.toLowerCase()))
-          .toList();
+      : orderDeals(
+          widget.deals
+              .where((d) =>
+                  _search.isEmpty ||
+                  d.businessName
+                      .toLowerCase()
+                      .contains(_search.toLowerCase()))
+              .toList(),
+          widget.personalisation);
 
   void _onMapCreated(MapboxMap map) async {
     _map = map;
@@ -768,7 +777,8 @@ class _NearbyTabState extends State<NearbyTab> {
   /// Hidden entirely when nothing selected has subcategories — an empty row
   /// of nothing is worse than no row, and today only Leisure has any.
   Widget _subcategoryRow(bool dark) {
-    final chips = subcategoryChipsFor(_visibleCategories);
+    final chips = orderSubcategories(
+        subcategoryChipsFor(_visibleCategories), widget.personalisation);
     if (chips.isEmpty) return const SizedBox.shrink();
     return SizedBox(
       height: 40,
