@@ -26,7 +26,10 @@ class AuthService {
       await _client.auth.signUp(
         email: email.trim(),
         password: password,
-        emailRedirectTo: 'https://diduknow.app/',
+        // Passim's own site, not diduknow.app. The confirmation link is the
+        // one moment a new user is most suspicious of an email, and landing
+        // them on a page branded as a different app reads as phishing.
+        emailRedirectTo: 'https://passimexplore.com/',
         data: data.isEmpty ? null : data,
       );
       return null;
